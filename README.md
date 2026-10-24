@@ -41,41 +41,35 @@
 
 每批默认提供 6 张画面，默认上限 12 张。细看快速变化的内容时，可以缩短时间区间、增加画面数量。
 
-## 安装
+## 安装和升级
 
-需要 DSH、Node.js 22+（可使用 DSH 自带版本），以及 FFmpeg 和 ffprobe。将 FFmpeg 所在目录加入 PATH，或在插件配置中填写两个程序的路径。
+DSH Desktop：打开 **插件 → 添加插件**，粘贴以下 GitHub 来源：
 
-```powershell
-git clone https://github.com/Tests4gptplay/dsh-video-vision.git
-cd dsh-video-vision
+```text
+github:Tests4gptplay/dsh-video-vision#v0.4.1
 ```
 
-### Windows 一键安装
+安装并启用 `video-vision` 后，重新加载插件或重启 DSH，在新的请求中发送视频链接即可。
 
-双击项目中的 `安装插件.cmd`。它会下载官方 yt-dlp 可执行文件、核对 SHA-256，然后把插件加入 DSH Desktop 配置。解析器默认保存在用户目录的 `.dsh/tools/dsh-video-vision` 中。
+Web 版安装命令：
 
-### 从旧版升级
-
-停用并卸载旧版插件，再安装新版。在“视频视觉”中选择原缓存目录，可继续使用已有视频、画面和观看进度；FFmpeg、解析器等自定义路径沿用原配置。
-
-### 手动安装
-
-在项目目录运行：
-
-```powershell
-node bin/prepare.mjs
-& "$env:LOCALAPPDATA\Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add (Get-Location).Path
+```bash
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.4.1'
 ```
 
-自定义 DSH 安装位置时，替换 CLI 路径。安装后启用 `video-vision` 条目，重新加载插件或重启 DSH，再开始新的请求。
+Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.4.1` 是固定版本来源，后续更新使用新的版本号。
 
-已经安装 yt-dlp 时，可以直接配置 `ytDlpPath`。也可以将解析器放在指定目录：
+### 运行依赖
 
-```powershell
-node bin/prepare.mjs --directory D:\VideoTools
-```
+使用 Node.js 22+（可使用 DSH 自带版本），并将 FFmpeg 与 ffprobe 所在目录加入 PATH，或在插件配置中填写两个程序的路径。
 
-将插件的 `ytDlpPath` 设为 `D:\VideoTools\yt-dlp.exe`。更新解析器时，使用同一目录并加上 `--update`。
+首次打开需要 yt-dlp 的视频时，插件会优先使用已配置或 PATH 中的解析器；尚未安装时自动下载官方可执行文件，核对 SHA-256 后保存在用户目录的 `.dsh/tools/dsh-video-vision` 中。已经安装 yt-dlp 时，可直接填写 `ytDlpPath`，使用自己的解析器。
+
+### 升级与已有缓存
+
+已安装 `dsh-video-vision` 时，使用上述来源更新，保留原来的插件配置和缓存目录。
+
+从早期不同包名的版本迁移时，先记下缓存目录与自定义工具路径，停用并卸载旧包，再安装新版。在“视频视觉”中选择原缓存目录，并填回原来的工具路径，即可继续使用已有视频、画面和观看进度。
 
 YouTube 使用 Node.js 运行其播放器解析逻辑；官方 yt-dlp 可执行文件内含所需的 EJS 脚本。插件会使用当前 Node.js 路径，也可通过 `nodePath` 指定。详见上游 [EJS 文档](https://github.com/yt-dlp/yt-dlp/wiki/EJS)。
 
@@ -150,4 +144,4 @@ npm test
 
 [MIT](LICENSE) · Tests4gptplay
 
-视频解析使用独立安装的 [yt-dlp](https://github.com/yt-dlp/yt-dlp)，视频解码使用 [FFmpeg](https://ffmpeg.org/)。各工具采用各自的许可证；本项目的软件包包含插件源码和安装脚本。
+视频解析使用独立安装的 [yt-dlp](https://github.com/yt-dlp/yt-dlp)，视频解码使用 [FFmpeg](https://ffmpeg.org/)。各工具采用各自的许可证；本项目的软件包包含插件运行代码和解析器准备工具。

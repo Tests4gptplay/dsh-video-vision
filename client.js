@@ -108,7 +108,7 @@ window.__ModuleLoader__.load({
       return h('section', { className: 'vv-settings', 'aria-label': '视频视觉设置' },
         h('style', null, css),
         h('div', { className: 'vv-row' },
-          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.4.0 · 视频与画面缓存管理')),
+          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.4.1 · 视频与画面缓存管理')),
           button(busy ? '处理中…' : '刷新', () => act('list', {}, '列表已刷新'), { disabled: busy })),
         error && h('div', { className: 'vv-notice vv-error', role: 'alert' }, error),
         notice && h('div', { className: 'vv-notice', role: 'status' }, notice),
