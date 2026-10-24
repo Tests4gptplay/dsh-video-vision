@@ -23,11 +23,11 @@
 ## 视频来源
 
 - **Bilibili**：视频链接、BV 号、b23.tv 分享短链和分 P 视频，使用内置接口。
-- **YouTube**：常规视频、youtu.be 分享链接和 Shorts。
-- **其他视频网站**：通过 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 接入 Vimeo、Dailymotion、Twitch 回放、TikTok 等站点；完整列表见上游的[站点目录](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)。
-- **媒体直链与本地视频**：支持解析器可读取的 HTTP(S) 媒体链接，以及本地视频文件。
+- **YouTube 与其他视频网站**：优先复用已保存的站点解析方法；遇到新站点时，AI 可按插件提供的指导，使用当前宿主的网页、浏览器和脚本工具探索方法，跑通后保存为扩展。
+- **备用解析器**：保留 [yt-dlp](https://github.com/yt-dlp/yt-dlp)，可通过 `resolver: "yt-dlp"` 处理 YouTube、Vimeo、Dailymotion 等视频。上游覆盖范围见[站点目录](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)。
+- **媒体直链与本地视频**：支持站点扩展或备用解析器可读取的 HTTP(S) 媒体链接，以及本地视频文件。
 
-平台解析由 yt-dlp 持续维护。需要登录的视频可在配置中指定自己提供的 cookie 文件，网络代理可通过 `proxy` 设置。直播内容使用已结束的回放链接。
+使用 yt-dlp 备用方式时，需要登录的视频可在配置中指定自己提供的 cookie 文件，网络代理可通过 `proxy` 设置。直播内容使用已结束的回放链接。
 
 ## 它怎样给 AI 接上视频视觉
 
@@ -38,6 +38,7 @@
 - **接续观看**：保存观看位置，下一次从上次进度继续。
 - **字幕与转写**：读取平台字幕，也可复用 DSH 已准备好的语音识别器转写短片段。
 - **本地缓存**：已打开的视频和画面可以重复使用。
+- **方法积累**：保存站点解析代码和实践笔记，下次直接复用，不必每次重新探索。
 
 每批默认提供 6 张画面，默认上限 12 张。细看快速变化的内容时，可以缩短时间区间、增加画面数量。
 
@@ -46,7 +47,7 @@
 DSH Desktop：打开 **插件 → 添加插件**，粘贴以下 GitHub 来源：
 
 ```text
-github:Tests4gptplay/dsh-video-vision#v0.4.1
+github:Tests4gptplay/dsh-video-vision#v0.5.0
 ```
 
 安装并启用 `video-vision` 后，重新加载插件或重启 DSH，在新的请求中发送视频链接即可。
@@ -54,16 +55,16 @@ github:Tests4gptplay/dsh-video-vision#v0.4.1
 Web 版安装命令：
 
 ```bash
-dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.4.1'
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.5.0'
 ```
 
-Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.4.1` 是固定版本来源，后续更新使用新的版本号。
+Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.5.0` 是固定版本来源，后续更新使用新的版本号。
 
 ### 运行依赖
 
 使用 Node.js 22+（可使用 DSH 自带版本），并将 FFmpeg 与 ffprobe 所在目录加入 PATH，或在插件配置中填写两个程序的路径。
 
-首次打开需要 yt-dlp 的视频时，插件会优先使用已配置或 PATH 中的解析器；尚未安装时自动下载官方可执行文件，核对 SHA-256 后保存在用户目录的 `.dsh/tools/dsh-video-vision` 中。已经安装 yt-dlp 时，可直接填写 `ytDlpPath`，使用自己的解析器。
+只有选择 yt-dlp 备用方式时，插件才准备这项依赖：优先使用已配置或现有的解析器；缺少可用程序时自动下载官方版本，核对 SHA-256 后保存在用户目录的 `.dsh/tools/dsh-video-vision` 中。已经安装 yt-dlp 时，可填写 `ytDlpPath` 使用自己的解析器。B 站内置方法、本地视频和自定义站点扩展不依赖 yt-dlp。
 
 ### 升级与已有缓存
 
@@ -71,12 +72,13 @@ Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptpla
 
 从早期不同包名的版本迁移时，先记下缓存目录与自定义工具路径，停用并卸载旧包，再安装新版。在“视频视觉”中选择原缓存目录，并填回原来的工具路径，即可继续使用已有视频、画面和观看进度。
 
-YouTube 使用 Node.js 运行其播放器解析逻辑；官方 yt-dlp 可执行文件内含所需的 EJS 脚本。插件会使用当前 Node.js 路径，也可通过 `nodePath` 指定。详见上游 [EJS 文档](https://github.com/yt-dlp/yt-dlp/wiki/EJS)。
+yt-dlp 处理 YouTube 时使用 Node.js 运行播放器解析逻辑；官方 yt-dlp 可执行文件内含所需的 EJS 脚本。插件会使用当前 Node.js 路径，也可通过 `nodePath` 指定。详见上游 [EJS 文档](https://github.com/yt-dlp/yt-dlp/wiki/EJS)。
 
 ## 设置与缓存管理
 
 打开 DSH **设置 → 视频视觉**：
 
+- **打开配置文件夹**：页面右上角按钮直接打开视频视觉的持久化扩展目录，内含方法指导、扩展接口和笔记目录。
 - **存储位置**：点击“设置缓存目录”，在系统目录选择窗口中选择文件夹。已有视频、画面和观看进度会一起迁移，新位置立即生效。
 - **当前占用**：查看缓存大小、条目数和画面数，可直接打开缓存文件夹。
 - **缓存列表**：按标题、平台或视频 ID 搜索，跳转原视频、打开单项目录、提取视频或删除该项缓存。
@@ -84,6 +86,27 @@ YouTube 使用 Node.js 运行其播放器解析逻辑；官方 yt-dlp 可执行�
 - **清空缓存**：确认后清理列表中的全部缓存，保留已提取文件、本地原视频以及目录中的其他文件。
 
 文件夹入口每次点击都会将对应窗口带到前台，关闭后可以再次打开。视频任务运行时仍可打开文件夹和提取文件；迁移和删除在任务完成后操作。B 站分离音视频的缓存会标明视频轨，独立音频可从文件列表提取。
+
+## 可积累的解析方法
+
+默认配置文件夹是 `%USERPROFILE%\.dsh\video-vision`；设置了 `DSH_HOME` 时位于 `%DSH_HOME%\video-vision`，也可通过 `configDirectory` 指定绝对路径。
+
+```text
+video-vision/
+  GUIDANCE.md                 # 按需给 AI 的探索与验证指导
+  README.md                   # 目录用途
+  resolvers/
+    README.md                 # 可执行扩展接口
+    example.mjs.txt            # 不自动执行的模板
+    your-site/
+      manifest.json           # 匹配主机、路径与启用状态
+      resolve.mjs             # 站点解析与下载代码
+  notes/                      # 经过实践的方法笔记
+```
+
+每次调用工具，返回值都会带上 `method_guidance`：指导文件路径、`methods` 读取入口和使用时机。完整指导只在需要时读取。打开视频先复用缓存和现有方法；需要补充方法时，工具返回 `needs_method`，AI 再调用 `methods` 读取指导。新扩展先明确试用，通过实际视频解码和画面检查后启用，下一次请求即可使用，无需重装。
+
+站点扩展是本机执行的 JavaScript，由 AI 使用宿主已有的文件工具保存。应只启用自己编写或确认过的代码；方法和笔记保存可复用步骤，不保存 Cookie、Token 或临时签名媒体地址。配置目录与安装目录、视频缓存分开，插件只补齐缺失的说明文件，保留已有编辑和扩展。
 
 ## 工具
 
@@ -95,7 +118,10 @@ YouTube 使用 Node.js 运行其播放器解析逻辑；官方 yt-dlp 可执行�
 | `watch` | 查看指定区间或精确时间点；省略起点时接着上次进度 |
 | `transcript` | 读取平台字幕及其时间点 |
 | `transcribe` | 使用 DSH 语音识别器转写指定短片段 |
-| `status` | 查看当前视频、缓存和语音识别状态 |
+| `status` | 查看当前视频、缓存、配置目录和语音识别状态 |
+| `methods` | 按需读取方法指导，列出站点扩展及其路径和错误 |
+
+`open` 的 `resolver` 默认为 `auto`；指定 `yt-dlp` 使用备用解析器，指定方法目录名可以直接试用该扩展，包括尚未启用的草稿。
 
 ## 配置
 
@@ -113,6 +139,7 @@ downloadTimeoutMs: 300000
 processTimeoutMs: 60000
 maxAudioSeconds: 60
 speechProvider: sensevoice-local
+# configDirectory: 'D:\VideoVisionConfig'
 # ytDlpPath: 'D:\VideoTools\yt-dlp.exe'
 # nodePath: 'C:\Program Files\nodejs\node.exe'
 # cookieFile: 'D:\Private\video-cookies.txt'
@@ -128,13 +155,14 @@ speechProvider: sensevoice-local
 命令行与插件共用视频处理流程，输出画面路径和结构化结果：
 
 ```powershell
-node bin/video-vision.mjs open --source "https://www.youtube.com/watch?v=视频ID" --frames 6
+node bin/video-vision.mjs methods --source "https://www.youtube.com/watch?v=视频ID"
+node bin/video-vision.mjs open --source "https://www.youtube.com/watch?v=视频ID" --resolver yt-dlp --frames 6
 node bin/video-vision.mjs watch --timestamps 12,45,120
 node bin/video-vision.mjs transcript
 node bin/video-vision.mjs --help
 ```
 
-可用 `--cwd` 指定工作目录，`--cache` 指定缓存位置，`--ytdlp`、`--ffmpeg` 和 `--ffprobe` 指定程序路径，`--output` 保存 JSON 结果。Ctrl+C 取消当前任务。
+可用 `--cwd` 指定工作目录，`--cache` 指定缓存位置，`--config-directory` 指定持久化扩展目录，`--ytdlp`、`--ffmpeg` 和 `--ffprobe` 指定程序路径，`--output` 保存 JSON 结果。Ctrl+C 取消当前任务。
 
 ```powershell
 npm test
@@ -144,4 +172,4 @@ npm test
 
 [MIT](LICENSE) · Tests4gptplay
 
-视频解析使用独立安装的 [yt-dlp](https://github.com/yt-dlp/yt-dlp)，视频解码使用 [FFmpeg](https://ffmpeg.org/)。各工具采用各自的许可证；本项目的软件包包含插件运行代码和解析器准备工具。
+备用解析使用独立安装的 [yt-dlp](https://github.com/yt-dlp/yt-dlp)，视频解码使用 [FFmpeg](https://ffmpeg.org/)。各工具采用各自的许可证；本项目的软件包包含插件运行代码和解析器准备工具。

@@ -10,8 +10,10 @@ if (!argv.length || argv.includes('--help')) {
   node bin/video-vision.mjs watch --video-id <id> --timestamps 12,45,120
   node bin/video-vision.mjs transcript --video-id <id>
   node bin/video-vision.mjs status
+  node bin/video-vision.mjs methods [--source <URL>]
 Options:
   --cwd <workspace> --cache <cache directory> --output <JSON path>
+  --resolver <auto/yt-dlp/method-id> --config-directory <persistent folder>
   --start <seconds> --end <seconds> --language <speech language>
   --ffmpeg <path> --ffprobe <path> --ytdlp <path> --node <path>
   --max-height <pixels> --max-download <MB> --download-timeout <ms>
@@ -20,10 +22,10 @@ Options:
 }
 const args = { action: argv.shift() }, config = {};
 let cwd = process.cwd(), output;
-const values = { '--source': 'source', '--video-id': 'video_id', '--language': 'language' };
+const values = { '--source': 'source', '--video-id': 'video_id', '--language': 'language', '--resolver': 'resolver' };
 const numbers = { '--frames': 'frames', '--start': 'start_seconds', '--end': 'end_seconds' };
 const paths = { '--ffmpeg': 'ffmpegPath', '--ffprobe': 'ffprobePath', '--ytdlp': 'ytDlpPath',
-  '--node': 'nodePath', '--cache': 'cacheDirectory', '--cookies': 'cookieFile', '--proxy': 'proxy' };
+  '--node': 'nodePath', '--cache': 'cacheDirectory', '--config-directory': 'configDirectory', '--cookies': 'cookieFile', '--proxy': 'proxy' };
 const settings = { '--max-height': 'maxHeight', '--max-download': 'maxDownloadMB', '--download-timeout': 'downloadTimeoutMs' };
 for (let i = 0; i < argv.length; i += 2) {
   const key = argv[i], value = argv[i + 1];

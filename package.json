@@ -1,6 +1,6 @@
 {
   "name": "dsh-video-vision",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Give AI models in DSH online video vision: open Bilibili, YouTube and other video links, inspect timestamped frames, and read captions.",
   "type": "module",
   "license": "MIT",
@@ -24,12 +24,13 @@
     "client.js",
     "lib/",
     "bin/",
+    "resources/",
     "cordis.patch.yml",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "test": "node test/smoke.mjs && node test/cache.mjs && node test/native-ui.mjs && node test/prepare.mjs",
+    "test": "node test/smoke.mjs && node test/cache.mjs && node test/native-ui.mjs && node test/prepare.mjs && node test/extensions.mjs",
     "setup:resolver": "node bin/prepare.mjs"
   },
   "dsh": {
@@ -37,7 +38,7 @@
       "patch": "./cordis.patch.yml"
     },
     "client": {
-      "inject": ["@deepseek-ai/dsh-client-connection", "@deepseek-ai/dsh-client-locale", "@deepseek-ai/dsh-client-ui-settings"],
+      "inject": ["@deepseek-ai/dsh-client-connection", "@deepseek-ai/dsh-client-locale", "@deepseek-ai/dsh-client-ui-settings", "@deepseek-ai/dsh-client-ui-primitives"],
       "platform": "web"
     }
   },

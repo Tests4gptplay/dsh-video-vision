@@ -14,7 +14,8 @@ const exports = join(testRoot, 'exports');
 const id = 'web-0123456789abcdef0123';
 const localId = 'local-0123456789abcdef';
 let configured = root;
-const config = { cacheDirectory: { get: () => configured } };
+const configuration = join(testRoot, 'configuration');
+const config = { cacheDirectory: { get: () => configured }, configDirectory: configuration };
 let revealCount = 0, canceled = false;
 const openedPaths = [];
 const cache = new CacheManager({ config, cwd: testRoot, persist: async path => { configured = path; },
@@ -84,6 +85,17 @@ try {
   const state = (await response.json()).result.value;
   assert.equal(state.root, destination);
   assert.equal(state.videoDirectory, join(destination, 'videos'));
+  assert.equal(state.configurationDirectory, configuration);
+  const folderRoute = routes.find(r => r.path.endsWith('/reveal-configuration'));
+  for (let n = 0; n < 2; n++) {
+    const result = await folderRoute.fetch(new Request('http://localhost' + folderRoute.path, { method: 'POST',
+      headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+        type: 'client-request', rpcId: 'config', method: 'video-vision/cache/reveal-configuration', payload: {}
+      }) }));
+    assert.deepEqual((await result.json()).result, { ok: true, value: { path: configuration } });
+  }
+  assert.deepEqual(openedPaths.slice(-2), [configuration, configuration]);
+  assert((await readFile(join(configuration, 'GUIDANCE.md'), 'utf8')).includes('needs_method'));
   const revealRoute = routes.find(r => r.path.endsWith('/reveal'));
   for (const payload of [{}, { videos: true }]) {
     const result = await revealRoute.fetch(new Request('http://localhost' + revealRoute.path, { method: 'POST',

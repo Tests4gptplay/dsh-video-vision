@@ -1,0 +1,21 @@
+// Template: replace this URL-selection line with the site's working extraction method.
+// This .txt example is not loaded as a resolver.
+import { createWriteStream } from 'node:fs';
+import { join } from 'node:path';
+import { Readable, Transform } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
+export default async function resolveVideo({ source, outputDirectory, signal, maxDownloadMB }) {
+  const mediaUrl = source; // Use a real media URL extracted afresh from the page/API.
+  const response = await fetch(mediaUrl, { signal });
+  if (!response.ok || !response.body) throw new Error('Video HTTP ' + response.status);
+  const limit = maxDownloadMB * 1024 * 1024;
+  let bytes = 0;
+  await pipeline(Readable.fromWeb(response.body), new Transform({
+    transform(chunk, encoding, done) {
+      bytes += chunk.length;
+      done(bytes > limit ? new Error('Video exceeds maxDownloadMB') : null, chunk);
+    }
+  }), createWriteStream(join(outputDirectory, 'video.mp4')), { signal });
+  return { title: new URL(source).hostname, mediaPath: 'video.mp4' };
+}
