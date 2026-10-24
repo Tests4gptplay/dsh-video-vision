@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { VideoVision, DEFAULTS, timecode } from './lib/engine.js?v=0.5.0';
-import { liveConfig } from './lib/cache.js?v=0.5.0';
-import { setupCacheSettings } from './lib/settings.js?v=0.5.0';
-export { Config } from './lib/settings.js?v=0.5.0';
+import { VideoVision, DEFAULTS, timecode } from './lib/engine.js?v=0.5.1';
+import { liveConfig } from './lib/cache.js?v=0.5.1';
+import { setupCacheSettings } from './lib/settings.js?v=0.5.1';
+export { Config } from './lib/settings.js?v=0.5.1';
 
 import { listMethods, MethodNeeded, configurationDirectory, ensureConfiguration } from './lib/extensions.js';
 
@@ -72,10 +72,10 @@ export function makeTool(ctx, settings = {}) {
       else if (action === 'status' && !args.video_id) {
         try { asset = await engine.load(); } catch (e) {
           if (e.code !== 'ENOENT' && !/Open a video first/.test(e.message)) throw e;
-          return { action, plugin_version: '0.5.0', video: null, speech: speechState, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([, value]) => value !== undefined)) };
+          return { action, plugin_version: '0.5.1', video: null, speech: speechState, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([, value]) => value !== undefined)) };
         }
       } else asset = await engine.load(args.video_id);
-      if (action === 'status') return { action, plugin_version: '0.5.0', ...engine.summary(asset), speech: speechState, configuration_directory: configurationDirectory(config) };
+      if (action === 'status') return { action, plugin_version: '0.5.1', ...engine.summary(asset), speech: speechState, configuration_directory: configurationDirectory(config) };
       if (action === 'transcript') return { action, ...engine.summary(asset), transcript: engine.transcript(asset, args.start_seconds, args.end_seconds) };
       if (action === 'transcribe') {
         if (!provider || !['ready', 'standby'].includes(speechState.state)) {

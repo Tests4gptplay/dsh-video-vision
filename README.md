@@ -47,7 +47,7 @@
 DSH Desktop：打开 **插件 → 添加插件**，粘贴以下 GitHub 来源：
 
 ```text
-github:Tests4gptplay/dsh-video-vision#v0.5.0
+github:Tests4gptplay/dsh-video-vision#v0.5.1
 ```
 
 安装并启用 `video-vision` 后，重新加载插件或重启 DSH，在新的请求中发送视频链接即可。
@@ -55,10 +55,10 @@ github:Tests4gptplay/dsh-video-vision#v0.5.0
 Web 版安装命令：
 
 ```bash
-dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.5.0'
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.5.1'
 ```
 
-Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.5.0` 是固定版本来源，后续更新使用新的版本号。
+Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.5.1` 是固定版本来源，后续更新使用新的版本号。
 
 ### 运行依赖
 
@@ -78,10 +78,11 @@ yt-dlp 处理 YouTube 时使用 Node.js 运行播放器解析逻辑；官方 yt-
 
 打开 DSH **设置 → 视频视觉**：
 
+- **方法文件夹**：点击“设置缓存目录”同一行的“方法文件夹”，打开保存方法指导、站点解析扩展和笔记的独立目录。
 - **存储位置**：点击“设置缓存目录”，在系统目录选择窗口中选择文件夹。已有视频、画面和观看进度会一起迁移，新位置立即生效。
 - **当前占用**：查看缓存大小、条目数和画面数，可直接打开缓存文件夹。
 - **缓存列表**：按标题、平台或视频 ID 搜索，跳转原视频、打开单项目录、提取视频或删除该项缓存。
-- **提取与保存**：点击“提取视频”或单文件“提取”，直接弹出 Windows 另存为窗口，选择文件名和位置；覆盖同名文件由系统窗口确认。第一栏的“打开缓存文件夹”打开上方显示的缓存目录；“视频文件夹”打开其中的 videos 子目录，新缓存的视频按条目保存在这里。
+- **提取与保存**：点击“提取视频”或单文件“提取”，直接弹出 Windows 另存为窗口，选择文件名和位置；覆盖同名文件由系统窗口确认。第一栏的“打开缓存文件夹”打开上方显示的缓存目录，新缓存的视频按条目保存在其中的 videos 子目录。
 - **清空缓存**：确认后清理列表中的全部缓存，保留已提取文件、本地原视频以及目录中的其他文件。
 
 文件夹入口每次点击都会将对应窗口带到前台，关闭后可以再次打开。视频任务运行时仍可打开文件夹和提取文件；迁移和删除在任务完成后操作。B 站分离音视频的缓存会标明视频轨，独立音频可从文件列表提取。

@@ -1,6 +1,6 @@
 {
   "name": "dsh-video-vision",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Give AI models in DSH online video vision: open Bilibili, YouTube and other video links, inspect timestamped frames, and read captions.",
   "type": "module",
   "license": "MIT",

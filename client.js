@@ -93,6 +93,11 @@ window.__ModuleLoader__.load({
         try { await rpc('reveal', payload); }
         catch (e) { setError(e.message); }
       }
+      async function openMethodsFolder() {
+        setError(''); setNotice('');
+        try { await rpc('reveal-configuration'); }
+        catch (e) { setError(e.message); }
+      }
       async function extraction(entry, file) {
         setError(''); setNotice('');
         try {
@@ -108,7 +113,7 @@ window.__ModuleLoader__.load({
       return h('section', { className: 'vv-settings', 'aria-label': '视频视觉设置' },
         h('style', null, css),
         h('div', { className: 'vv-row' },
-          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.5.0 · 视频与画面缓存管理')),
+          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.5.1 · 视频与画面缓存管理')),
           button(busy ? '处理中…' : '刷新', () => act('list', {}, '列表已刷新'), { disabled: busy })),
         error && h('div', { className: 'vv-notice vv-error', role: 'alert' }, error),
         notice && h('div', { className: 'vv-notice', role: 'status' }, notice),
@@ -120,12 +125,12 @@ window.__ModuleLoader__.load({
           h('div', { className: 'vv-actions' },
             button('设置缓存目录', () => setDirectory(), { className: 'vv-primary', disabled: busy }),
             button('打开缓存文件夹', () => openFolder(), { disabled: !data, title: data?.root }),
-            button('视频文件夹', () => openFolder({ videos: true }), { disabled: !data, title: data?.videoDirectory })),
+            button('方法文件夹', () => openMethodsFolder(), { disabled: false, title: data?.configurationDirectory })),
           h('div', { className: 'vv-sub', style: { marginTop: 7 } }, '点击列表中的“提取视频”或单文件“提取”，在另存为窗口选择保存位置。'),
           h('div', { className: 'vv-sub', style: { marginTop: 7 } }, '更改位置会迁移列表中的缓存，观看进度与已有画面一并保留。'),
-          h('div', { style: { marginTop: 14 } }, h('strong', null, '配置与扩展文件夹')),
+          h('div', { style: { marginTop: 14 } }, h('strong', null, '方法与扩展文件夹')),
           h('div', { className: 'vv-path' }, data?.configurationDirectory || '正在读取…'),
-          h('div', { className: 'vv-sub', style: { marginTop: 5 } }, '这里保存方法指导、站点解析扩展和持久化笔记；升级插件或清空视频缓存会保留它们。')),
+          h('div', { className: 'vv-sub', style: { marginTop: 5 } }, '点击“方法文件夹”查看方法指导、站点解析扩展和持久化笔记；升级插件或清空视频缓存会保留它们。')),
         data && h('div', { className: 'vv-card' },
           h('div', { className: 'vv-row' },
             h('h3', null, '当前占用'),
