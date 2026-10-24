@@ -20,7 +20,7 @@ for (const call of launches) {
   assert.equal(call.options.windowsHide, false);
   assert.equal(call.options.stdio, 'ignore');
 }
-let factory, Component, picks = 0;
+let factory, Component, moduleId, section, transportCall, picks = 0;
 const React = {
   createElement: (type, props, ...children) => ({ type, props, children }),
   useState: value => [value, () => {}],
@@ -28,15 +28,20 @@ const React = {
   useRef: () => ({ current: null })
 };
 const window = { __DSH_DIRECTORY_PICKER__: { pick: async () => { picks++; return null; } },
-  __ModuleLoader__: { load: value => { factory = value.factory; } } };
+  __ModuleLoader__: { load: value => { factory = value.factory; moduleId = value.id; } } };
 vm.runInNewContext(await readFile(new URL('../client.js', import.meta.url), 'utf8'), { window });
 const plugin = factory(() => React);
 plugin.apply({
   effect: fn => fn(),
   locale: { register: () => () => {}, bind: () => key => key },
-  connection: { rpc: { call: () => { throw Error('Canceled picker must not migrate'); } } },
-  slots: { inject: (_, fn) => fn(), register: (_, component) => { Component = component; } }
+  connection: { rpc: { call: async (path, method) => { transportCall = { path, method }; return { ok: true, value: {} }; } } },
+  slots: { inject: (_, fn) => fn(), register: (options, component) => { Component = component; section = options; } }
 });
+assert.equal(moduleId, 'dsh-video-vision');
+assert.equal(section.id, 'video-vision-cache');
+assert.equal(section.locale, 'video-vision');
+await section.inject().rpc('list');
+assert.deepEqual(transportCall, { path: '/api', method: 'video-vision/cache/list' });
 const tree = Component({ rpc: async () => { throw Error('Canceled picker must not migrate'); } });
 const nodes = [];
 function walk(node) { if (!node || typeof node !== 'object') return; nodes.push(node); for (const c of node.children || []) { if (Array.isArray(c)) c.forEach(walk); else walk(c); } }

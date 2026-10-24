@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { parseBilibili, selectStreams } from '../lib/bilibili.js';
-import { sampleTimes, timecode, VideoVision } from '../lib/engine.js';
-import { makeTool, renderVideo, apply } from '../index.js';
+import { sampleTimes, timecode, VideoVision, DEFAULTS } from '../lib/engine.js';
+import { makeTool, renderVideo, apply, name } from '../index.js';
+import { cacheMarker } from '../lib/cache.js';
+assert.equal(name, 'video-vision');
+assert.equal(DEFAULTS.cacheDirectory, '.dsh-video-vision');
+assert.equal(cacheMarker, '.video-vision.json');
 const signal = new AbortController().signal;
 assert.deepEqual(await parseBilibili('https://www.bilibili.com/video/BV1GTn66pEi3/?p=2&share_source=copy_web', signal), { bvid: 'BV1GTn66pEi3', page: 2 });
 assert.deepEqual(await parseBilibili('BV1GTn66pEi3', signal), { bvid: 'BV1GTn66pEi3', page: 1 });

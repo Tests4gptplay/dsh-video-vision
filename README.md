@@ -1,12 +1,12 @@
-# DSH Codex Vision
+# DSH Video Vision
 
-**让 DSH 中的 Codex 直接看在线视频。**
+**让 DSH 中的 AI 直接看视频。**
 
-发送 B 站、YouTube 等视频网站的链接，Codex 就能获取视频画面、定位具体片段，并结合字幕理解内容，省去手动下载再上传视频的步骤。适合一起看教程、讨论作品、分析演示过程，以及回到某个时间点细看画面。
+发送 B 站、YouTube 等视频网站的链接，AI 就能获取视频画面、定位具体片段，并结合字幕理解内容，省去手动下载再上传视频的步骤。适合一起看教程、讨论作品、分析演示过程，以及回到某个时间点细看画面。
 
 ## 这样使用
 
-安装并启用后，在 DSH 中直接对 Codex 说：
+安装并启用后，在 DSH 中选择支持工具调用与图片输入的 AI 模型，直接对它说：
 
 > 看一下这个视频：https://www.youtube.com/watch?v=视频ID
 
@@ -29,9 +29,9 @@
 
 平台解析由 yt-dlp 持续维护。需要登录的视频可在配置中指定自己提供的 cookie 文件，网络代理可通过 `proxy` 设置。直播内容使用已结束的回放链接。
 
-## 它怎样给 Codex 接上视频视觉
+## 它怎样给 AI 接上视频视觉
 
-插件获取视频，将带时间戳的画面通过 DSH 原生图片附件交给当前 Codex 模型。Codex 先看全片概览，再按时间区间或精确时间点查看细节；字幕与片段语音转写补充画面信息。
+插件获取视频，将带时间戳的画面通过 DSH 原生图片附件交给当前 AI 模型。AI 先看全片概览，再按时间区间或精确时间点查看细节；字幕与片段语音转写补充画面信息。
 
 - **链接直接观看**：发送视频链接即可开始。
 - **按时间细看**：指定片段或时间点，查看动作变化、界面和屏幕文字。
@@ -46,13 +46,17 @@
 需要 DSH、Node.js 22+（可使用 DSH 自带版本），以及 FFmpeg 和 ffprobe。将 FFmpeg 所在目录加入 PATH，或在插件配置中填写两个程序的路径。
 
 ```powershell
-git clone https://github.com/Tests4gptplay/dsh-codex-vision.git
-cd dsh-codex-vision
+git clone https://github.com/Tests4gptplay/dsh-video-vision.git
+cd dsh-video-vision
 ```
 
 ### Windows 一键安装
 
-双击项目中的 `安装插件.cmd`。它会下载官方 yt-dlp 可执行文件、核对 SHA-256，然后把插件加入 DSH Desktop 配置。解析器默认保存在用户目录的 `.dsh/tools/dsh-codex-vision` 中。
+双击项目中的 `安装插件.cmd`。它会下载官方 yt-dlp 可执行文件、核对 SHA-256，然后把插件加入 DSH Desktop 配置。解析器默认保存在用户目录的 `.dsh/tools/dsh-video-vision` 中。
+
+### 从旧版升级
+
+停用并卸载旧版插件，再安装新版。在“视频视觉”中选择原缓存目录，可继续使用已有视频、画面和观看进度；FFmpeg、解析器等自定义路径沿用原配置。
 
 ### 手动安装
 
@@ -63,7 +67,7 @@ node bin/prepare.mjs
 & "$env:LOCALAPPDATA\Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add (Get-Location).Path
 ```
 
-自定义 DSH 安装位置时，替换 CLI 路径。安装后启用 `codex-vision` 条目，重新加载插件或重启 DSH，再开始新的请求。
+自定义 DSH 安装位置时，替换 CLI 路径。安装后启用 `video-vision` 条目，重新加载插件或重启 DSH，再开始新的请求。
 
 已经安装 yt-dlp 时，可以直接配置 `ytDlpPath`。也可以将解析器放在指定目录：
 
@@ -101,12 +105,12 @@ YouTube 使用 Node.js 运行其播放器解析逻辑；官方 yt-dlp 可执行�
 
 ## 配置
 
-在 `codex-vision` 条目的 `config` 中设置：
+在 `video-vision` 条目的 `config` 中设置：
 
 ```yaml
 ffmpegPath: ffmpeg
 ffprobePath: ffprobe
-cacheDirectory: .dsh-codex-vision
+cacheDirectory: .dsh-video-vision
 maxHeight: 720
 frameWidth: 1280
 maxFrames: 12
@@ -121,7 +125,7 @@ speechProvider: sensevoice-local
 # proxy: 'http://127.0.0.1:7890'
 ```
 
-默认使用当前会话工作目录的 `.dsh-codex-vision`；设置页显示最近使用的视频会话缓存位置，尚未观看时使用 DSH 默认工作目录。可在设置页改为固定的绝对路径，让各会话共享同一缓存位置。`maxHeight` 是优先选择的清晰度，结果会列出实际分辨率。`maxDownloadMB` 设置文件大小预算，`downloadTimeoutMs` 设置解析或下载单次任务的最长时间。
+默认使用当前会话工作目录的 `.dsh-video-vision`；设置页显示最近使用的视频会话缓存位置，尚未观看时使用 DSH 默认工作目录。可在设置页改为固定的绝对路径，让各会话共享同一缓存位置。`maxHeight` 是优先选择的清晰度，结果会列出实际分辨率。`maxDownloadMB` 设置文件大小预算，`downloadTimeoutMs` 设置解析或下载单次任务的最长时间。
 
 字幕优先使用平台提供的人工字幕，其次使用自动字幕，结果标明语言和来源。使用语音转写前，在 DSH 的语音设置中准备好识别器，默认使用 `sensevoice-local`。转写以短片段为单位，默认每段最长 60 秒。
 
@@ -130,10 +134,10 @@ speechProvider: sensevoice-local
 命令行与插件共用视频处理流程，输出画面路径和结构化结果：
 
 ```powershell
-node bin/codex-vision.mjs open --source "https://www.youtube.com/watch?v=视频ID" --frames 6
-node bin/codex-vision.mjs watch --timestamps 12,45,120
-node bin/codex-vision.mjs transcript
-node bin/codex-vision.mjs --help
+node bin/video-vision.mjs open --source "https://www.youtube.com/watch?v=视频ID" --frames 6
+node bin/video-vision.mjs watch --timestamps 12,45,120
+node bin/video-vision.mjs transcript
+node bin/video-vision.mjs --help
 ```
 
 可用 `--cwd` 指定工作目录，`--cache` 指定缓存位置，`--ytdlp`、`--ffmpeg` 和 `--ffprobe` 指定程序路径，`--output` 保存 JSON 结果。Ctrl+C 取消当前任务。

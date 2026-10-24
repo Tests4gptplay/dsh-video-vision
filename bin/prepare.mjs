@@ -28,7 +28,7 @@ if (!assetName || (process.platform !== 'darwin' && process.arch !== 'x64')) {
   throw new Error('Install the official yt-dlp build for your platform and set ytDlpPath.');
 }
 const signal = AbortSignal.timeout(180000);
-const headers = { 'User-Agent': 'DSH-Codex-Vision', Accept: 'application/vnd.github+json' };
+const headers = { 'User-Agent': 'DSH-Video-Vision', Accept: 'application/vnd.github+json' };
 async function get(url) {
   const r = await fetch(url, { headers, signal });
   if (!r.ok) throw new Error('Download HTTP ' + r.status + ': ' + url);

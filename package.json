@@ -1,10 +1,13 @@
 {
-  "name": "dsh-codex-vision",
-  "version": "0.3.4",
-  "description": "Give Codex in DSH online video vision: open Bilibili, YouTube and other video links, inspect timestamped frames, and read captions.",
+  "name": "dsh-video-vision",
+  "version": "0.4.0",
+  "description": "Give AI models in DSH online video vision: open Bilibili, YouTube and other video links, inspect timestamped frames, and read captions.",
   "type": "module",
   "license": "MIT",
   "author": "Tests4gptplay",
+  "repository": { "type": "git", "url": "git+https://github.com/Tests4gptplay/dsh-video-vision.git" },
+  "homepage": "https://github.com/Tests4gptplay/dsh-video-vision#readme",
+  "bugs": { "url": "https://github.com/Tests4gptplay/dsh-video-vision/issues" },
   "engines": {
     "node": ">=22"
   },
@@ -14,7 +17,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "dsh-codex-vision": "./bin/codex-vision.mjs"
+    "dsh-video-vision": "./bin/video-vision.mjs"
   },
   "files": [
     "index.js",

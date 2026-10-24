@@ -6,10 +6,10 @@ import { resolve, dirname } from 'node:path';
 const argv = process.argv.slice(2);
 if (!argv.length || argv.includes('--help')) {
   console.log(`Usage:
-  node bin/codex-vision.mjs open --source <URL/BV/file> [--frames 6]
-  node bin/codex-vision.mjs watch --video-id <id> --timestamps 12,45,120
-  node bin/codex-vision.mjs transcript --video-id <id>
-  node bin/codex-vision.mjs status
+  node bin/video-vision.mjs open --source <URL/BV/file> [--frames 6]
+  node bin/video-vision.mjs watch --video-id <id> --timestamps 12,45,120
+  node bin/video-vision.mjs transcript --video-id <id>
+  node bin/video-vision.mjs status
 Options:
   --cwd <workspace> --cache <cache directory> --output <JSON path>
   --start <seconds> --end <seconds> --language <speech language>

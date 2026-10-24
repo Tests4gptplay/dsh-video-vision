@@ -80,14 +80,14 @@ try {
   const route = routes.find(r => r.path.endsWith('/list'));
   const response = await route.fetch(new Request('http://localhost' + route.path, { method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ type: 'client-request', rpcId: 'test-1', method: 'codex-vision/cache/list', payload: {} }) }));
+    body: JSON.stringify({ type: 'client-request', rpcId: 'test-1', method: 'video-vision/cache/list', payload: {} }) }));
   const state = (await response.json()).result.value;
   assert.equal(state.root, destination);
   assert.equal(state.videoDirectory, join(destination, 'videos'));
   const revealRoute = routes.find(r => r.path.endsWith('/reveal'));
   for (const payload of [{}, { videos: true }]) {
     const result = await revealRoute.fetch(new Request('http://localhost' + revealRoute.path, { method: 'POST',
-      headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'client-request', rpcId: 'open', method: 'codex-vision/cache/reveal', payload }) }));
+      headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'client-request', rpcId: 'open', method: 'video-vision/cache/reveal', payload }) }));
     assert.equal((await result.json()).result.ok, true);
   }
   assert.deepEqual(openedPaths.slice(-2), [destination, join(destination, 'videos')]);

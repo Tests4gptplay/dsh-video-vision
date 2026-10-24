@@ -1,12 +1,12 @@
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
-$action = $env:DSH_CV_ACTION
+$action = $env:DSH_VV_ACTION
 $videos = [Environment]::GetFolderPath([Environment+SpecialFolder]::MyVideos)
 if (-not $videos) { $videos = Join-Path $env:USERPROFILE 'Videos' }
 if ($action -eq 'reveal') {
-  Start-Process -FilePath 'explorer.exe' -ArgumentList ('"' + $env:DSH_CV_PATH + '"')
-  @{ path = $env:DSH_CV_PATH } | ConvertTo-Json -Compress
+  Start-Process -FilePath 'explorer.exe' -ArgumentList ('"' + $env:DSH_VV_PATH + '"')
+  @{ path = $env:DSH_VV_PATH } | ConvertTo-Json -Compress
   exit
 }
 if ($action -ne 'save' -and $action -ne 'directory') { throw "Unknown file action: $action" }
@@ -24,17 +24,17 @@ try {
   if ($action -eq 'directory') {
     $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
     $dialog.Description = '选择视频缓存目录'
-    $dialog.SelectedPath = $env:DSH_CV_PATH
+    $dialog.SelectedPath = $env:DSH_VV_PATH
     $dialog.ShowNewFolderButton = $true
   } elseif ($action -eq 'save') {
     $dialog = New-Object System.Windows.Forms.SaveFileDialog
     $dialog.Title = '另存为'
-    $dialog.FileName = $env:DSH_CV_NAME
+    $dialog.FileName = $env:DSH_VV_NAME
     $dialog.InitialDirectory = $videos
     $dialog.RestoreDirectory = $true
     $dialog.OverwritePrompt = $true
     $dialog.AddExtension = $true
-    $extension = [IO.Path]::GetExtension($env:DSH_CV_NAME).TrimStart('.')
+    $extension = [IO.Path]::GetExtension($env:DSH_VV_NAME).TrimStart('.')
     if ($extension) {
       $dialog.DefaultExt = $extension
       $dialog.Filter = "$($extension.ToUpper()) (*.$extension)|*.$extension|All files (*.*)|*.*"

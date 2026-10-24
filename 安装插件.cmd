@@ -16,7 +16,7 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-echo Installing DSH Codex Vision from:
+echo Installing DSH Video Vision from:
 echo %~dp0
 call "%DSH%" plugin --profile desktop add "%~dp0."
 if errorlevel 1 (
@@ -25,5 +25,5 @@ if errorlevel 1 (
   exit /b 1
 )
 echo Installation completed. Reload the plugin in DSH or restart the app.
-echo Send Codex a video URL to start watching with video_vision.
+echo Send your AI a video URL to start watching with video_vision.
 pause

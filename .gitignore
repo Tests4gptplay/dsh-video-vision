@@ -1,5 +1,4 @@
-.dsh-codex-vision/
-.dsh-video-study/
+.dsh-video-vision/
 *.tgz
 node_modules/
 tools/
