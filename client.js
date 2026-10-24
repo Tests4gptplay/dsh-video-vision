@@ -2,7 +2,6 @@ window.__ModuleLoader__.load({
   id: 'dsh-video-vision',
   factory: require => {
     const React = require('react');
-    const { Button } = require('@deepseek-ai/dsh-client-ui-primitives');
     const h = React.createElement;
     const { useEffect, useState, useRef } = React;
     const css = `
@@ -48,22 +47,11 @@ window.__ModuleLoader__.load({
       const n = Math.floor(value || 0);
       return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
     }
-    function ConfigurationFolderAction({ rpc, onError }) {
-      const [opening, setOpening] = useState(false);
-      async function open() {
-        setOpening(true); onError('');
-        try { await rpc('reveal-configuration'); }
-        catch (error) { onError(error.message); }
-        finally { setOpening(false); }
-      }
-      return h(Button, { variant: 'outline', size: 'sm', disabled: opening, onClick: open }, '打开配置文件夹');
-    }
-    function VideoSettings({ rpc, mountFolderAction }) {
+    function VideoSettings({ rpc }) {
       const [data, setData] = useState(null);
       const [cachePath, setCachePath] = useState('');
       const [busy, setBusy] = useState(false);
       const [error, setError] = useState('');
-      useEffect(() => mountFolderAction(setError), [mountFolderAction]);
       const [notice, setNotice] = useState('');
       const [confirm, setConfirm] = useState(null);
       const confirmationRef = useRef(null);
@@ -137,7 +125,7 @@ window.__ModuleLoader__.load({
           h('div', { className: 'vv-sub', style: { marginTop: 7 } }, '更改位置会迁移列表中的缓存，观看进度与已有画面一并保留。'),
           h('div', { style: { marginTop: 14 } }, h('strong', null, '配置与扩展文件夹')),
           h('div', { className: 'vv-path' }, data?.configurationDirectory || '正在读取…'),
-          h('div', { className: 'vv-sub', style: { marginTop: 5 } }, '右上角“打开配置文件夹”可查看方法指导、站点解析扩展和持久化笔记；升级插件或清空视频缓存会保留它们。')),
+          h('div', { className: 'vv-sub', style: { marginTop: 5 } }, '这里保存方法指导、站点解析扩展和持久化笔记；升级插件或清空视频缓存会保留它们。')),
         data && h('div', { className: 'vv-card' },
           h('div', { className: 'vv-row' },
             h('h3', null, '当前占用'),
@@ -190,13 +178,9 @@ window.__ModuleLoader__.load({
         if (!result?.ok) throw new Error(result?.error?.message || '缓存管理请求失败');
         return result.value;
       };
-      const mountFolderAction = onError => ctx.slots.register({
-        name: 'settings.action', id: 'open-document', priority: 100, order: 0,
-        inject: () => ({ rpc, onError })
-      }, ConfigurationFolderAction);
       ctx.slots.inject('settings.section', () => ctx.slots.register({
         name: 'settings.section', id: 'video-vision-cache', order: 110,
-        label: () => t('nav'), locale: 'video-vision', inject: () => ({ rpc, mountFolderAction })
+        label: () => t('nav'), locale: 'video-vision', inject: () => ({ rpc })
       }, VideoSettings));
     }
     return { apply, inject };
