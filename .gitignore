@@ -1,0 +1,6 @@
+.dsh-codex-vision/
+.dsh-video-study/
+*.tgz
+node_modules/
+tools/
+test/.cache-tests/

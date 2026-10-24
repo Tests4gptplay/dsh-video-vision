@@ -1,0 +1,45 @@
+{
+  "name": "dsh-codex-vision",
+  "version": "0.3.4",
+  "description": "Give Codex in DSH online video vision: open Bilibili, YouTube and other video links, inspect timestamped frames, and read captions.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Tests4gptplay",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "dsh-codex-vision": "./bin/codex-vision.mjs"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib/",
+    "bin/",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "安装插件.cmd"
+  ],
+  "scripts": {
+    "test": "node test/smoke.mjs && node test/cache.mjs && node test/native-ui.mjs",
+    "setup:resolver": "node bin/prepare.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": ["@deepseek-ai/dsh-client-connection", "@deepseek-ai/dsh-client-locale", "@deepseek-ai/dsh-client-ui-settings"],
+      "platform": "web"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.2"
+  }
+}
