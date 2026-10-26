@@ -1,4 +1,10 @@
 import assert from 'node:assert/strict';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+const browserTestRoot = await mkdtemp(join(tmpdir(), 'dsh-smoke-browser-'));
+process.env.DSH_BROWSER_SESSION_HOME = browserTestRoot;
+const services = {};
 import { parseBilibili, selectStreams } from '../lib/bilibili.js';
 import { sampleTimes, timecode, VideoVision, DEFAULTS } from '../lib/engine.js';
 import { makeTool, renderVideo, apply, name } from '../index.js';
@@ -25,7 +31,7 @@ assert.deepEqual(rendered.map(b => b.type), ['text', 'text', 'image']);
 assert.equal(rendered[2].attachment, image);
 assert.match(rendered[1].text, /42.355/);
 let registered;
-const ctx = { tools: { register: value => { registered = value; } }, workingDirectory: { ensure: async () => process.cwd() }, get: () => undefined, inject: () => {} };
+const ctx = { tools: { register: value => { registered = value; } }, workingDirectory: { ensure: async () => process.cwd() }, get: () => undefined, inject: () => {}, effect: fn => fn(), provide: (key, value) => { services[key] = value; } };
 apply(ctx, {});
 assert.equal(registered.name, 'video_vision');
 assert.equal(typeof registered.execute, 'function');
@@ -52,4 +58,6 @@ assert.equal(selectCaption({ language: 'en', automatic_captions: {
   zh: [{ ext: 'json3', url: 'https://example.com/b' }], 'en-orig': [{ ext: 'json3', url: 'https://example.com/a' }] } }).language, 'en-orig');
 assert(resolverArgs({}).includes('--ignore-config'));
 assert(!resolverArgs({}).includes('--cookies-from-browser'));
+await services.browserSessions.status();
+await rm(browserTestRoot, { recursive: true, force: true });
 console.log('PASS: platform URLs, captions, stream selection, timestamp sampling, image rendering, tool registration and transcript ranges.');

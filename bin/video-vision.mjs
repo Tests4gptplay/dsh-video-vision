@@ -8,6 +8,7 @@ if (!argv.length || argv.includes('--help')) {
   console.log(`Usage:
   node bin/video-vision.mjs open --source <URL/BV/file> [--frames 6]
   node bin/video-vision.mjs watch --video-id <id> --timestamps 12,45,120
+  node bin/video-vision.mjs audio --video-id <id> --start 0 --end 30
   node bin/video-vision.mjs transcript --video-id <id>
   node bin/video-vision.mjs status
   node bin/video-vision.mjs methods [--source <URL>]
@@ -15,17 +16,19 @@ Options:
   --cwd <workspace> --cache <cache directory> --output <JSON path>
   --resolver <auto/yt-dlp/method-id> --config-directory <persistent folder>
   --start <seconds> --end <seconds> --language <speech language>
+  --audio-mode <auto/analyze/off>
   --ffmpeg <path> --ffprobe <path> --ytdlp <path> --node <path>
   --max-height <pixels> --max-download <MB> --download-timeout <ms>
-  --cookies <explicit cookie file> --proxy <proxy URL>`);
+  --proxy <proxy URL>
+  yt-dlp is anonymous; native login authorization is controlled in the Desktop UI.`);
   process.exit(0);
 }
 const args = { action: argv.shift() }, config = {};
 let cwd = process.cwd(), output;
-const values = { '--source': 'source', '--video-id': 'video_id', '--language': 'language', '--resolver': 'resolver' };
+const values = { '--source': 'source', '--video-id': 'video_id', '--language': 'language', '--resolver': 'resolver', '--audio-mode': 'audio_mode' };
 const numbers = { '--frames': 'frames', '--start': 'start_seconds', '--end': 'end_seconds' };
 const paths = { '--ffmpeg': 'ffmpegPath', '--ffprobe': 'ffprobePath', '--ytdlp': 'ytDlpPath',
-  '--node': 'nodePath', '--cache': 'cacheDirectory', '--config-directory': 'configDirectory', '--cookies': 'cookieFile', '--proxy': 'proxy' };
+  '--node': 'nodePath', '--cache': 'cacheDirectory', '--config-directory': 'configDirectory', '--proxy': 'proxy' };
 const settings = { '--max-height': 'maxHeight', '--max-download': 'maxDownloadMB', '--download-timeout': 'downloadTimeoutMs' };
 for (let i = 0; i < argv.length; i += 2) {
   const key = argv[i], value = argv[i + 1];

@@ -10,6 +10,10 @@ window.__ModuleLoader__.load({
       .vv-settings h2{font-size:21px;font-weight:650;margin:0 0 3px}
       .vv-settings h3{font-size:14px;font-weight:600;margin:0}
       .vv-sub{color:var(--dsw-alias-label-secondary);font-size:12px}
+      .vv-first-use{display:block;font-size:inherit;font-weight:700;color:var(--dsw-alias-label-primary);line-height:1.6;margin:12px 0 6px}
+      .vv-setup{margin-top:12px;padding:12px;border:1px solid var(--dsw-alias-border-l2,#c8cbd3);border-radius:9px}
+      .vv-setup ol{margin:7px 0;padding-left:20px}
+      .vv-setup li{margin:5px 0}
       .vv-card{border:1px solid var(--dsw-alias-border-l2,#c8cbd3);border-radius:14px;padding:16px;margin-top:14px;background:var(--dsw-alias-background-secondary,rgba(255,255,255,.08))}
       .vv-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
       .vv-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
@@ -47,6 +51,7 @@ window.__ModuleLoader__.load({
       const n = Math.floor(value || 0);
       return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
     }
+
     function VideoSettings({ rpc }) {
       const [data, setData] = useState(null);
       const [cachePath, setCachePath] = useState('');
@@ -57,6 +62,8 @@ window.__ModuleLoader__.load({
       const confirmationRef = useRef(null);
       useEffect(() => { confirmationRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, [confirm]);
       const [search, setSearch] = useState('');
+      const [setupInfo, setSetupInfo] = useState(null);
+      const [pendingAction, setPendingAction] = useState('');
       async function reload() {
         const result = await rpc('list');
         setData(result);
@@ -68,15 +75,24 @@ window.__ModuleLoader__.load({
         }).catch(e => { if (alive) setError(e.message); });
         return () => { alive = false; };
       }, []);
+      useEffect(() => {
+        let alive = true;
+        const updateBridge = () => rpc('browser-status').then(browser_session => {
+          if (alive) setData(previous => previous ? { ...previous, browser_session } : previous);
+        }).catch(() => {});
+        window.addEventListener('focus', updateBridge);
+        return () => { alive = false; window.removeEventListener('focus', updateBridge); };
+      }, []);
       async function act(endpoint, payload, message) {
-        setBusy(true); setError(''); setNotice(''); setConfirm(null);
+        setBusy(true); setPendingAction(endpoint); setError(''); setNotice(''); setConfirm(null);
         try {
           const value = await rpc(endpoint, payload);
           if (endpoint === 'relocate') setCachePath(value.root);
           await reload();
-          setNotice(value.retained?.length ? '新位置已启用，旧目录中有文件仍被占用：' + value.retained.join('、') : message);
+          setNotice(endpoint === 'browser-status' ? (value.connected ? '检查完成：已导入的登录态可用。' : '检查完成：尚无可用登录态，请导入或刷新。') :
+            value.retained?.length ? '新位置已启用，旧目录中有文件仍被占用：' + value.retained.join('、') : message);
         } catch (e) { setError(e.message); }
-        finally { setBusy(false); }
+        finally { setBusy(false); setPendingAction(''); }
       }
       const blocked = busy;
       const button = (label, onClick, options = {}) => h('button', { type: 'button', disabled: blocked, onClick, ...options }, label);
@@ -87,6 +103,27 @@ window.__ModuleLoader__.load({
           const selected = picker?.pick ? { path: await picker.pick() } : await rpc('pick-directory');
           if (selected.path && !selected.canceled) await act('relocate', { path: selected.path }, '缓存目录已设置。');
         } catch (e) { setError(e.message); }
+      }
+      async function authorizeBrowser(enabled, syncToNative) {
+        await act('browser-authorization', { enabled, syncToNative },
+          enabled ? (syncToNative ? '已保存：默认浏览器授权开启，内置浏览器同步开启。' : '已保存：默认浏览器授权开启，内置浏览器同步关闭。') : '已保存：默认浏览器授权和同步均已关闭。');
+      }
+      async function importBrowser(refresh = false) {
+        const endpoint = refresh ? 'browser-refresh' : 'browser-setup';
+        setBusy(true); setPendingAction(endpoint); setError(''); setNotice('');
+        try {
+          await rpc(endpoint);
+          setSetupInfo(null);
+          await reload();
+          setNotice(refresh ? '刷新完成：登录态已更新。' : '导入完成：登录态已保存。');
+        } catch (e) { setError(e.message); setSetupInfo(true); }
+        finally { setBusy(false); setPendingAction(''); }
+      }
+      async function openBrowserSettings() {
+        setBusy(true); setPendingAction('browser-settings'); setError('');
+        try { await rpc('browser-settings'); setSetupInfo(true); setNotice('已打开浏览器连接设置。已有 CAH 或其他可用连接时，直接点击导入即可。'); }
+        catch (e) { setError(e.message); }
+        finally { setBusy(false); setPendingAction(''); }
       }
       async function openFolder(payload = {}) {
         setError(''); setNotice('');
@@ -102,7 +139,7 @@ window.__ModuleLoader__.load({
         setError(''); setNotice('');
         try {
           const result = await rpc('extract', { id: entry.id, file });
-          if (!result.canceled) setNotice('已保存到：' + result.path);
+          if (!result.canceled) setNotice((result.merged_audio ? '已合并音轨并保存到：' : '已保存到：') + result.path);
         } catch (e) { setError(e.message); }
       }
       function askDelete(entry, file) {
@@ -113,11 +150,56 @@ window.__ModuleLoader__.load({
       return h('section', { className: 'vv-settings', 'aria-label': '视频视觉设置' },
         h('style', null, css),
         h('div', { className: 'vv-row' },
-          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.5.2 · 视频与画面缓存管理')),
+          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.9.0 · 视频、音频与画面缓存管理')),
           button(busy ? '处理中…' : '刷新', () => act('list', {}, '列表已刷新'), { disabled: busy })),
         error && h('div', { className: 'vv-notice vv-error', role: 'alert' }, error),
         notice && h('div', { className: 'vv-notice', role: 'status' }, notice),
         !data && !error && h('div', { className: 'vv-empty' }, '正在读取缓存…'),
+        h('div', { className: 'vv-card' },
+          h('h3', null, '浏览器登录态授权'),
+          h('label', { className: 'vv-row', style: { justifyContent: 'flex-start', marginTop: 10 } },
+            h('input', { type: 'checkbox', role: 'switch', 'aria-label': '授权使用默认浏览器登录态',
+              checked: data?.browser_session?.enabled === true,
+              disabled: busy || !data,
+              style: { width: 18, minWidth: 18, margin: 0 },
+              onChange: event => authorizeBrowser(event.target.checked, data?.browser_session?.syncToNative === true) }),
+            '授权使用默认浏览器登录态'),
+          h('label', { className: 'vv-row', style: { justifyContent: 'flex-start', marginTop: 10 } },
+            h('input', { type: 'checkbox', role: 'switch', 'aria-label': '同步至 DSH 内置浏览器',
+              checked: data?.browser_session?.syncToNative === true,
+              disabled: busy || !data?.browser_session?.enabled,
+              style: { width: 18, minWidth: 18, margin: 0 },
+              onChange: event => authorizeBrowser(true, event.target.checked) }),
+            '同步至 DSH 内置浏览器'),
+          pendingAction === 'browser-authorization' && h('div', { className: 'vv-notice', role: 'status' }, '正在保存授权设置…'),
+          h('div', { className: 'vv-sub', style: { marginTop: 7 } },
+            '自动发现并复用正在运行的浏览器登录态，供 DSH 访问需要登录的网站。开启同步后，DSH 内置浏览器也可使用。'),
+          h('div', { className: 'vv-sub', style: { marginTop: 5 } },
+            '登录态加密保存在本机，点击“刷新登录态”可更新。'),
+          h('strong', { className: 'vv-first-use' }, '保持已登录的浏览器运行，点击“导入登录态”；以后按需刷新。'),
+          h('div', { className: 'vv-sub', style: { marginTop: 5 } },
+            '默认浏览器：' + (data?.browser_session?.browser || '读取中') + ' · 登录态：' +
+            (data?.browser_session?.connected ? '已导入' : data?.browser_session?.imported ? '需刷新' : '未导入') +
+            (data?.browser_session?.importedAt ? ' · 导入时间：' + new Date(data.browser_session.importedAt).toLocaleString() : '') +
+            (data && !data?.browser_session?.ready ? ' · 本地组件需重启 DSH Desktop 后启用' : '')),
+          h('div', { className: 'vv-actions', style: { marginTop: 9 } },
+            button(pendingAction === 'browser-setup' ? '正在导入登录态…' : data?.browser_session?.connected ? '登录态已导入' : '导入登录态', () => importBrowser(),
+              { className: 'vv-primary', disabled: busy || !data?.browser_session?.enabled || data?.browser_session?.connected === true }),
+            button(pendingAction === 'browser-refresh' ? '正在刷新登录态…' : '刷新登录态', () => importBrowser(true),
+              { disabled: busy || !data?.browser_session?.enabled || !data?.browser_session?.imported }),
+            button(pendingAction === 'browser-status' ? '正在检查…' : '检查状态', () => act('browser-status', {}, ''), { disabled: busy || !data })),
+          h('div', { className: 'vv-sub', style: { marginTop: 6 } }, '若登录态失效，请点击“刷新登录态”。'),
+          ['browser-setup', 'browser-refresh'].includes(pendingAction) && h('div', { className: 'vv-notice', role: 'status' },
+            '正在发现浏览器连接并导入登录态；若浏览器显示连接确认，请选择允许。'),
+          (!data?.browser_session?.imported || setupInfo) && h('div', { className: 'vv-setup', 'aria-label': '首次导入登录态' },
+            h('strong', null, '首次使用'),
+            h('ol', null,
+              h('li', null, '保持已登录的浏览器运行；CAH 等现有浏览器连接会自动识别。'),
+              h('li', null, '开启授权，点击“导入登录态”。浏览器若显示连接确认，选择允许即可。'),
+              h('li', null, '看到“导入完成”后即可使用；后续只需按需刷新。')),
+            button(pendingAction === 'browser-settings' ? '正在打开…' : '浏览器连接设置（可选）', openBrowserSettings,
+              { disabled: busy }),
+            h('div', { className: 'vv-sub', style: { marginTop: 6 } }, '已运行 CAH 等浏览器会话时直接导入；需要建立新的 Chrome 连接时，可使用上方设置。'))),
         h('div', { className: 'vv-card' },
           h('h3', null, '存储位置'),
           h('label', { htmlFor: 'vv-cache-path', className: 'vv-sub' }, '缓存文件夹（完整路径）'),
@@ -126,7 +208,7 @@ window.__ModuleLoader__.load({
             button('设置缓存目录', () => setDirectory(), { className: 'vv-primary', disabled: busy }),
             button('缓存文件夹', () => openFolder(), { disabled: !data, title: data?.root }),
             button('方法文件夹', () => openMethodsFolder(), { disabled: false, title: data?.configurationDirectory })),
-          h('div', { className: 'vv-sub', style: { marginTop: 7 } }, '点击列表中的“提取视频”或单文件“提取”，在另存为窗口选择保存位置。'),
+          h('div', { className: 'vv-sub', style: { marginTop: 7 } }, '“提取视频”会将已缓存的独立音轨无损合并到视频；单文件“提取”按原样保存。'),
           h('div', { className: 'vv-sub', style: { marginTop: 7 } }, '更改位置会迁移列表中的缓存，观看进度与已有画面一并保留。'),
           h('div', { style: { marginTop: 14 } }, h('strong', null, '方法与扩展文件夹')),
           h('div', { className: 'vv-path' }, data?.configurationDirectory || '正在读取…'),

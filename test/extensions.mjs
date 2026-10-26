@@ -37,7 +37,14 @@ try {
   assert((await readFile(guidance, 'utf8')).endsWith('User-owned note.\n'));
   const methods = await execute({ action: 'methods' });
   assert.equal(methods.directory, directory);
-  assert.match(methods.guidance, /User-owned note/);
+  assert.match(methods.user_guidance, /User-owned note/);
+  assert.match(methods.guidance, /audio.analyzed_range_seconds/);
+  assert.match(methods.audio_guidance, /歌词/);
+  const builtIn = methods.builtinGuidancePath;
+  await writeFile(builtIn, 'Old shipped guidance');
+  await ensureConfiguration(config);
+  assert.match(await readFile(builtIn, 'utf8'), /audio.analyzed_range_seconds/);
+  assert((await readFile(guidance, 'utf8')).endsWith('User-owned note.\n'));
   assert.equal(methods.backup.resolver, 'yt-dlp');
 
   server.listen(0, '127.0.0.1');

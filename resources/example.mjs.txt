@@ -17,5 +17,7 @@ export default async function resolveVideo({ source, outputDirectory, signal, ma
       done(bytes > limit ? new Error('Video exceeds maxDownloadMB') : null, chunk);
     }
   }), createWriteStream(join(outputDirectory, 'video.mp4')), { signal });
+  // For separate audio, download it too and add audioPath: 'audio.m4a'.
+  // Keep video + audio within the same maxDownloadMB budget and timeline.
   return { title: new URL(source).hostname, mediaPath: 'video.mp4' };
 }

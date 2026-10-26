@@ -52,6 +52,13 @@ assert.deepEqual(registrations.map(entry => entry.name), ['settings.section']);
 const nodes = [];
 function walk(node) { if (!node || typeof node !== 'object') return; nodes.push(node); for (const c of node.children || []) { if (Array.isArray(c)) c.forEach(walk); else walk(c); } }
 walk(tree);
+const authorization = nodes.find(n => n.type === 'input' && n.props.role === 'switch');
+assert(authorization); assert.equal(authorization.props.checked, false);
+assert.equal(authorization.props.disabled, true, 'Wait for the local bridge capability before enabling');
+const switches = nodes.filter(n => n.type === 'input' && n.props.role === 'switch');
+assert.equal(switches.length, 2);
+assert.deepEqual(switches.map(n => n.props['aria-label']), ['授权使用默认浏览器登录态', '同步至 DSH 内置浏览器']);
+assert(switches.every(n => n.props.checked === false));
 const button = nodes.find(n => n.type === 'button' && n.children[0] === '设置缓存目录');
 assert(button); assert.equal(button.props.disabled, false);
 await button.props.onClick();
