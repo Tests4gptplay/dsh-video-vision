@@ -6,6 +6,8 @@
 
 发送 B 站、YouTube 等视频网站的链接，AI 就能获取视频画面和音频、定位具体片段，并结合字幕、歌词或对白转写理解内容，省去手动下载再上传视频的步骤。适合一起看教程、讨论作品、分析演示过程，以及回到某个时间点细看画面。
 
+**Support / 赞助：** [Ko-fi](https://ko-fi.com/kou392350) · [Patreon](https://www.patreon.com/cw/Kou848) · [爱发电 / Afdian](https://afdian.com/a/kkt_ifd1) · [支付宝 / Alipay](SPONSOR.md)
+
 ## 这样使用
 
 安装并启用后，在 DSH 中选择支持工具调用与图片输入的 AI 模型，直接对它说：
