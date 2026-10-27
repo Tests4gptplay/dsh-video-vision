@@ -44,7 +44,7 @@ function request(op, payload = {}, { directory = root(), signal, timeoutMs = 200
     const abort = () => finish(signal.reason);
     const timer = setTimeout(() => finish(new Error('本地会话服务未响应，请重新打开设置。')), timeoutMs);
     signal?.addEventListener('abort', abort, { once: true });
-    socket.once('error', () => finish(new Error('本地会话组件尚未启动，请重启 DSH Desktop 后再试。')));
+    socket.once('error', cause => finish(Object.assign(new Error('无法连接本地会话组件，请检查组件状态。', { cause }), { code: 'browser_session_unavailable' })));
     socket.once('close', () => { if (!settled) finish(new Error('本地浏览器桥已断开。')); });
     socket.once('connect', () => {
       let key; try { key = readFileSync(join(directory, 'bridge.key'), 'utf8').trim(); } catch { finish(new Error('请先设置本地浏览器桥。')); return; }

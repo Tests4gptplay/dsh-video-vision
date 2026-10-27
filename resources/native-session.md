@@ -4,7 +4,7 @@
 
 视频插件通过 DSH 原生插件管理器安装。Windows Electron 版 DSH Desktop 的登录态导入与内置浏览器同步使用随包附带的本地会话组件，首次使用时安装一次；升级后运行同一命令更新组件。
 
-先退出 DSH Desktop，在 PowerShell 中运行以下命令，再重新打开 DSH。示例采用默认安装位置；自定义安装时替换相应路径。
+先完全退出 DSH Desktop（包括托盘中的主进程），在 PowerShell 中运行以下命令，再重新打开 DSH。示例采用默认安装位置；自定义安装时替换相应路径。
 
 ```powershell
 $resources = Join-Path $env:LOCALAPPDATA 'Programs\DeepSeek Harness\resources'
@@ -12,6 +12,8 @@ $plugin = Join-Path $env:USERPROFILE '.dsh\profiles\desktop\node_modules\dsh-vid
 $node = Join-Path $env:USERPROFILE '.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe'
 & $node (Join-Path $plugin 'browser-session\install-desktop.cjs') $resources
 ```
+
+已安装过组件时，若 Desktop 更新使组件或启动入口缺失，点击“导入登录态”或“刷新登录态”会恢复组件。恢复后完全退出并重新启动 Desktop，再导入；刷新页面或重新加载插件不会重启 Desktop 主进程。
 
 组件将会话服务接入 Desktop 主进程，并为原始应用文件保留备份。安装完成后，按下面的设置页步骤授权和导入。
 

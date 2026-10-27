@@ -2,7 +2,7 @@
 
 **让 DSH 中的 AI 结合画面、声音和歌词理解视频。**
 
-当前版本：`0.9.0`，包含音频分析、歌词转写与浏览器登录态导入和同步。
+当前版本：`0.9.1`，包含音频分析、歌词转写与浏览器登录态导入和同步。
 
 发送 B 站、YouTube 等视频网站的链接，AI 就能获取视频画面和音频、定位具体片段，并结合字幕、歌词或对白转写理解内容，省去手动下载再上传视频的步骤。适合一起看教程、讨论作品、分析演示过程，以及回到某个时间点细看画面。
 
@@ -50,12 +50,12 @@ yt-dlp 备用方式始终匿名，不接收 Cookie 或浏览器登录态。登�
 
 ## 安装和升级
 
-使用下方固定版本来源安装或升级至 `v0.9.0`。
+使用下方固定版本来源安装或升级至 `v0.9.1`。
 
 DSH Desktop：打开 **插件 → 添加插件**，粘贴以下 GitHub 来源：
 
 ```text
-github:Tests4gptplay/dsh-video-vision#v0.9.0
+github:Tests4gptplay/dsh-video-vision#v0.9.1
 ```
 
 安装并启用 `video-vision` 后，重新加载插件或重启 DSH，在新的请求中发送视频链接即可。
@@ -63,10 +63,10 @@ github:Tests4gptplay/dsh-video-vision#v0.9.0
 Web 版安装命令：
 
 ```bash
-dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.9.0'
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.9.1'
 ```
 
-Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.9.0` 是固定版本来源，后续更新使用新的版本号。
+Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.9.1` 是固定版本来源，后续更新使用新的版本号。
 
 ### 运行依赖
 

@@ -1,5 +1,5 @@
 // Local Desktop integration. Preserves every ASAR offset and keeps an original backup.
-const fs = require('node:fs');
+const fs = require(process.versions.electron ? 'original-fs' : 'node:fs');
 const { join, resolve } = require('node:path');
 const { createHash } = require('node:crypto');
 const { spawnSync } = require('node:child_process');
@@ -24,7 +24,7 @@ function saveMarker(backup) {
   const file = fs.statSync(archive);
   fs.mkdirSync(P.root(), { recursive: true });
   fs.writeFileSync(join(P.root(), 'desktop-integration.json'), JSON.stringify({
-    archive, archiveSize: file.size, archiveMtimeMs: file.mtimeMs, backup, version: '0.9.0'
+    archive, archiveSize: file.size, archiveMtimeMs: file.mtimeMs, backup, version: JSON.parse(fs.readFileSync(join(__dirname, '..', 'package.json'), 'utf8')).version
   }, null, 2));
 }
 if (main.includes(marker)) {

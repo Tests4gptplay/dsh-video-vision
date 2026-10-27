@@ -150,7 +150,7 @@ window.__ModuleLoader__.load({
       return h('section', { className: 'vv-settings', 'aria-label': '视频视觉设置' },
         h('style', null, css),
         h('div', { className: 'vv-row' },
-          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.9.0 · 视频、音频与画面缓存管理')),
+          h('div', null, h('h2', null, '视频视觉'), h('div', { className: 'vv-sub' }, 'DSH Video Vision 0.9.1 · 视频、音频与画面缓存管理')),
           button(busy ? '处理中…' : '刷新', () => act('list', {}, '列表已刷新'), { disabled: busy })),
         error && h('div', { className: 'vv-notice vv-error', role: 'alert' }, error),
         notice && h('div', { className: 'vv-notice', role: 'status' }, notice),
@@ -179,9 +179,9 @@ window.__ModuleLoader__.load({
           h('strong', { className: 'vv-first-use' }, '保持已登录的浏览器运行，点击“导入登录态”；以后按需刷新。'),
           h('div', { className: 'vv-sub', style: { marginTop: 5 } },
             '默认浏览器：' + (data?.browser_session?.browser || '读取中') + ' · 登录态：' +
-            (data?.browser_session?.connected ? '已导入' : data?.browser_session?.imported ? '需刷新' : '未导入') +
+            (!data?.browser_session?.ready ? '暂不可读取' : data?.browser_session?.connected ? '已导入' : data?.browser_session?.imported ? '需刷新' : '未导入') +
             (data?.browser_session?.importedAt ? ' · 导入时间：' + new Date(data.browser_session.importedAt).toLocaleString() : '') +
-            (data && !data?.browser_session?.ready ? ' · 本地组件需重启 DSH Desktop 后启用' : '')),
+            (data?.browser_session?.componentMessage ? ' · ' + data.browser_session.componentMessage : '')),
           h('div', { className: 'vv-actions', style: { marginTop: 9 } },
             button(pendingAction === 'browser-setup' ? '正在导入登录态…' : data?.browser_session?.connected ? '登录态已导入' : '导入登录态', () => importBrowser(),
               { className: 'vv-primary', disabled: busy || !data?.browser_session?.enabled || data?.browser_session?.connected === true }),
