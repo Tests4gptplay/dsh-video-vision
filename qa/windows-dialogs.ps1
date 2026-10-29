@@ -55,3 +55,5 @@ $results+=@{case="$lang-abort";result='pass';response=$v}
 $results|ConvertTo-Json -Depth 8|Set-Content -Encoding utf8 (Join-Path $out 'results.json')
 Get-FileHash lib/native-ui.js,lib/windows-ui.ps1,lib/ui-locale.js | Format-Table | Out-File (Join-Path $out 'source-hashes.txt')
 Write-Output 'PASS native EN/ZH directory/save select/cancel and AbortSignal'
+
+exit 0
