@@ -15,7 +15,7 @@ jobs:
           node-version: '22'
       - name: Exercise native file dialogs
         shell: powershell
-        run: ./qa/windows-dialogs.ps1
+        run: Invoke-Expression (Get-Content -Raw -Encoding UTF8 ./qa/windows-dialogs.ps1)
       - uses: actions/upload-artifact@v4
         if: always()
         with:
