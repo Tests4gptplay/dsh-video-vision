@@ -7,14 +7,16 @@ let connected = false, imported = false, enabled = true, syncToNative = false, f
 const importResult = new Promise(resolve => { finishImport = resolve; });
 const status = () => ({ enabled, syncToNative, connected, imported, ready: true, supported: false, browser: 'Google Chrome', desktopIntegration: false });
 const listing = () => ({ entries: [], bytes: 0, root: 'C:\\fixture-cache', browser_session: status() });
+let dictionaries;
 const React = {
+  useSyncExternalStore: (_subscribe, getSnapshot) => getSnapshot(),
   createElement: (type, props, ...children) => ({ type, props: props || {}, children }),
   useState: value => { const slot = index++; if (!(slot in states)) states[slot] = value; return [states[slot], next => { states[slot] = typeof next === 'function' ? next(states[slot]) : next; }]; },
   useRef: () => ({ current: null }), useEffect() {}
 };
 const window = { __ModuleLoader__: { load: module => { factory = module.factory; } } };
-vm.runInNewContext(await readFile(new URL('../client.js', import.meta.url), 'utf8'), { window });
-factory(() => React).apply({ effect: fn => fn(), locale: { register: () => () => {}, bind: () => key => key },
+vm.runInNewContext(await readFile(new URL('../client.js', import.meta.url), 'utf8'), { window, dshDesktop: { protocolVersion: 1, browser: {} } });
+factory(() => React).apply({ effect: fn => fn(), locale: { register: (_ns, values) => { dictionaries = values; return () => {}; }, bind: () => key => dictionaries.zh[key], getSnapshot: () => ({ active: 'zh' }), subscribe: () => () => {} },
   connection: { rpc: { call: async (_path, method, payload) => {
     calls.push(method); let value;
     if (method.endsWith('/browser-setup')) { await importResult; connected = imported = true; value = status(); }

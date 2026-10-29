@@ -1,0 +1,146 @@
+[
+  {
+    "test": "smoke.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.254
+  },
+  {
+    "test": "frame-endpoints.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 2.045
+  },
+  {
+    "test": "cache.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.306
+  },
+  {
+    "test": "native-ui.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.257
+  },
+  {
+    "test": "browser-ui.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.121
+  },
+  {
+    "test": "ui-locale.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.14
+  },
+  {
+    "test": "browser-session.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.253
+  },
+  {
+    "test": "desktop-integration.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.274
+  },
+  {
+    "test": "prepare.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.131
+  },
+  {
+    "test": "extensions.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 2.79
+  },
+  {
+    "test": "audio.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 2.963
+  },
+  {
+    "test": "platform-native-ui.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.115
+  },
+  {
+    "test": "linux-discovery.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.119
+  },
+  {
+    "test": "linux-default-browser.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.108
+  },
+  {
+    "test": "macos-discovery.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.1
+  },
+  {
+    "test": "cdp-source.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.127
+  },
+  {
+    "test": "cdp-session.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.141
+  },
+  {
+    "test": "cdp-ui.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.47
+  },
+  {
+    "test": "keyring-storage.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.101
+  },
+  {
+    "test": "keyring-snapshot-dispatch.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.105
+  },
+  {
+    "test": "snapshot-recovery.cjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.114
+  },
+  {
+    "test": "linux-listener-discovery.mjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.101
+  },
+  {
+    "test": "sync-concurrency.cjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.09
+  },
+  {
+    "test": "desktop-hook-upgrade.cjs",
+    "status": "PASS",
+    "exit": 0,
+    "seconds": 0.837
+  }
+]

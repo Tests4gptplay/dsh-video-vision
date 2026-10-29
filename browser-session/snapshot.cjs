@@ -36,9 +36,9 @@ function normalizeCookies(items) {
       ...(c.expires > 0 && !c.session ? { expirationDate: c.expires } : {})
     }));
 }
-async function captureCookies({ portFile, signal, discover = discoverBrowserEndpoints, WebSocketImpl = globalThis.WebSocket, timeoutMs = 90000 } = {}) {
+async function captureCookies({ endpoint, portFile, signal, discover = discoverBrowserEndpoints, WebSocketImpl = globalThis.WebSocket, timeoutMs = 90000 } = {}) {
   signal?.throwIfAborted();
-  const endpoints = portFile ? [endpointFromPortFile(await fs.readFile(portFile, 'utf8'))] : await discover({ signal });
+  const endpoints = endpoint ? [endpoint] : portFile ? [endpointFromPortFile(await fs.readFile(portFile, 'utf8'))] : await discover({ signal });
   if (!endpoints.length) throw fault('setup_required');
   let lastError;
   for (const endpoint of endpoints) {
@@ -80,44 +80,53 @@ async function captureEndpoint({ endpoint, signal, WebSocketImpl, timeoutMs }) {
 }
 
 function createSnapshotService({ directory = P.root(), safeStorage, capture = captureCookies,
-  portFile } = {}) {
+  portFile, filename: storageFilename = 'session-state.bin', source = 'Chrome', authorizationDirectory = directory } = {}) {
   let snapshot, importing, server, watcher;
   const sockets = new Set();
-  const filename = join(directory, 'session-state.bin');
-  const grant = () => P.authorization(directory);
+  const filename = join(directory, storageFilename);
+  const grant = () => P.authorization(authorizationDirectory);
   async function load() {
     if (snapshot !== undefined) return;
-    snapshot = null;
+    let bytes;
+    try { bytes = await fs.readFile(filename); }
+    catch (error) { if (error.code === 'ENOENT') snapshot = null; return; }
     try {
-      if (!safeStorage.isEncryptionAvailable()) return;
-      const stored = JSON.parse(safeStorage.decryptString(await fs.readFile(filename)));
+      if (!await safeStorage.isEncryptionAvailable()) return;
+      const stored = JSON.parse(await safeStorage.decryptString(bytes));
       if (stored.version === 1 && Array.isArray(stored.cookies)) snapshot = stored;
-    } catch {}
+    } catch {
+      // Locked storage or temporarily unreadable data can recover. Do not
+      // cache a failure as an empty snapshot or change the stored file.
+    }
   }
   async function status() {
     await load();
     const available = Boolean(snapshot?.cookies.some(c => !c.expirationDate || c.expirationDate > Date.now() / 1000));
     return { ready: true, connected: available, imported: Boolean(snapshot),
-      importedAt: snapshot?.importedAt || null, source: 'Chrome', importing: Boolean(importing) };
+      importedAt: snapshot?.importedAt || null, source, importing: Boolean(importing),
+      storageBackend: await safeStorage.getSelectedStorageBackend?.() || null };
   }
   async function dispatch(message, signal) {
     if (message.op === 'status') return status();
     if (!grant().enabled) throw fault('disabled');
     if (message.op === 'import') {
       if (importing) throw fault('busy');
-      if (!safeStorage.isEncryptionAvailable()) throw fault('storage_unavailable');
       const controller = new AbortController();
       importing = controller;
       const cancel = () => controller.abort();
       signal?.addEventListener('abort', cancel, { once: true });
       try {
         signal?.throwIfAborted();
+        try { await safeStorage.prepare?.(); } catch { throw fault('storage_unavailable'); }
+        if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
+        if (!await safeStorage.isEncryptionAvailable()) throw fault('storage_unavailable');
+        if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
         const cookies = await capture({ portFile, signal: controller.signal });
         if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
         if (!cookies.length) throw fault('read_failed');
         const next = { version: 1, importedAt: new Date().toISOString(), cookies };
         let encrypted;
-        try { encrypted = safeStorage.encryptString(JSON.stringify(next)); } catch { throw fault('storage_unavailable'); }
+        try { encrypted = await safeStorage.encryptString(JSON.stringify(next)); } catch { throw fault('storage_unavailable'); }
         try {
           await fs.writeFile(filename + '.tmp', encrypted, { mode: 0o600 });
           if (controller.signal.aborted || !grant().enabled) throw fault('disabled');

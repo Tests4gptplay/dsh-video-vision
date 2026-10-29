@@ -15,14 +15,16 @@ await revealFolder('D:\\cache', undefined, launch);
 await revealFolder('D:\\cache', undefined, launch);
 assert.equal(launches.length, 2);
 for (const call of launches) {
-  assert.equal(call.command, 'explorer.exe');
+  assert.equal(call.command, process.platform === 'win32' ? 'explorer.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open');
   assert.deepEqual(call.args, ['D:\\cache']);
   assert.equal(call.options.windowsHide, false);
   assert.equal(call.options.stdio, 'ignore');
 }
 let factory, Component, moduleId, section, transportCall, picks = 0;
 const registrations = [];
+let dictionaries;
 const React = {
+  useSyncExternalStore: (_subscribe, getSnapshot) => getSnapshot(),
   createElement: (type, props, ...children) => ({ type, props, children }),
   useState: value => [value, () => {}],
   useEffect: () => {},
@@ -30,11 +32,11 @@ const React = {
 };
 const window = { __DSH_DIRECTORY_PICKER__: { pick: async () => { picks++; return null; } },
   __ModuleLoader__: { load: value => { factory = value.factory; moduleId = value.id; } } };
-vm.runInNewContext(await readFile(new URL('../client.js', import.meta.url), 'utf8'), { window });
+vm.runInNewContext(await readFile(new URL('../client.js', import.meta.url), 'utf8'), { window, dshDesktop: { protocolVersion: 1, browser: {} } });
 const plugin = factory(name => { assert.equal(name, 'react'); return React; });
 plugin.apply({
   effect: fn => fn(),
-  locale: { register: () => () => {}, bind: () => key => key },
+  locale: { register: (_ns, values) => { dictionaries = values; return () => {}; }, bind: () => key => dictionaries.zh[key], getSnapshot: () => ({ active: 'zh' }), subscribe: () => () => {} },
   connection: { rpc: { call: async (path, method) => { transportCall = { path, method }; return { ok: true, value: {} }; } } },
   slots: { inject: (_, fn) => fn(), register: (options, component) => {
     registrations.push(options);

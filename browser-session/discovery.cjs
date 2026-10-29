@@ -1,11 +1,14 @@
 // Discover published connections of running Chromium browsers; no browser launch.
 const fs = require('node:fs/promises');
 const { join } = require('node:path');
-const { execFile } = require('node:child_process');
-const { promisify } = require('node:util');
-const exec = promisify(execFile);
 
 function argument(command, name) {
+  if (Array.isArray(command)) {
+    const key = '--' + name;
+    const at = command.findIndex(item => item === key || item.startsWith(key + '='));
+    if (at < 0) return undefined;
+    return command[at] === key ? command[at + 1] : command[at].slice(key.length + 1);
+  }
   const match = String(command).match(new RegExp('(?:^|\\s)--' + name + '(?:=|\\s+)("[^"]*"|[^\\s]+)'));
   return match?.[1].replace(/^"|"$/g, '');
 }
@@ -16,18 +19,7 @@ function endpointFromPortFile(text) {
     throw new Error('浏览器连接信息不完整。');
   return new URL(path, 'ws://127.0.0.1:' + number).href;
 }
-async function runningBrowsers() {
-  if (process.platform !== 'win32') return [];
-  const command = `Get-CimInstance Win32_Process -Filter "Name = 'chrome.exe' OR Name = 'msedge.exe' OR Name = 'chromium.exe' OR Name = 'brave.exe'" | Where-Object { $_.CommandLine -notmatch '(?:^|\\s)--type=' } | Select-Object -ExpandProperty CommandLine | ConvertTo-Json -Compress`;
-  const { stdout } = await exec('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], { windowsHide: true });
-  const value = JSON.parse(stdout.trim() || '[]');
-  return Array.isArray(value) ? value : [value];
-}
-function defaultPortFiles() {
-  if (!process.env.LOCALAPPDATA) return [];
-  return ['Google/Chrome', 'Microsoft/Edge', 'Chromium', 'BraveSoftware/Brave-Browser']
-    .map(name => join(process.env.LOCALAPPDATA, name, 'User Data', 'DevToolsActivePort'));
-}
+const { runningBrowsers, defaultPortFiles } = require('./platform/index.cjs');
 async function discoverBrowserEndpoints({ signal, commands, portFiles, readFile = fs.readFile, fetch = globalThis.fetch } = {}) {
   signal?.throwIfAborted();
   commands ??= await runningBrowsers().catch(() => []);

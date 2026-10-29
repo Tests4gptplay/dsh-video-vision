@@ -19,6 +19,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 function installRuntime() {
   fs.mkdirSync(runtime, { recursive: true });
   for (const name of ['sync.cjs', 'protocol.cjs', 'snapshot.cjs', 'discovery.cjs']) fs.copyFileSync(join(__dirname, name), join(runtime, name));
+  fs.cpSync(join(__dirname, 'platform'), join(runtime, 'platform'), { recursive: true });
 }
 function saveMarker(backup) {
   const file = fs.statSync(archive);
@@ -27,15 +28,23 @@ function saveMarker(backup) {
     archive, archiveSize: file.size, archiveMtimeMs: file.mtimeMs, backup, version: JSON.parse(fs.readFileSync(join(__dirname, '..', 'package.json'), 'utf8')).version
   }, null, 2));
 }
+let replacement, previousBackup;
+const legacyCondition = 'details.resourceType !== "mainFrame" || ';
 if (main.includes(marker)) {
-  installRuntime(); saveMarker(JSON.parse(fs.readFileSync(join(P.root(), 'desktop-integration.json'), 'utf8')).backup);
-  console.log('Desktop local bridge already integrated; runtime updated.'); process.exit(0);
+  previousBackup = JSON.parse(fs.readFileSync(join(P.root(), 'desktop-integration.json'), 'utf8')).backup;
+  if (!main.includes(legacyCondition)) {
+    installRuntime(); saveMarker(previousBackup);
+    console.log('Desktop local bridge already integrated; runtime updated.'); process.exit(0);
+  }
+  // Upgrade the existing hook in place instead of adding a second listener.
+  replacement = Buffer.from(main.replace(legacyCondition, ' '.repeat(legacyCondition.length)));
 }
 const exe = fs.readFileSync(join(resources, '..', 'DeepSeek Harness.exe'));
 const sentinel = Buffer.from('dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX');
 const fuse = exe.indexOf(sentinel) + sentinel.length;
 if (fuse < sentinel.length || exe[fuse] !== 1 || exe[fuse + 1] < 5 || exe[fuse + 2 + 4] !== 48)
   throw new Error('Desktop integrity settings do not permit this local integration; no files changed.');
+if (!replacement) {
 const start = main.indexOf('//#region lib/types/browser-guests.js');
 const end = main.indexOf('//#endregion', start);
 if (start < 0 || end < 0) throw new Error('Unsupported Desktop browser implementation.');
@@ -47,14 +56,15 @@ const tail = `\t\t\t].includes(url.protocol) });
 \tallowedNavigation`;
 if (!region.includes(old) || !region.includes(tail)) throw new Error('Desktop browser request hook changed; no files changed.');
 region = region.replace(old, '\t\t\tconst cancel = [').replace(tail, `\t\t\t].includes(url.protocol);
-            if (cancel || details.resourceType !== "mainFrame" || !["http:", "https:"].includes(url.protocol)) callback({ cancel });
+            if (cancel || !["http:", "https:"].includes(url.protocol)) callback({ cancel });
             else dshLocalBrowserSession.beforeRequest(browserSession, url.href).then(() => callback({ cancel: false }), () => callback({ cancel: false }));
 \t\t});
 \t}
 \tallowedNavigation`);
 region = region.replace(/\/\*\*[\s\S]*?\*\//g, '');
 const injected = '// ' + marker + '\nconst dshLocalBrowserSession = createRequire(import.meta.url)(join(process.resourcesPath, "dsh-browser-session", "sync.cjs"));\n';
-let replacement = Buffer.from(main.slice(0, start) + injected + region + main.slice(end));
+replacement = Buffer.from(main.slice(0, start) + injected + region + main.slice(end));
+}
 if (replacement.length > entry.size) throw new Error('Fixed-size integration budget exceeded; no files changed.');
 replacement = Buffer.concat([replacement, Buffer.alloc(entry.size - replacement.length, 32)]);
 const checkFile = join(P.root(), 'desktop-syntax-check.mjs');
@@ -81,5 +91,5 @@ if (!installed.subarray(0, 16).equals(bytes.subarray(0, 16)) ||
     !installed.subarray(16 + jsonSize, offset).equals(bytes.subarray(16 + jsonSize, offset)) ||
     !installed.subarray(offset + entry.size).equals(bytes.subarray(offset + entry.size)) ||
     hash(installed.subarray(offset, offset + entry.size)) !== entry.integrity.hash) throw new Error('Installed archive verification failed; restore backup.');
-saveMarker(backup);
+saveMarker(previousBackup || backup);
 console.log(JSON.stringify({ integrated: true, restartRequired: true, backup, changed: ['lib/main.js', 'main integrity hash'], allOtherArchiveBytesPreserved: true }));

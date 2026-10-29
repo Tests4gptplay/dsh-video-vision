@@ -1,6 +1,6 @@
 {
   "name": "dsh-video-vision",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Watch online videos in DSH with timestamped frames, audio, speech and lyric transcription, and music timing analysis.",
   "type": "module",
   "license": "MIT",
@@ -37,7 +37,12 @@
     "browser-session/sync.cjs",
     "browser-session/snapshot.cjs",
     "browser-session/discovery.cjs",
-    "browser-session/install-desktop.cjs"
+    "browser-session/install-desktop.cjs",
+    "browser-session/platform/",
+    "browser-session/keyring-storage.cjs",
+    "browser-session/cdp-source.cjs",
+    "browser-session/cdp-session.cjs",
+    "SPONSOR.md"
   ],
   "dsh": {
     "bundle": {
@@ -53,7 +58,8 @@
     }
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "^3.18.2"
+    "@deepseek-ai/schemastery": "^3.18.2",
+    "@napi-rs/keyring": "^2.1.2"
   },
   "scripts": {
     "test": "node test/smoke.mjs && node test/cache.mjs && node test/native-ui.mjs && node test/browser-ui.mjs && node test/browser-session.mjs && node test/desktop-integration.mjs && node test/snapshot.mjs && node test/prepare.mjs && node test/extensions.mjs && node test/audio.mjs && node test/native-session.mjs",

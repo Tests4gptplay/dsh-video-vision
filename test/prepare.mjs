@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { sep, join, resolve } from 'node:path';
 import { prepareResolver } from '../lib/prepare.js';
 import { invokeResolver } from '../lib/ytdlp.js';
 
@@ -36,6 +36,6 @@ try {
     new AbortController().signal, 'missing'), /configured ytDlpPath was not found/);
   console.log('PASS: resolver preparation, reuse, checksum preservation and explicit executable settings.');
 } finally {
-  if (!root.startsWith(base + '\\')) throw new Error('Unexpected test directory');
+  if (!root.startsWith(base + sep)) throw new Error('Unexpected test directory');
   await rm(root, { recursive: true, force: true });
 }

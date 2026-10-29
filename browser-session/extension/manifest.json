@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "DSH 本地会话桥",
+  "name": "__MSG_extensionName__",
   "version": "0.1.0",
-  "description": "使用浏览器官方接口，在本机为 DSH 复用用户授权的站点会话。",
+  "description": "__MSG_extensionDescription__",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv880e1PvPx53wgO+sQTNmcWPdZNB3oIYk1Dpb9vgPnOeuCqAxig7M5VtF2HLme/5uvE/ig/GrVuV3DgP6ecCUBVoT+L4MjkaUczmut5sjgmfAQCTXzEcdCKTbsTz9pzmlS8GlHgJIkQxvws+lIjENADY/wiRo24jqsGYIMXIuTSlPhe9JDrdGsGQIjMDhHplJ5Q1zQhuq74NVWCAtbvhn0Z472nf56NBeoun9zY8ySM0w9FJOAHrpXROB2MhS1zkcAHGhRRIrg1zRWbaqRDz52sy8pzNsmCjy//XpJysgQWlJEdUr1UWH5b0H582IujZx/UNhHqjUei09m6qHhvxnwIDAQAB",
   "permissions": [
     "cookies",
@@ -16,7 +16,8 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "DSH 本地会话桥",
+    "default_title": "__MSG_extensionName__",
     "default_popup": "popup.html"
-  }
+  },
+  "default_locale": "en"
 }

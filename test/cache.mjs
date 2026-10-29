@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, stat, rm, symlink } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { sep, join, resolve } from 'node:path';
 import { CacheManager } from '../lib/cache.js';
 import { VideoVision } from '../lib/engine.js';
 import { registerCacheTransport, Config } from '../lib/settings.js';
@@ -108,6 +108,6 @@ try {
   console.log('PASS: cache listing, file extraction, relocation, live settings, scoped deletion, busy jobs, local originals and RPC.');
 } finally {
   // Only the isolated directory created by this test is removed.
-  if (!testRoot.startsWith(base + '\\')) throw new Error('Unexpected test directory');
+  if (!testRoot.startsWith(base + sep)) throw new Error('Unexpected test directory');
   await rm(testRoot, { recursive: true, force: true });
 }

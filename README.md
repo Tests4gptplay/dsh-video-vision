@@ -2,7 +2,9 @@
 
 **让 DSH 中的 AI 结合画面、声音和歌词理解视频。**
 
-当前版本：`0.9.1`，包含音频分析、歌词转写与浏览器登录态导入和同步。
+当前版本：`0.9.2`。设置页跟随 DSH 切换中英文，补充 Linux/macOS 登录态导入与系统文件窗口适配，并修复视频尾点取帧、缓存操作提示和会话恢复问题。
+
+本次更新与验证状态见[测试报告](docs/testing-0.9.2.md)。
 
 发送 B 站、YouTube 等视频网站的链接，AI 就能获取视频画面和音频、定位具体片段，并结合字幕、歌词或对白转写理解内容，省去手动下载再上传视频的步骤。适合一起看教程、讨论作品、分析演示过程，以及回到某个时间点细看画面。
 
@@ -50,12 +52,12 @@ yt-dlp 备用方式始终匿名，不接收 Cookie 或浏览器登录态。登�
 
 ## 安装和升级
 
-使用下方固定版本来源安装或升级至 `v0.9.1`。
+使用下方固定版本来源安装或升级至 `v0.9.2`。
 
 DSH Desktop：打开 **插件 → 添加插件**，粘贴以下 GitHub 来源：
 
 ```text
-github:Tests4gptplay/dsh-video-vision#v0.9.1
+github:Tests4gptplay/dsh-video-vision#v0.9.2
 ```
 
 安装并启用 `video-vision` 后，重新加载插件或重启 DSH，在新的请求中发送视频链接即可。
@@ -63,16 +65,24 @@ github:Tests4gptplay/dsh-video-vision#v0.9.1
 Web 版安装命令：
 
 ```bash
-dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.9.1'
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.9.2'
 ```
 
-Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.9.1` 是固定版本来源，后续更新使用新的版本号。
+Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.9.2` 是固定版本来源，后续更新使用新的版本号。
 
 ### 运行依赖
 
 使用 Node.js 22+（可使用 DSH 自带版本），并将 FFmpeg 与 ffprobe 所在目录加入 PATH，或在插件配置中填写两个程序的路径。
 
 只有选择 yt-dlp 备用方式时，插件才准备这项依赖：优先使用已配置或现有的解析器；缺少可用程序时自动下载官方版本，核对 SHA-256 后保存在用户目录的 `.dsh/tools/dsh-video-vision` 中。已经安装 yt-dlp 时，可填写 `ytDlpPath` 使用自己的解析器。B 站内置方法、本地视频和自定义站点扩展不依赖 yt-dlp。
+
+### 平台说明
+
+- Windows 保留原 Desktop 会话组件与系统文件窗口。
+- Linux 直接使用插件的导入/刷新按钮；加密存储需要可用的 Secret Service。系统文件窗口使用 Zenity，未安装时尝试 KDialog。
+- macOS 已加入浏览器发现、系统钥匙串与文件窗口适配，实机验证待补。macOS DSH 内置浏览器同步尚未适配。
+- Web 模式可将已导入会话提供给插件共享服务；没有 Electron 内置浏览器时不提供原生同步开关。
+- 导入需要来源浏览器提供可连接的调试端点；多个来源可在设置中选择。分区 Cookie（CHIPS）暂不支持。
 
 ### 升级与已有缓存
 
@@ -87,21 +97,21 @@ yt-dlp 处理 YouTube 时使用 Node.js 运行播放器解析逻辑；官方 yt-
 打开 DSH **设置 → 视频视觉**：
 
 - **授权使用默认浏览器登录态**：默认关闭。保持已登录的浏览器运行，点击“导入登录态”。自动发现现有 Chrome、Edge 等浏览器连接（含 CAH 自定义资料目录与端口）；浏览器若显示连接确认，选择允许即可。成功后按钮显示“登录态已导入”并禁用，“刷新登录态”可手动更新。登录态加密保存在本机，导入完成后结束本次连接。**若登录态失效，请点击“刷新登录态”。** 其他 DSH 插件可接入共享 `browserSessions.fetch/json` 服务。
-- **同步至 DSH 内置浏览器**：独立开关，默认关闭。开启后内置浏览器访问网站时同步该站点 Cookie；关闭时撤回导入值并恢复原值。设备绑定登录与网页本地存储会话仍需网站确认。首次导入及本地 Desktop 同步组件说明见 [会话指导](resources/native-session.md)。
+- **同步至 DSH 内置浏览器（Windows Desktop）**：独立开关，默认关闭。开启后内置浏览器访问网站时同步该站点 Cookie；关闭时撤回导入值并恢复原值。设备绑定登录与网页本地存储会话仍需网站确认。首次导入及本地 Desktop 同步组件说明见 [会话指导](resources/native-session.md)。
 - **匿名备用方式**：yt-dlp 始终匿名，不接收会话凭据；站点解析子进程也不接收凭据。视频、完整音轨和字幕遵循同样规则。
 
 - **方法文件夹**：点击“设置缓存目录”同一行的“方法文件夹”，打开保存方法指导、站点解析扩展和笔记的独立目录。
 - **存储位置**：点击“设置缓存目录”，在系统目录选择窗口中选择文件夹。已有视频、画面和观看进度会一起迁移，新位置立即生效。
 - **当前占用**：查看缓存大小、条目数和画面数，可直接打开缓存文件夹。
 - **缓存列表**：按标题、平台或视频 ID 搜索，跳转原视频、打开单项目录、提取视频或删除该项缓存。
-- **提取与保存**：点击“提取视频”或单文件“提取”，直接弹出 Windows 另存为窗口，选择文件名和位置；覆盖同名文件由系统窗口确认。第一栏的“缓存文件夹”打开上方显示的缓存目录，新缓存的视频按条目保存在其中的 videos 子目录。
+- **提取与保存**：点击“提取视频”或单文件“提取”，弹出系统另存为窗口，选择文件名和位置；覆盖同名文件由系统窗口确认。第一栏的“缓存文件夹”打开上方显示的缓存目录，新缓存的视频按条目保存在其中的 videos 子目录。
 - **清空缓存**：确认后清理列表中的全部缓存，保留已提取文件、本地原视频以及目录中的其他文件。
 
 文件夹入口每次点击都会将对应窗口带到前台，关闭后可以再次打开。视频任务运行时仍可打开文件夹和提取文件；迁移和删除在任务完成后操作。“提取视频”会将已经获取的完整独立音轨无损合并进导出视频；原本已有声音的视频直接保存。文件列表中的单文件“提取”按原样保存，适合单独导出音频或视频轨。
 
 ## 可积累的解析方法
 
-默认配置文件夹是 `%USERPROFILE%\.dsh\video-vision`；设置了 `DSH_HOME` 时位于 `%DSH_HOME%\video-vision`，也可通过 `configDirectory` 指定绝对路径。
+默认配置文件夹是用户主目录下的 `.dsh/video-vision`（Windows 为 `%USERPROFILE%\.dsh\video-vision`）；设置了 `DSH_HOME` 时位于 `%DSH_HOME%\video-vision`，也可通过 `configDirectory` 指定绝对路径。
 
 ```text
 video-vision/
