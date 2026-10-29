@@ -31,7 +31,7 @@ $r=$win.Current.BoundingRectangle;$bmp=New-Object Drawing.Bitmap([int]$r.Width,[
 if($mode -eq 'cancel'){[NativeQA]::SendMessage([IntPtr]$win.Current.NativeWindowHandle,0x111,[IntPtr]2,[IntPtr]0)|Out-Null}
 elseif($action -eq 'directory'){[NativeQA]::SendMessage([IntPtr]$win.Current.NativeWindowHandle,0x111,[IntPtr]1,[IntPtr]0)|Out-Null}
 else {
-$button=$nodes | Where-Object {$_.Current.AutomationId -eq '1' -and $_.Current.ControlType -eq [System.Windows.Automation.ControlType]::Button} | Select-Object -First 1
+$button=$nodes | Where-Object {$_.Current.Name -eq 'Save'} | Select-Object -First 1
 if(!$button){throw 'Save button not found'}
 $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
 }
@@ -40,6 +40,7 @@ $v=Get-Content -Raw $stdout | ConvertFrom-Json
 if($p.ExitCode -ne 0){throw "Native failure: $(Get-Content -Raw $stderr)"}
 if($mode -eq 'cancel'){if(!$v.canceled){throw 'Cancel semantics changed'}}else{if($v.canceled -or $v.path -ne $path){throw "Selection mismatch: $($v.path) expected $path"}}
 $results+=@{case=$id;result='pass';title=$title;expectedLabel=$expected;response=$v}
+$results|ConvertTo-Json -Depth 8|Set-Content -Encoding utf8 (Join-Path $out 'results.json')
 } finally { if(!$p.HasExited){Get-CimInstance Win32_Process | Where-Object {$_.ParentProcessId -eq $p.Id} | ForEach-Object {Stop-Process -Id $_.ProcessId -ErrorAction SilentlyContinue};$p.Kill()} }
 }}}
 # Exercise actual Node AbortSignal path in each locale.
