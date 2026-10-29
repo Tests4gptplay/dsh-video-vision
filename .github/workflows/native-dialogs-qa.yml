@@ -1,0 +1,23 @@
+name: Windows native dialog language QA
+on:
+  push:
+    branches: [test/english-native-091-20261029]
+permissions:
+  contents: read
+jobs:
+  native-dialogs:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exercise native file dialogs
+        shell: powershell
+        run: ./qa/windows-dialogs.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-native-dialog-evidence
+          path: qa-results/
