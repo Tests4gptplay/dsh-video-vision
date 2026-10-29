@@ -11,6 +11,7 @@ foreach($lang in @('en','zh')) { foreach($action in @('directory','save')) { for
 $id="$lang-$action-$mode";$stdout=Join-Path $out "$id.json";$stderr=Join-Path $out "$id.stderr.txt"
 $path=if($action -eq 'directory'){$fixture}else{Join-Path $fixture "$id.mp4"}
 $p=Start-Process node -ArgumentList @('qa/launch.mjs',$action,$lang,$path) -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+$processHandle=$p.Handle
 try {
 $deadline=(Get-Date).AddSeconds(30);$win=$null
 while((Get-Date) -lt $deadline -and !$win) {
