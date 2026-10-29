@@ -15,11 +15,11 @@ try {
 $deadline=(Get-Date).AddSeconds(30);$win=$null
 while((Get-Date) -lt $deadline -and !$win) {
 $desc=@(Get-CimInstance Win32_Process | Where-Object {$_.ParentProcessId -eq $p.Id} | Select-Object -ExpandProperty ProcessId)
-$all=[System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Children,[System.Windows.Automation.Condition]::TrueCondition)
+$all=[System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)
 foreach($w in $all){if($desc -contains $w.Current.ProcessId -and $w.Current.ClassName -eq '#32770'){$win=$w;break}}
 if(!$win){Start-Sleep -Milliseconds 200}
 }
-if(!$win){throw "No native dialog: $id"}
+if(!$win){ $all | ForEach-Object { "$($_.Current.ProcessId) | $($_.Current.ClassName) | $($_.Current.Name)" } | Set-Content (Join-Path $out "$id.windows.txt"); throw "No native dialog: $id" }
 Start-Sleep -Milliseconds 500
 $nodes=$win.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)
 $title=$win.Current.Name;$names=@($title)+@($nodes | ForEach-Object {$_.Current.Name})
