@@ -2,7 +2,7 @@ $ErrorActionPreference='Stop'
 Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes,System.Drawing,System.Windows.Forms
 Add-Type @'
 using System;using System.Runtime.InteropServices;
-public class NativeQA { [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h,int m,IntPtr w,IntPtr l); }
+public class NativeQA { [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y); [DllImport("user32.dll")] public static extern void mouse_event(uint flags,uint x,uint y,uint data,UIntPtr info); [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h,int m,IntPtr w,IntPtr l); }
 '@
 $out=Join-Path $PWD 'qa-results';New-Item -ItemType Directory -Force $out | Out-Null
 $fixture=Join-Path $env:RUNNER_TEMP 'vv-ui-fixture';New-Item -ItemType Directory -Force $fixture | Out-Null
@@ -33,7 +33,9 @@ elseif($action -eq 'directory'){[NativeQA]::SendMessage([IntPtr]$win.Current.Nat
 else {
 $button=$nodes | Where-Object {$_.Current.Name -eq 'Save'} | Select-Object -First 1
 if(!$button){throw 'Save button not found'}
-$button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+$b=$button.Current.BoundingRectangle
+[NativeQA]::SetCursorPos([int]($b.X+$b.Width/2),[int]($b.Y+$b.Height/2))|Out-Null
+[NativeQA]::mouse_event(2,0,0,0,[UIntPtr]::Zero);[NativeQA]::mouse_event(4,0,0,0,[UIntPtr]::Zero)
 }
 if(!$p.WaitForExit(15000)){throw "Dialog did not return: $id"}
 $v=Get-Content -Raw $stdout | ConvertFrom-Json
