@@ -1,0 +1,34 @@
+{
+  "scope": "Independent legacy bridge exit manifest correction; product TGZ unchanged",
+  "historicalPackage": {
+    "path": "test-artifacts/dsh-video-vision-0.9.3-audit.6-copyclarity.tgz",
+    "sha256": "27e3fa6b3cf452c5c2dedd1834969f0aca706f34da8567b88d4b62b221ea74c9"
+  },
+  "matchingGitBaselines": [
+    "3ea2d329ab5a818f87fd1e0bf95c90c565331c81",
+    "7faf92f9a3e3f801d1b4d17d0f8d7d234c785d3b",
+    "cde7de6d8a83695291b7c6492805fe04d442f5c0"
+  ],
+  "correctedEntries": {
+    "protocol.cjs": {
+      "previousIncorrect": "e637d9296d7d1a89fe40c6146d284aab5b1e8cce7da758bfec80a60a685f294f",
+      "publishedPackage": "3b0d2ad85c8633cc6ab32551814c9fc4e915099a7344a125318601dcebce48c9"
+    },
+    "snapshot.cjs": {
+      "previousIncorrect": "8d1b78114287d7c5c3fc8f03a3b41c28621348703aad84c9dbd70825f372359e",
+      "publishedPackage": "ef783b780b93b56b9b4e27aa693ab708c3cc1d1c78a7ec4b38039645fa3b19ae"
+    }
+  },
+  "unchangedEntries": 6,
+  "cause": "Manifest generation read a mutable development worktree rather than immutable historical input. Previous synthetic tests did not verify the shipped allowlist against the published package.",
+  "focusedRegression": "PASS: pinned historical TGZ digest, eight actual runtime files and installer layout, unknown modifications refused, partial retirement retry, partial file removal retry, recovery evidence and unrelated data preserved",
+  "limitations": "Synthetic host archive only; no actual installed Desktop exit executed",
+  "productTgzSha256": "b0f2242bf815f74585ecc12b32cf364f763d56fd9177315197c2eb25dba9f5f8",
+  "sourceSuites": {
+    "pass": 37,
+    "fail": 0
+  },
+  "originalManifestNegativeControl": "FAIL as expected: published audit.6 runtime mismatch: protocol.cjs",
+  "actualFix1ZipUnpackedRegression": "PASS",
+  "fix1ZipSha256": "edb1406e9e5cec50f8cd71d016f0bc6e393758a53b54170fbfb87951229531ee"
+}

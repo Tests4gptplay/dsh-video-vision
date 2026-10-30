@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { retireArchive, hash, run, runtimeState } from '../tools/legacy-exit.mjs';
 const source = `// DSH_LOCAL_BROWSER_SESSION_BRIDGE
 const dshLocalBrowserSession = createRequire(import.meta.url)(join(process.resourcesPath, "dsh-browser-session", "sync.cjs"));
@@ -67,7 +68,65 @@ try {
   const retired=await fixtureTool.run({resources,state,apply:true,hostStopped:true,expectedSha:done.afterSha256});
   assert.equal(retired.complete,true);await assert.rejects(fs.access(join(resources,'dsh-browser-session','fixture.cjs')),{code:'ENOENT'});
   assert.equal(JSON.parse(await fs.readFile(join(state,'legacy-exit-runtime-data.json'))).files['fixture.cjs'],synthetic.toString('base64'));
-  // Standalone package includes trusted fixture hashes only; existing binaries and cookies never used.
-  const known=JSON.parse(await fs.readFile(new URL('../tools/legacy-exit-known-runtime.json',import.meta.url)));assert(Object.keys(known).length>=4);
-  console.log('legacy-exit: exact patch, unrelated bytes, refusal, revocation failure/retry, idempotence, opaque old-store preservation passed');
+  // Independently frozen *published package*, never hash the mutable worktree to
+  // manufacture the expected allowlist. Historical code is copied, NOT executed.
+  const packageUrl = new URL('../test-artifacts/dsh-video-vision-0.9.3-audit.6-copyclarity.tgz', import.meta.url);
+  const packageBytes = await fs.readFile(packageUrl);
+  assert.equal(hash(packageBytes), '27e3fa6b3cf452c5c2dedd1834969f0aca706f34da8567b88d4b62b221ea74c9');
+  const names = ['sync.cjs','protocol.cjs','snapshot.cjs','discovery.cjs',
+    'platform/index.cjs','platform/linux.cjs','platform/darwin.cjs','platform/windows.cjs'];
+  const known=JSON.parse(await fs.readFile(new URL('../tools/legacy-exit-known-runtime.json',import.meta.url)));
+  assert.deepEqual(Object.keys(known).sort(), [...names].sort());
+  const published = {};
+  for (const name of names) {
+    published[name] = execFileSync('tar', ['-xzOf', packageUrl.pathname, 'package/browser-session/' + name]);
+    assert.equal(known[name], hash(published[name]), 'published audit.6 runtime mismatch: ' + name);
+  }
+  const installer = execFileSync('tar', ['-xzOf', packageUrl.pathname, 'package/browser-session/install-desktop.cjs']).toString();
+  assert(installer.includes("for (const name of ['sync.cjs', 'protocol.cjs', 'snapshot.cjs', 'discovery.cjs']) fs.copyFileSync(join(__dirname, name), join(runtime, name))"));
+  assert(installer.includes("fs.cpSync(join(__dirname, 'platform'), join(runtime, 'platform'), { recursive: true })"));
+  const realResources=join(root,'published-resources'), realState=join(root,'published-state');
+  const realRuntime=join(realResources,'dsh-browser-session');
+  await fs.mkdir(join(realRuntime,'platform'),{recursive:true});await fs.mkdir(realState);
+  await fs.writeFile(join(realResources,'app.asar'),original);
+  await fs.writeFile(join(realResources,'unrelated.txt'),'unrelated-resource');
+  await fs.writeFile(join(realState,'session-state.bin'),'opaque-preserved');
+  for (const name of names) await fs.writeFile(join(realRuntime,name),published[name]);
+  assert.equal(Object.keys(await runtimeState(realRuntime,known)).length,8);
+  // Unknown modified bytes are not admitted. As in the reported partial exit,
+  // authorization and hook may already be retired, but runtime stays intact.
+  await fs.appendFile(join(realRuntime,'protocol.cjs'),'\n// unknown modification');
+  const partial=await run({resources:realResources,state:realState,apply:true,hostStopped:true,expectedSha:hash(original)});
+  assert.equal(partial.complete,false);assert.match(partial.failures[0].message,/Unknown runtime.*protocol/);
+  assert(partial.steps.includes('authorization_disabled_and_verified'));
+  assert(partial.steps.includes('current_archive_has_no_bridge_hook'));
+  for(const name of names) await fs.access(join(realRuntime,name));
+  const recovery=await fs.readFile(partial.recoveryContainer);
+  assert.equal(hash(Buffer.from(JSON.parse(recovery).bytesBase64,'base64')),hash(original));
+  // Restore only this synthetic test's modified bytes, then retry against the
+  // current archive, not a stale pre-exit hash. No user file repair is performed.
+  await fs.writeFile(join(realRuntime,'protocol.cjs'),published['protocol.cjs']);
+  const resumed=await run({resources:realResources,state:realState,apply:true,hostStopped:true,expectedSha:partial.afterSha256});
+  assert.equal(resumed.complete,true);
+  const savedRuntime=JSON.parse(await fs.readFile(join(realState,'legacy-exit-runtime-data.json')));
+  for(const name of names){
+    assert.equal(savedRuntime.files[name],published[name].toString('base64'));
+    await assert.rejects(fs.access(join(realRuntime,name)),{code:'ENOENT'});
+  }
+  assert.deepEqual(await fs.readFile(partial.recoveryContainer),recovery);
+  assert.equal(await fs.readFile(join(realResources,'unrelated.txt'),'utf8'),'unrelated-resource');
+  assert.equal(await fs.readFile(join(realState,'session-state.bin'),'utf8'),'opaque-preserved');
+  const recoveryBefore=await fs.readFile(join(realState,'legacy-exit-runtime-data.json'));
+  assert.equal((await run({resources:realResources,state:realState,apply:true,hostStopped:true,expectedSha:resumed.afterSha256})).complete,true);
+  assert.deepEqual(await fs.readFile(join(realState,'legacy-exit-runtime-data.json')),recoveryBefore);
+  // Partially removed known runtime can resume from existing recovery evidence.
+  await fs.writeFile(join(realRuntime,'snapshot.cjs'),published['snapshot.cjs']);
+  await fs.writeFile(join(realRuntime,'unrelated.cjs'),'do not delete');
+  const refused=await run({resources:realResources,state:realState,apply:true,hostStopped:true,expectedSha:resumed.afterSha256});
+  assert.equal(refused.complete,false);assert.equal(await fs.readFile(join(realRuntime,'unrelated.cjs'),'utf8'),'do not delete');
+  assert.deepEqual(await fs.readFile(join(realRuntime,'snapshot.cjs')),published['snapshot.cjs']);
+  await fs.unlink(join(realRuntime,'unrelated.cjs')); // synthetic fixture only
+  assert.equal((await run({resources:realResources,state:realState,apply:true,hostStopped:true,expectedSha:resumed.afterSha256})).complete,true);
+  assert.deepEqual(await fs.readFile(join(realState,'legacy-exit-runtime-data.json')),recoveryBefore);
+  console.log('legacy-exit: frozen published audit.6 8-file layout/allowlist, unknown bytes refusal, partial-exit retry, preserved recovery/unrelated data, exact ASAR patch and failure boundaries passed');
 } finally {await fs.rm(root,{recursive:true,force:true});}
