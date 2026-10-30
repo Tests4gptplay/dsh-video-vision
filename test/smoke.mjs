@@ -36,7 +36,8 @@ apply(ctx, {});
 assert.equal(registered.name, 'video_vision');
 assert.equal(typeof registered.execute, 'function');
 assert.equal(registered.isConcurrencySafe(), false);
-assert.equal(makeTool(ctx).timeoutMs, 600000);
+// DSH ToolDefinition: omit timeoutMs for no deadline; cancellation is exercised by audit-budgets.mjs.
+assert.equal(makeTool(ctx).timeoutMs, undefined);
 assert.equal(new VideoVision(process.cwd()).transcript({ duration: 100, captions: { state: 'available', cues: [{ start: 5, end: 7, text: 'test' }, { start: 20, end: 23, text: 'other' }] } }, 4, 8).cues.length, 1);
 const { normalizeSource, webId, timestampUrl, parseCaptions, selectCaption, resolverArgs } = await import('../lib/ytdlp.js');
 const youtube = 'https://www.youtube.com/watch?v=BaW_jenozKc';

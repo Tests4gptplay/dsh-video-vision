@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';import {pathToFileURL} from 'node:url';
+import {analyzePcm} from '../lib/audio.js';import {renderVideo} from '../index.js';
+const official=process.env.VV_OFFICIAL_PRUNER;
+assert.ok(official, 'Set VV_OFFICIAL_PRUNER to the installed official Host pruner module for this optional integration check');
+const {ToolResultPruner,resolveConfig}=await import(pathToFileURL(official));
+const pruner=Object.create(ToolResultPruner.prototype);pruner.config=resolveConfig();
+assert.deepEqual(pruner.config,{thresholdChars:8192,headChars:4096,tailChars:1024});
+const pcm=Buffer.alloc(60*16000*2);for(let i=0;i<60*16000;i++)if(i%12800>=6400)pcm.writeInt16LE(Math.round(16000*Math.sin(i/7)),i*2);
+const analysis=analyzePcm(pcm),prefix='/tmp/video-vision-synthetic-integration-fixture/video-data';
+const value={action:'audio',video_id:'local-synthetic-only',title:'many-quiet.mkv',source:'local',source_url:null,duration_seconds:60,resolution:'32x32',has_audio_in_cached_video:true,audio_source:{state:'available',storage:'embedded',path:prefix+'/fixtures/many-quiet.mkv'},subtitle_state:'not-provided',subtitle_language:null,next_start_seconds:0,cache_directory:prefix+'/cache/videos/local-synthetic-only',resolver_id:null,audio:{state:'available',source_kind:'embedded',clip_path:prefix+'/cache/videos/local-synthetic-only/audio-0-60000.wav',analyzed_range_seconds:[0,60],next_start_seconds:null,analysis,transcript:{state:'not-requested',source:'speech-recognition'}},method_guidance:{action:'methods',path:prefix+'/configuration/GUIDANCE.md',builtin_path:prefix+'/configuration/BUILTIN_GUIDANCE.md',audio_path:prefix+'/configuration/AUDIO_GUIDANCE.md',native_session_path:prefix+'/configuration/NATIVE_SESSION_GUIDANCE.md',resolver_interface_path:prefix+'/configuration/resolvers/BUILTIN_INTERFACE.md',use_when:'Read audio_path for lyrics, music and sound; builtin_path contains current viewing/resolver instructions. path preserves user guidance. Use methods for new sites or a failing resolver.'}};
+assert.ok(analysis.quiet_range_count>32);assert.equal(analysis.quiet_ranges.length,32);
+const rendered=renderVideo({},value);const pruned=pruner.pruneContent(rendered);assert.ok(pruned,'Representative real output must exceed official default threshold');const visible=pruned.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+for(const key of ['quiet_range_count','quiet_ranges_truncated','onset_count','prominent_onsets_truncated','detail_hint','analyzed_range_seconds'])assert.ok(visible.includes('"'+key+'"'),key+' lost to default Host pruning');assert.ok(visible.includes('[... tool result middle pruned ...]'));assert.ok(visible.includes('narrower start_seconds/end_seconds'));assert.ok(rendered[0].text.includes('quiet_ranges'));assert.equal(value.audio.analysis,analysis);
+// Prove the old array-first order reproduces missing metadata under the exact same policy.
+const {quiet_range_count,quiet_ranges_truncated,onset_count,prominent_onsets_truncated,detail_hint,tempo,level_timeline,quiet_ranges,prominent_onsets_seconds,...rest}=analysis;
+const old={...rest,level_timeline,quiet_ranges,quiet_range_count,quiet_ranges_truncated,onset_count,prominent_onsets_truncated,prominent_onsets_seconds,tempo};
+const oldVisible=pruner.pruneContent(renderVideo({}, {...value,audio:{...value.audio,analysis:old}})).map(b=>b.type==='text'?b.text:'').join('\n');assert.ok(!oldVisible.includes('"quiet_ranges_truncated"'));
+console.log(JSON.stringify({pass:true,officialDefault:pruner.config,totalQuietRanges:analysis.quiet_range_count,returnedQuietRanges:analysis.quiet_ranges.length,metadataVisibleAfterPruning:true,oldOrderLosesMetadata:true,fullJsonAfterPruning:false,scope:'real official pruner component; not GUI'}));

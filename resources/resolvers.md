@@ -46,7 +46,7 @@ export default async function resolveVideo({
 }
 ```
 
-mediaPath 和可选的 audioPath 必须指向本次 outputDirectory 内的已下载文件，可以是相对路径；视频与独立音频合计遵守 maxDownloadMB。title 和 captions 可省略。对于分离音视频或 HLS/DASH，可分别下载后返回 mediaPath 与 audioPath，也可使用传入的 ffmpegPath 合并后返回 mediaPath。声音与视频使用同一时间轴。
+mediaPath 和可选的 audioPath 必须指向本次 outputDirectory 内的已下载文件，可以是相对路径；视频与独立音频合计遵守用户设置的 maxDownloadMB；未设置总预算时该值为 Infinity。title 和 captions 可省略。对于分离音视频或 HLS/DASH，可分别下载后返回 mediaPath 与 audioPath，也可使用传入的 ffmpegPath 合并后返回 mediaPath。声音与视频使用同一时间轴。
 
 有声视频的方法要保留声音。试用后同时查看返回画面与 audio.state / audio.analyzed_range_seconds；歌词和节奏指导见 ../AUDIO_GUIDANCE.md。
 

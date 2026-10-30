@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import {mkdtemp,mkdir,writeFile,readFile,stat} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {VideoVision} from '../lib/engine.js';import {run} from '../lib/process.js';
+const root=await mkdtemp(join(tmpdir(),'vv-cache-recovery-')),signal=new AbortController().signal;
+const video=join(root,'source.mp4');await run('ffmpeg',['-v','error','-f','lavfi','-i','color=c=blue:s=32x32:r=10','-t','0.5','-c:v','libx264','-y',video],root,signal,0);
+const original=await readFile(video);const configDirectory=join(root,'methods');const method=join(configDirectory,'resolvers','qa');await mkdir(method,{recursive:true});await writeFile(join(method,'manifest.json'),JSON.stringify({hosts:['fixture.invalid']}));await writeFile(join(method,'resolve.mjs'),`import {copyFile} from 'node:fs/promises';export default async({outputDirectory})=>{await copyFile(${JSON.stringify(video)},outputDirectory+'/video.mp4');return {mediaPath:'video.mp4'}};`);
+const e=new VideoVision(root,{configDirectory,nodePath:process.execPath});const url='https://fixture.invalid/video';let a=await e.open(url,signal);const manifest=join(e.folder(a.id),'manifest.json');
+await writeFile(manifest,'{bad');a=await e.open(url,signal);assert.equal(a.duration,0.5);
+await writeFile(manifest,JSON.stringify({...a,captions:null,cursor:'invalid'}));a=await e.open(url,signal);assert.ok(Array.isArray(a.captions.cues));assert.equal(a.cursor,0);
+await e.frames(a,{frames:1},signal);await writeFile(a.mediaPath,'broken-media');a=await e.open(url,signal);assert.deepEqual(await readFile(a.mediaPath),original);assert.equal((await e.frames(a,{frames:1},signal)).length,1);
+const before=await readFile(manifest),probe=e.probe;e.probe=async()=>{throw Object.assign(new Error('fixture permission error'),{code:'EPERM'});};await assert.rejects(e.open(url,signal),e=>e.code==='EPERM');assert.deepEqual(await readFile(manifest),before);e.probe=probe;assert.equal((await e.open(url,signal)).id,a.id);
+assert.deepEqual(await readFile(video),original);console.log('PASS owned malformed manifest and corrupt downloaded media recover, injected EPERM preserved, retry works, local source unchanged');

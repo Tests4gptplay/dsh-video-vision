@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import {mkdtemp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {VideoVision} from '../lib/engine.js';import {run} from '../lib/process.js';import {analyzePcm} from '../lib/audio.js';
+const root=await mkdtemp(join(tmpdir(),'vv-audio-tail-')),signal=new AbortController().signal;
+const file=join(root,'short.mp4');await run('ffmpeg',['-v','error','-f','lavfi','-i','color=c=blue:s=32x32:r=100','-f','lavfi','-i','sine=frequency=440:sample_rate=16000','-t','0.2','-c:v','libx264','-c:a','aac','-y',file],root,signal,0);
+const e=new VideoVision(root),asset=await e.open(file,signal);const tail=await e.audioClip(asset,0.15,0.2,signal);assert.ok(tail.pcm.length>0);assert.ok(tail.duration<=0.051);
+const tiny=await e.audioClip(asset,0.198,0.2,signal);assert.ok(tiny.pcm.length>0);
+await assert.rejects(e.audioClip(asset,0.2,0.2,signal),/empty/);await assert.rejects(e.audioClip(asset,0.21,0.22,signal),/between/);
+assert.ok((await e.audioClip(asset,0,0.01,signal)).pcm.length>0);
+const pcm=Buffer.alloc(40*16000*2);for(let i=0;i<40*16000;i++)if(i%16000>=8000)pcm.writeInt16LE(Math.round(20000*Math.sin(i/7)),i*2);
+const a=analyzePcm(pcm);assert.ok(a.quiet_range_count>32);assert.equal(a.quiet_ranges.length,32);assert.equal(a.quiet_ranges_truncated,true);assert.equal(typeof a.prominent_onsets_truncated,'boolean');
+console.log('PASS valid audio tail/tiny range, explicit empty/invalid range, recovery, visible summary truncation');

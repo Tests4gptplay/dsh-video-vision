@@ -1,5 +1,5 @@
 const { createHash, randomUUID } = require('node:crypto');
-const { homedir } = require('node:os');
+const { homedir, endianness } = require('node:os');
 const { join, resolve } = require('node:path');
 const { readFileSync } = require('node:fs');
 const net = require('node:net');
@@ -13,24 +13,81 @@ function authorization(directory = root()) {
     return { enabled: value.enabled === true, syncToNative: value.enabled === true && value.syncToNative === true };
   } catch { return { enabled: false, syncToNative: false }; }
 }
-function frames(stream, callback, fail = () => {}) {
-  let pending = Buffer.alloc(0);
-  stream.on('data', chunk => {
-    pending = Buffer.concat([pending, chunk]);
-    while (pending.length >= 4) {
-      const size = pending.readUInt32LE(0);
-      if (size > 4 * 1024 * 1024) { pending = Buffer.alloc(0); fail(); return; }
-      if (pending.length < size + 4) return;
-      const payload = pending.subarray(4, size + 4); pending = pending.subarray(size + 4);
-      try { callback(JSON.parse(payload.toString('utf8'))); } catch { fail(); }
-    }
-  });
+// Local IPC has a UInt32LE byte length, not Chrome's native-messaging budget.
+// Accumulate only received bytes (not the advertised size), and concatenate once
+// per frame so fragmented large cookie snapshots do not incur quadratic copies.
+const localFormat = { byteOrder: 'LE', maxBytes: 0xffffffff };
+// Chrome stdio is a separate protocol: native byte order and asymmetric limits.
+// https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging
+const nativeInputFormat = { byteOrder: endianness(), maxBytes: 64 * 1024 * 1024 };
+const nativeOutputFormat = { byteOrder: endianness(), maxBytes: 1024 * 1024 };
+function frameError(message) {
+  return Object.assign(new Error(message), { code: 'invalid_browser_session_frame' });
 }
-function send(stream, value) {
+function decodeFrames(stream, callback, fail, { byteOrder, maxBytes }) {
+  const header = Buffer.alloc(4);
+  const decoder = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
+  let headerBytes = 0, size, received = 0, parts = [], stopped = false;
+  function detach() {
+    stopped = true; parts = [];
+    stream.removeListener('data', data);
+    stream.removeListener('end', ended);
+    stream.removeListener('close', ended);
+    stream.removeListener('error', failed);
+  }
+  function failed(error) {
+    if (stopped) return;
+    detach(); fail(error);
+  }
+  function ended() {
+    if (stopped) return;
+    if (headerBytes || size !== undefined) failed(frameError('Incomplete browser session frame.'));
+    else detach();
+  }
+  function data(chunk) {
+    if (stopped) return;
+    try {
+      if (!Buffer.isBuffer(chunk)) chunk = Buffer.from(chunk);
+      let offset = 0;
+      while (offset < chunk.length && !stopped) {
+        if (size === undefined) {
+          const count = Math.min(4 - headerBytes, chunk.length - offset);
+          chunk.copy(header, headerBytes, offset, offset + count);
+          headerBytes += count; offset += count;
+          if (headerBytes !== 4) continue;
+          size = byteOrder === 'LE' ? header.readUInt32LE(0) : header.readUInt32BE(0);
+          headerBytes = 0;
+          if (!size || size > maxBytes) throw frameError('Invalid browser session frame length.');
+        }
+        const count = Math.min(size - received, chunk.length - offset);
+        if (count) { parts.push(chunk.subarray(offset, offset + count)); received += count; offset += count; }
+        if (received !== size) continue;
+        const payload = parts.length === 1 ? parts[0] : Buffer.concat(parts, size);
+        size = undefined; received = 0; parts = [];
+        callback(JSON.parse(decoder.decode(payload)));
+      }
+    } catch (error) { failed(error); }
+  }
+  stream.on('data', data);
+  stream.once('end', ended);
+  stream.once('close', ended);
+  stream.once('error', failed);
+  return detach;
+}
+function encodeFrame(stream, value, { byteOrder, maxBytes }) {
   const payload = Buffer.from(JSON.stringify(value));
-  const header = Buffer.alloc(4); header.writeUInt32LE(payload.length);
-  stream.write(Buffer.concat([header, payload]));
+  if (payload.length > maxBytes) throw frameError('Browser session message exceeds this protocol\'s length limit.');
+  const header = Buffer.alloc(4);
+  if (byteOrder === 'LE') header.writeUInt32LE(payload.length); else header.writeUInt32BE(payload.length);
+  // Two queued writes avoid copying a complete large payload just to prefix it.
+  stream.cork?.();
+  try { stream.write(header); return stream.write(payload); }
+  finally { stream.uncork?.(); }
 }
+function frames(stream, callback, fail = () => {}) { return decodeFrames(stream, callback, fail, localFormat); }
+function send(stream, value) { return encodeFrame(stream, value, localFormat); }
+function framesNative(stream, callback, fail = () => {}) { return decodeFrames(stream, callback, fail, nativeInputFormat); }
+function sendNative(stream, value) { return encodeFrame(stream, value, nativeOutputFormat); }
 function request(op, payload = {}, { directory = root(), signal, timeoutMs = 20000, channel = 'bridge', messages = {} } = {}) {
   signal?.throwIfAborted();
   return new Promise((resolveRequest, reject) => {
@@ -48,7 +105,8 @@ function request(op, payload = {}, { directory = root(), signal, timeoutMs = 200
     socket.once('close', () => { if (!settled) finish(new Error('本地浏览器桥已断开。')); });
     socket.once('connect', () => {
       let key; try { key = readFileSync(join(directory, 'bridge.key'), 'utf8').trim(); } catch { finish(new Error('请先设置本地浏览器桥。')); return; }
-      send(socket, { id: randomUUID(), op, ...payload, key });
+      try { send(socket, { id: randomUUID(), op, ...payload, key }); }
+      catch (error) { finish(error); }
     });
     frames(socket, value => value.ok ? finish(null, value.value) : finish(new Error(
       messages[value.code] || (value.code === 'disabled' ? '默认浏览器授权已关闭。' :
@@ -71,4 +129,4 @@ function scopedCookies(cookies, value) {
       (url.pathname === (c.path || '/') || url.pathname.startsWith((c.path || '/').replace(/\/$/, '') + '/'));
   }).sort((a, b) => (b.path || '/').length - (a.path || '/').length);
 }
-module.exports = { root, socketPath, authorization, frames, send, request, siteUrl, scopedCookies };
+module.exports = { root, socketPath, authorization, frames, send, framesNative, sendNative, request, siteUrl, scopedCookies };

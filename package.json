@@ -1,6 +1,6 @@
 {
   "name": "dsh-video-vision",
-  "version": "0.9.2",
+  "version": "0.9.3-audit.6",
   "description": "Watch and analyze online or local video in DSH with frames, audio and captions; cache and export media, reuse site methods, and use yt-dlp as a backup.",
   "type": "module",
   "license": "MIT",
@@ -64,5 +64,6 @@
   "scripts": {
     "test": "node test/smoke.mjs && node test/cache.mjs && node test/native-ui.mjs && node test/browser-ui.mjs && node test/browser-session.mjs && node test/desktop-integration.mjs && node test/snapshot.mjs && node test/prepare.mjs && node test/extensions.mjs && node test/audio.mjs && node test/native-session.mjs",
     "setup:resolver": "node bin/prepare.mjs"
-  }
+  },
+  "private": true
 }

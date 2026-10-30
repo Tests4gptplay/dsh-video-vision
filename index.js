@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { budgetRecovery, timeoutRecovery } from './lib/budgets.js';
 import { automaticAudioRange, inspectAudio } from './lib/audio.js';
 import { join } from 'node:path';
 import { VideoVision, DEFAULTS } from './lib/engine.js?v=0.9.1';
@@ -43,7 +44,6 @@ export function makeTool(ctx, settings = {}, nativeSession) {
       additionalProperties: false
     },
     output: { schema: { type: 'object', additionalProperties: true }, render: renderVideo },
-    timeoutMs: 600000,
     isConcurrencySafe: () => false,
     async execute(args, exec) {
       const cwd = exec.agent ? await ctx.workingDirectory.ensure(exec.agent, exec.signal) : process.cwd();
@@ -79,10 +79,10 @@ export function makeTool(ctx, settings = {}, nativeSession) {
       else if (action === 'status' && !args.video_id) {
         try { asset = await engine.load(); } catch (e) {
           if (e.code !== 'ENOENT' && !/Open a video first/.test(e.message)) throw e;
-          return { action, plugin_version: '0.9.2', video: null, speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([key, value]) => key !== 'cookieFile' && value !== undefined)) };
+          return { action, plugin_version: '0.9.3-audit.6', video: null, speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([key, value]) => key !== 'cookieFile' && value !== undefined)) };
         }
       } else asset = await engine.load(args.video_id);
-      if (action === 'status') return { action, plugin_version: '0.9.2', ...engine.summary(asset), speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config) };
+      if (action === 'status') return { action, plugin_version: '0.9.3-audit.6', ...engine.summary(asset), speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config) };
       if (action === 'transcript') return { action, ...engine.summary(asset), transcript: engine.transcript(asset, args.start_seconds, args.end_seconds) };
       if (['audio', 'transcribe'].includes(action)) {
         const audio = await inspectAudio(engine, asset, { ...args, audio_mode: action === 'transcribe' ? 'auto' : args.audio_mode }, speech, speechState, exec.signal);
@@ -121,6 +121,8 @@ export function makeTool(ctx, settings = {}, nativeSession) {
     try { return { ...await execute(args, exec), method_guidance }; }
     catch (error) {
       exec.signal.throwIfAborted();
+      const recovery = budgetRecovery(error) || timeoutRecovery(error);
+      if (recovery) return { action: args.action ?? (args.source ? 'open' : 'watch'), ...recovery, method_guidance };
       error.message += '\nFor site-resolution problems, call video_vision methods. Guidance: ' + method_guidance.path;
       throw error;
     }

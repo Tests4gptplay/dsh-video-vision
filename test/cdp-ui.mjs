@@ -58,6 +58,15 @@ web.status({ sourceId: 'OFFLINE', browser: 'Offline saved browser', imported: tr
 nodes = web.render();
 assert.equal(nodes.filter(n => n.type === 'select').length, 1, 'Offline selected source plus one live alternative remains selectable');
 assert.ok(nodes.some(n => n.type === 'option' && n.props.value === 'NEW'));
+const offlineOption = nodes.find(n => n.type === 'option' && n.props.value === 'OFFLINE');
+assert.ok(offlineOption && offlineOption.props.disabled, 'Offline current source has its own non-switching option');
+assert.equal(offlineOption.children.join(''), 'Offline saved browser · 连接不可用（保留已选来源）');
+assert.equal(nodes.find(n => n.type === 'select').props.value, 'OFFLINE');
+assert.equal(web.calls.filter(c => c.method.endsWith('/browser-source')).length, 1, 'Offline rendering must not switch source');
+web.language('en');
+assert.equal(web.render().find(n => n.type === 'option' && n.props.value === 'OFFLINE').children.join(''), 'Offline saved browser · Connection unavailable (selected source retained)');
+web.language('zh');
+
 await nodes.find(n => n.type === 'select').props.onChange({ target: { value: 'NEW' } });
 assert.equal(web.calls.filter(c => c.method.endsWith('/browser-source')).length, 2);
 web.status({ sourceId: 'A', sources: [{ id: 'A', label: 'Synthetic A' }, { id: 'B', label: 'Synthetic B' }] });
@@ -70,3 +79,14 @@ assert.ok(desktop.render().some(n => n.props['aria-label'] === '同步至 DSH �
 desktop.language('en');
 assert.ok(desktop.render().some(n => n.props['aria-label'] === 'Sync to the DSH built-in browser'));
 console.log('PASS: VM-rendered Web/Desktop capability visibility, single browser-card source picker, two-source choice, offline-source replacement, one RPC+reload per switch, zh/en labels. Not a real browser GUI test.');
+
+const edge = fixture();
+edge.status({sourceId:'A',browser:'Saved A',sources:[{id:'B',label:'Live B'}]});
+let e=edge.render(); assert.equal(e.find(n=>n.type==='option'&&n.props.value==='A').props.disabled,true);
+edge.status({sources:[{id:'A',label:'Returned A'},{id:'B',label:'Live B'}]});
+e=edge.render();assert.equal(e.filter(n=>n.type==='option'&&n.props.value==='A').length,1);assert.notEqual(e.find(n=>n.type==='option'&&n.props.value==='A').props.disabled,true);assert.equal(e.find(n=>n.type==='select').props.value,'A');
+edge.status({sources:[]});e=edge.render();assert.equal(e.filter(n=>n.type==='select').length,0);assert.ok(e.some(n=>n.children.some(c=>typeof c==='string'&&c.includes('Saved A'))));
+edge.status({sourceId:'',sources:[{id:'B',label:'Live B'}]});e=edge.render();assert.equal(e.find(n=>n.type==='select').props.value,'');assert.equal(e.filter(n=>n.type==='option'&&n.props.value==='').length,1);
+const label='<img src=x onerror=boom> & " \'';
+edge.status({sourceId:'A',browser:label,sources:[{id:'B',label}]});e=edge.render();const a=e.find(n=>n.type==='option'&&n.props.value==='A');assert.ok(a.children[0].startsWith(label));assert.equal(a.props.dangerouslySetInnerHTML,undefined);assert.ok(e.find(n=>n.type==='option'&&n.props.value==='B').children.includes(label));assert.equal(edge.calls.length,0);
+console.log('PASS independent VM edges: reappearance/no duplicate/empty list preserves summary/empty selection/text-child labels/no rendering RPC. Not native DOM or GUI proof.');

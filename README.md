@@ -2,9 +2,9 @@
 
 **在 DSH 中观看、分析和保存网络及本地视频，让 AI 结合时间戳画面、音频与字幕理解内容。**
 
-当前版本：`0.9.2`。设置页跟随 DSH 切换中英文，补充 Linux/macOS 登录态导入与系统文件窗口适配，并修复视频尾点取帧、缓存操作提示和会话恢复问题。
+当前候选：`0.9.3-audit.6`（本分支测试包，未发布正式版本）。设置页跟随 DSH 切换中英文，补充 Linux/macOS 登录态导入与系统文件窗口适配，并修复视频尾点取帧、缓存操作提示和会话恢复问题。
 
-本次更新与验证状态见[测试报告](docs/testing-0.9.2.md)。
+本候选修复离线已选浏览器来源显示，并使设置页颜色跟随宿主主题与皮肤覆盖。云端验收记录见[候选验收](docs/testing/ACCEPTANCE.md)；历史0.9.2记录见[旧版测试报告](docs/testing-0.9.2.md)。
 
 发送视频链接或提供本地视频路径，AI 可以获取带时间戳的画面、分析音频、读取平台字幕，并在识别器就绪时转写对白和歌词。视频、音轨和画面保存在本地缓存，可接续观看、按时间细看，也可从设置页提取并另存视频或单个缓存文件。
 
@@ -56,23 +56,15 @@ yt-dlp 备用方式始终匿名，不接收 Cookie 或浏览器登录态。登�
 
 ## 安装和升级
 
-使用下方固定版本来源安装或升级至 `v0.9.2`。
+本分支候选包：`dsh-video-vision-0.9.3-audit.6-copyclarity.tgz`，位于 `test-artifacts/`；精确SHA和步骤见[安装说明](test-artifacts/INSTALL.md)。正式发行版仍在[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases)，不要将历史v0.9.2来源当成本候选。
 
-DSH Desktop：打开 **插件 → 添加插件**，粘贴以下 GitHub 来源：
-
-```text
-github:Tests4gptplay/dsh-video-vision#v0.9.2
-```
-
-安装并启用 `video-vision` 后，重新加载插件或重启 DSH，在新的请求中发送视频链接即可。
-
-Web 版安装命令：
+DSH Desktop：打开 **插件 → 添加插件**，填写候选 `.tgz` 的完整本地路径。Web 版安装命令：
 
 ```bash
-dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.9.2'
+dsh plugin --profile web add '/完整路径/dsh-video-vision-0.9.3-audit.6-copyclarity.tgz'
 ```
 
-Web 与 Desktop 分别安装。[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases/latest) 同时提供备用 `.tgz` 软件包。`v0.9.2` 是固定版本来源，后续更新使用新的版本号。
+Web 与 Desktop 分别安装。启用 `video-vision` 后正常重新加载插件，在新的请求中发送视频链接即可。
 
 ### 运行依赖
 

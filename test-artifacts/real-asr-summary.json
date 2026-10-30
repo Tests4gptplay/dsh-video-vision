@@ -1,0 +1,50 @@
+{
+  "source": "https://www.bilibili.com/video/BV1GTn66pEi3/",
+  "tool": "frozen audit6 makeTool.execute",
+  "route": "official Cordis SpeechToText + LocalSubprocess + SenseVoice; no synthetic provider",
+  "windowSeconds": [
+    0,
+    15
+  ],
+  "language": "en",
+  "recognizer": "sensevoice-local INT8",
+  "start": "2026-10-30T09:42:45.163Z",
+  "end": "2026-10-30T09:42:46.865Z",
+  "state": "available",
+  "cached": false,
+  "recognizedWordCount": 28,
+  "transcriptSHA256": "52fcc4825d3af65e936d8805a71702704c3eed53b20bd446c0042e12866e8930",
+  "audio": {
+    "bytes": 1741905,
+    "sha256": "35d2eddaa5dc84b5a3be889a037dd60c7e37929686a25956c99b9ea732573d86"
+  },
+  "clip": {
+    "bytes": 480044,
+    "sha256": "32d341a0b9ebd7a10bdc70a0fa996ce16bc477a3d521065104a573785a4097ca",
+    "duration": 15,
+    "sampleRate": 16000
+  },
+  "assets": [
+    {
+      "file": "tokens.txt",
+      "bytes": 315894,
+      "sha256": "f449eb28dc567533d7fa59be34e2abca8784f771850c78a47fb731a31429a1dc",
+      "officialPinnedMatch": true
+    },
+    {
+      "file": "model.int8.onnx",
+      "bytes": 239233841,
+      "sha256": "c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51",
+      "officialPinnedMatch": true
+    },
+    {
+      "file": "silero_vad.onnx",
+      "bytes": 1807522,
+      "sha256": "a35ebf52fd3ce5f1469b2a36158dba761bc47b973ea3382b3186ca15b1f5af28",
+      "officialPinnedMatch": true
+    }
+  ],
+  "accuracy": "Pipeline verified; no word-error-rate ground truth comparison yet. Music/lyrics recognition not asserted perfect.",
+  "scope": "one real English vocal clip; not all languages/providers",
+  "providerDisposedAfterResult": true
+}

@@ -1,0 +1,32 @@
+{
+  "version": "0.9.3-audit.6",
+  "sha256": "4120cb9e4cb37ff761d1921568e9fe78026b86ff8f7a0b6a7ea3188503494305",
+  "stage": "executed frozen cloud matrix passed; explicit platform/provider gaps remain",
+  "acceptedCloudCoverage": [
+    "fresh state/settings/locales and default pruning",
+    "16 media command groups and independent pixels/audio",
+    "actual public BV plugin parse/download/six frames",
+    "budget persistence and three failure/recovery loops",
+    "stop/recovery",
+    "native export and packet-exact mux",
+    "cache migration/busy guard/four corruption repairs",
+    "synthetic browser A/B isolation, empty persistence, selected-offline native menu",
+    "protected download/media, two-session headers/body revocation and recovery, final OFF",
+    "independent private provider and Electron component checks (not actual DSH Desktop bridge)",
+    "cache deletion cancellation/confirmation, unrelated file preservation and two-workspace rebuild/shared latest",
+    "built-in Light/Dark and 904px native source menu/focus/disabled readability",
+    "actual official local SenseVoice INT8 transcription of user public video English vocals, 0–15s, noncached; lexical errors observed"
+  ],
+  "partial": [],
+  "remainingInCurrentCloudRound": [],
+  "localOnlyGapsToFinalize": [
+    "actual DSH Desktop bridge versus standalone Electron component",
+    "Windows/macOS full platform bindings",
+    "CHIPS/live/multi-durl cases not executed in actual Host",
+    "real Unix IPC portion not available",
+    "arbitrary custom skin palette installation",
+    "same endpoint source ID disappearance/reappearance native UI (VM coverage only; actual reopened CDP endpoint gets new ID)"
+  ],
+  "noFullLocalRerunRequired": true,
+  "checkpointUTC": "2026-10-30T09:30:53.789969+00:00"
+}

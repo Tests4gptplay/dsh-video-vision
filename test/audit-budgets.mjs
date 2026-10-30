@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {mkdtemp,writeFile,readFile,stat} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {byteBudget,budgetSignal} from '../lib/budgets.js';import {run} from '../lib/process.js';
+import {runMethod} from '../lib/extensions.js';import {VideoVision,DEFAULTS} from '../lib/engine.js';
+import {makeTool} from '../index.js';
+const root=await mkdtemp(join(tmpdir(),'vv-audit-budget-')),signal=new AbortController().signal;
+assert.equal(byteBudget({}),Infinity);assert.equal(byteBudget({maxDownloadMB:0}),Infinity);assert.equal(byteBudget({maxDownloadMB:2}),2097152);
+assert.equal(budgetSignal(signal,0),signal);assert.equal(DEFAULTS.downloadTimeoutMs,0);assert.equal(makeTool({}).timeoutMs,undefined);
+await run(process.execPath,['-e','setTimeout(()=>console.log("completed"),80)'],root,signal,0,'no-deadline');
+await assert.rejects(run(process.execPath,['-e','setInterval(()=>{},1000)'],root,signal,30,'deadline'),/timeout|aborted/i);
+const stop=new AbortController();setTimeout(()=>stop.abort(new Error('user-stop')),80);
+await assert.rejects(run(process.execPath,['-e','setInterval(()=>{},1000)'],root,stop.signal,0,'cancel'),/user-stop/);
+const modulePath=join(root,'resolve.mjs');await writeFile(modulePath,`import {writeFile} from 'node:fs/promises';export default async ({outputDirectory,maxDownloadMB})=>{if(maxDownloadMB!==Infinity)throw Error('not Infinity');await writeFile(outputDirectory+'/fake.mp4','fixture');return {mediaPath:'fake.mp4'};}`);
+const result=await runMethod({modulePath,id:'qa',revision:'1',name:'qa'},'https://fixture.invalid/video',root,{...DEFAULTS,nodePath:process.execPath},signal);assert.equal(result.downloadBytes,7);
+const e=new VideoVision(root);e.mediaFetch=async()=>new Response(new Uint8Array(16));await e.download(['https://fixture.invalid/video'],join(root,'download.bin'),'https://fixture.invalid',signal);assert.equal((await stat(join(root,'download.bin'))).size,16);
+e.config.maxDownloadMB=0.000001;await assert.rejects(e.download(['https://fixture.invalid/video'],join(root,'limited.bin'),'https://fixture.invalid',signal),/budget/);
+console.log('PASS optional totals, explicit limits, user cancellation, resolver Infinity arithmetic, no hidden tool deadline');

@@ -13,7 +13,7 @@ const messages = {
   setup_required: '未找到可用的浏览器连接。请保持已登录的浏览器或 CAH 运行，再点击导入。',
   connection_failed: '未能连接正在运行的浏览器。请保持来源浏览器运行后重试。',
   timed_out: '等待浏览器确认超时。原登录态未改动，可再次点击刷新。',
-  read_failed: '浏览器未提供可导入的 Cookie。原登录态未改动。',
+  read_failed: '无法读取浏览器 Cookie。原登录态未改动。',
   storage_unavailable: '当前系统的本地加密存储不可用，未保存登录态。',
   save_failed: '登录态未能保存，原登录态未改动。',
   busy: '正在导入登录态，请等待本次操作结束。',
@@ -103,6 +103,7 @@ function createSnapshotService({ directory = P.root(), safeStorage, capture = ca
     await load();
     const available = Boolean(snapshot?.cookies.some(c => !c.expirationDate || c.expirationDate > Date.now() / 1000));
     return { ready: true, connected: available, imported: Boolean(snapshot),
+      cookieCount: snapshot ? snapshot.cookies.length : null,
       importedAt: snapshot?.importedAt || null, source, importing: Boolean(importing),
       storageBackend: await safeStorage.getSelectedStorageBackend?.() || null };
   }
@@ -123,7 +124,10 @@ function createSnapshotService({ directory = P.root(), safeStorage, capture = ca
         if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
         const cookies = await capture({ portFile, signal: controller.signal });
         if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
-        if (!cookies.length) throw fault('read_failed');
+        // An explicitly successful empty read is a logout/empty snapshot, not
+        // a read failure. Persist it so scoped sync can revoke prior imports.
+        // A failed or malformed read still leaves the encrypted snapshot intact.
+        if (!Array.isArray(cookies)) throw fault('read_failed');
         const next = { version: 1, importedAt: new Date().toISOString(), cookies };
         let encrypted;
         try { encrypted = await safeStorage.encryptString(JSON.stringify(next)); } catch { throw fault('storage_unavailable'); }
