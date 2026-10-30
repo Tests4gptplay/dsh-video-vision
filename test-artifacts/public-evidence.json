@@ -1,0 +1,137 @@
+{
+  "candidate": "0.9.3-audit.6",
+  "environment": "Own cloud Linux; actual official DSH Host with synthetic fixture driver, except explicitly identified actual CLI/public media/official ASR supplement",
+  "privacy": "Whitelisted result excerpts; no real account cookies, tokens, personal logs or full lyrics. Source hashes identify retained reports; public excerpts below are independently readable.",
+  "evidence": [
+    {
+      "sourceReport": "summary-pruning-verified.json",
+      "sourceReportSHA256": "910fdc10764a911649f593f6a13cd0e32e43b2667d0ce764a5b478bc460442f7",
+      "observed": {
+        "first": {
+          "at": "2026-10-30T05:40:43.426Z",
+          "callId": "qa-0922c9ce-9a6b-4ad3-8e19-44e405e382f0",
+          "characters": 8534,
+          "pruned": false,
+          "quietCountVisible": true,
+          "quietTruncatedVisible": true,
+          "onsetCountVisible": true,
+          "onsetTruncatedVisible": true,
+          "detailHintVisible": true
+        },
+        "firstPruned": {
+          "at": "2026-10-30T06:18:00.242Z",
+          "callId": "qa-0922c9ce-9a6b-4ad3-8e19-44e405e382f0",
+          "characters": 5159,
+          "pruned": true,
+          "quietCountVisible": true,
+          "quietTruncatedVisible": true,
+          "onsetCountVisible": true,
+          "onsetTruncatedVisible": true,
+          "detailHintVisible": true
+        },
+        "sampleCount": 152
+      }
+    },
+    {
+      "sourceReport": "revocation-two-phase-0856.json",
+      "sourceReportSHA256": "91160c1644bda5f9afe6d376061729479d20c32a2bc5e05e5c7f5e0fd1bdf1b5",
+      "observed": {
+        "at": "2026-10-30T08:57:30.525711+00:00",
+        "events": [
+          {
+            "utc": "2026-10-30T08:55:07.832Z",
+            "event": "request",
+            "id": 6,
+            "path": "/slow-headers.mp4",
+            "authorized": true,
+            "status": 200
+          },
+          {
+            "utc": "2026-10-30T08:55:37.243Z",
+            "event": "request",
+            "id": 7,
+            "path": "/slow-body.mp4",
+            "authorized": true,
+            "status": 200
+          },
+          {
+            "utc": "2026-10-30T08:55:37.244Z",
+            "event": "headers",
+            "id": 7
+          },
+          {
+            "utc": "2026-10-30T08:55:37.247Z",
+            "event": "partial-body",
+            "id": 7,
+            "bytes": 1024
+          },
+          {
+            "utc": "2026-10-30T08:56:34.764Z",
+            "event": "closed",
+            "id": 6,
+            "completed": false
+          },
+          {
+            "utc": "2026-10-30T08:56:34.765Z",
+            "event": "closed",
+            "id": 7,
+            "completed": false
+          }
+        ],
+        "noHeadersOnId6": true,
+        "bodyPartial1024": true,
+        "bothClosedIncomplete": true,
+        "englishError": "Default browser authorization has been disabled or updated.",
+        "chineseError": "默认浏览器授权已关闭或更新。"
+      }
+    },
+    {
+      "sourceReport": "delete-verified-clear-confirm.json",
+      "sourceReportSHA256": "91026352c10ce8dd92416f0ba38f8aeb6ed9ba4224fe61f205df4bb8f87ce294",
+      "observed": {
+        "at": "2026-10-30T09:10:03.138636+00:00",
+        "mode": "clear-confirm",
+        "expectedFiles": 1,
+        "actualFiles": 1,
+        "missing": [],
+        "extra": [],
+        "changed": [],
+        "externalSourceMethodsExportsChanged": [],
+        "backupChanged": [],
+        "passed": true
+      }
+    },
+    {
+      "sourceReport": "SANITIZED-ASR-RECEIPT.json",
+      "sourceReportSHA256": "d318493473290f1eb117c571b2edb9b89d7fc1d593e73bf88fc45f66abebf116",
+      "observed": {
+        "source": "https://www.bilibili.com/video/BV1GTn66pEi3/",
+        "tool": "frozen audit6 makeTool.execute",
+        "route": "official Cordis SpeechToText + LocalSubprocess + SenseVoice; no synthetic provider",
+        "windowSeconds": [
+          0,
+          15
+        ],
+        "language": "en",
+        "recognizer": "sensevoice-local INT8",
+        "start": "2026-10-30T09:42:45.163Z",
+        "end": "2026-10-30T09:42:46.865Z",
+        "state": "available",
+        "cached": false,
+        "recognizedWordCount": 28,
+        "transcriptSHA256": "52fcc4825d3af65e936d8805a71702704c3eed53b20bd446c0042e12866e8930",
+        "audio": {
+          "bytes": 1741905,
+          "sha256": "35d2eddaa5dc84b5a3be889a037dd60c7e37929686a25956c99b9ea732573d86"
+        },
+        "clip": {
+          "bytes": 480044,
+          "sha256": "32d341a0b9ebd7a10bdc70a0fa996ce16bc477a3d521065104a573785a4097ca",
+          "duration": 15,
+          "sampleRate": 16000
+        },
+        "providerDisposedAfterResult": true
+      }
+    }
+  ]
+}
