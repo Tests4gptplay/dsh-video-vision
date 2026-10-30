@@ -1,0 +1,420 @@
+{
+  "version": "0.10.0-candidate.2",
+  "sha256": "9b6a8c65eea44cf501f766ac06ee4b7fdde258e81f88945b96d5b137d9fa7bc2",
+  "bytes": 81902,
+  "files": 42,
+  "source": {
+    "scope": "source",
+    "results": [
+      {
+        "file": "audio.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-audio-tail.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budget-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budgets.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-cache-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-frame-precision.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-host-pruner.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-response-lifecycle.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-service-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-theme.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "authorization-isolation.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-clear-scroll.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cache.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-source.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "extensions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "frame-endpoints.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-snapshot-dispatch.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-storage.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "legacy-exit.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-default-browser.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-listener-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "macos-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "platform-native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "prepare.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "product-surface.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "session-concurrency.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "smoke.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-recovery.cjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-transactions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "source-identity.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "ui-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "unified-runtime.mjs",
+        "status": "pass",
+        "exitCode": 0
+      }
+    ]
+  },
+  "packed": {
+    "scope": "packed-runtime",
+    "results": [
+      {
+        "file": "audio.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-audio-tail.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budget-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budgets.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-cache-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-frame-precision.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-host-pruner.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-response-lifecycle.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-service-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-theme.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "authorization-isolation.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-clear-scroll.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cache.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-source.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "extensions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "frame-endpoints.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-snapshot-dispatch.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-storage.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "legacy-exit.mjs",
+        "status": "not-in-package",
+        "reason": "Separate explicitly invoked exit tool is source-tested, intentionally excluded from product"
+      },
+      {
+        "file": "linux-default-browser.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-listener-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "macos-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "platform-native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "prepare.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "product-surface.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "session-concurrency.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "smoke.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-recovery.cjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-transactions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "source-identity.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "ui-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "unified-runtime.mjs",
+        "status": "pass",
+        "exitCode": 0
+      }
+    ]
+  },
+  "scope": "UI-only behavior, wording, version metadata and documentation; no session migration or new capture route",
+  "oldUiNegativeControl": "PASS: old client fails regression on unwanted scrollIntoView before cleanup request",
+  "packChecks": [
+    "42 file bytes equal tested source and unpacked runtime",
+    "No retired sync/native-host/installer/extension executable entries",
+    "No private-tool acronym in packaged files"
+  ],
+  "gui": "Not run: isolated Chromium sandbox-enabled launch blocked by execution environment socket restrictions; no security bypass. User-machine GUI remains to verify.",
+  "realNetwork": "Not repeated for UI-only candidate; candidate.1 historical media/ASR evidence is not newly executed candidate.2 evidence",
+  "legacyExitFix1Sha256": "edb1406e9e5cec50f8cd71d016f0bc6e393758a53b54170fbfb87951229531ee",
+  "publication": "Test-branch candidate only; no main or marketplace release",
+  "fullSuiteReferenceSha256": "791850e8cb7af51b8fa356f69878c0ec89fcc15124224340c0c25d45f89048bb",
+  "finalPackageFollowup": {
+    "sourceUiSuites": 5,
+    "actualUnpackedUiSuites": 5,
+    "result": "PASS",
+    "deltaFromFullSuitePackage": "Only four ui48/ui53 zh/en string values; normalized client bytes identical; other 41 packaged files byte-identical",
+    "finalCopyZh": [
+      "保持已登录的浏览器运行；现有的浏览器连接会自动识别。",
+      "已有浏览器连接时，选择来源后导入；需要建立新的Chrome连接时，可使用上方设置。"
+    ]
+  },
+  "sourceFullSuiteNote": "38 suites ran before final four-string-only adjustment; final source UI five suites rerun",
+  "packedFullSuiteNote": "37 product suites ran on fullSuiteReferenceSha256; final actual unpacked UI five suites rerun, no claim of a second full final-package run"
+}

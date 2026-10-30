@@ -16,6 +16,11 @@ for(const language of ['en','zh','en']) {
  active=language;const nodes=render();const output=text(nodes);
  assert(output.includes(language==='en'?'Browser session authorization':'浏览器登录态授权'));
  assert(output.includes('用户视频标题'),'user content unchanged');
+ const guidance=nodes.find(n=>n.type==='div'&&n.children.includes(dictionary[language].ui64));
+ const preservation=nodes.find(n=>n.type==='div'&&n.children.includes(dictionary[language].methodsPreserved));
+ assert(guidance&&preservation&&guidance!==preservation,'Methods guidance and preservation are separate block lines');
+ assert(nodes.some(n=>n.props.className==='vv-sub'&&n.children.includes(guidance)&&n.children.includes(preservation)),'Both lines retain the same inherited secondary text style');
+
  if(language==='en') assert(!/[\u3400-\u9fff]/.test(output.replace('用户视频标题','')), output);
  for (const node of nodes) for (const key of ['aria-label','placeholder']) if (language === 'en' && typeof node.props[key] === 'string') assert(!/[\u3400-\u9fff]/.test(node.props[key]));
  await nodes.find(n=>n.type==='button'&&n.children[0]===(language==='en'?'Cache folder':'缓存文件夹')).props.onClick();assert.equal(calls.at(-1).uiLanguage,language);

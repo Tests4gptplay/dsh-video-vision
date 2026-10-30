@@ -2,7 +2,7 @@
 
 **在 DSH 中观看、分析和保存网络及本地视频，让 AI 结合时间戳画面、音频与字幕理解内容。**
 
-当前候选：`0.10.0-candidate.1`（本分支测试包，未发布正式版本）。统一跨平台登录态采集与加密副本，移除无宿主插件接口的内置同步，新增仅清VV副本操作。保留此前视频/音频/缓存修复。全量验收见 [候选说明](docs/testing/UNIFIED-CANDIDATE.md)。
+当前候选：`0.10.0-candidate.2`（本分支测试包，未发布正式版本）。统一跨平台登录态采集与加密副本，移除无宿主插件接口的内置同步，新增仅清VV副本操作。保留此前视频/音频/缓存修复。本次仅修订清理登录态按钮、就地确认及方法说明换行；会话运行逻辑不变。验收见 [本次 UI 修订](docs/testing/UI-CANDIDATE-2.md)，此前全量记录见 [候选说明](docs/testing/UNIFIED-CANDIDATE.md)。
 
 保留离线已选来源显示与宿主主题适配。完整云端源码、实际包和真实媒体验证记录见[全量覆盖](docs/testing/FULL-COVERAGE.md)；历史0.9.2记录见[旧版测试报告](docs/testing-0.9.2.md)。
 
@@ -56,12 +56,12 @@ yt-dlp 备用方式始终匿名，不接收 Cookie 或浏览器登录态。登�
 
 ## 安装和升级
 
-本次候选包为 `dsh-video-vision-0.10.0-candidate.1.tgz`（本地候选交付文件，尚未发布）；精确SHA见 [包清单](docs/testing/PACKED-MANIFEST.json)，全量步骤见 [候选说明](docs/testing/UNIFIED-CANDIDATE.md)。已安装旧宿主桥时先审核 [一次性退出说明](docs/testing/LEGACY-EXIT.md)。`test-artifacts/` 中0.9.x文件仅历史证据，勿当作本候选安装。正式发行版仍在[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases)。
+本次候选包为 `dsh-video-vision-0.10.0-candidate.2.tgz`（本地候选交付文件，尚未发布）；精确SHA见 [本次包清单](test-artifacts/unified-0.10.0-candidate.2/PACKED-MANIFEST.json)，全量步骤见 [候选说明](docs/testing/UNIFIED-CANDIDATE.md)。已安装旧宿主桥时先审核 [一次性退出说明](docs/testing/LEGACY-EXIT.md)。`test-artifacts/` 中0.9.x文件仅历史证据，勿当作本候选安装。正式发行版仍在[GitHub Releases](https://github.com/Tests4gptplay/dsh-video-vision/releases)。
 
 DSH Desktop：打开 **插件 → 添加插件**，填写候选 `.tgz` 的完整本地路径。Web 版安装命令：
 
 ```bash
-dsh plugin --profile web add '/完整路径/dsh-video-vision-0.10.0-candidate.1.tgz'
+dsh plugin --profile web add '/完整路径/dsh-video-vision-0.10.0-candidate.2.tgz'
 ```
 
 Web 与 Desktop 分别安装。启用 `video-vision` 后正常重新加载插件，在新的请求中发送视频链接即可。
@@ -92,7 +92,7 @@ yt-dlp 处理 YouTube 时使用 Node.js 运行播放器解析逻辑；官方 yt-
 
 打开 DSH **设置 → 视频视觉**：
 
-- **授权使用默认浏览器登录态**：默认关闭。保持已登录的浏览器运行，点击“导入登录态”。发现后必须明确选择现有 Chrome、Edge 等浏览器连接（含 CAH 自定义资料目录与端口）；浏览器若显示连接确认，选择允许即可。成功后按钮显示“登录态已导入”并禁用，“刷新登录态”可手动更新。登录态加密保存在本机，导入完成后结束本次连接。**若登录态失效，请点击“刷新登录态”。** 其他 DSH 插件可接入共享 `browserSessions.fetch/json` 服务。
+- **授权使用默认浏览器登录态**：默认关闭。保持已登录的浏览器运行，点击“导入登录态”。发现后必须明确选择现有 Chrome、Edge 等浏览器连接（支持自定义资料目录与端口）；浏览器若显示连接确认，选择允许即可。成功后按钮显示“登录态已导入”并禁用，“刷新登录态”可手动更新。登录态加密保存在本机，导入完成后结束本次连接。**若登录态失效，请点击“刷新登录态”。** 其他 DSH 插件可接入共享 `browserSessions.fetch/json` 服务。
 - **清理 VV 登录态副本**：只清本插件管理的登录态保存副本，关闭有效读取；失败/部分成功明确报告。不清源浏览器、内置浏览器独立登录态或媒体缓存。官方 rc.5 未公开插件 Cookie/session 导入接口，因此移除内置同步及旧宿主桥，不保留隐藏恢复路径。已安装旧桥的退出步骤见 [说明](docs/testing/LEGACY-EXIT.md)。
 - **匿名备用方式**：yt-dlp 始终匿名，不接收会话凭据；站点解析子进程也不接收凭据。视频、完整音轨和字幕遵循同样规则。
 

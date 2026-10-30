@@ -1,6 +1,6 @@
 {
   "name": "dsh-video-vision",
-  "version": "0.10.0-candidate.1",
+  "version": "0.10.0-candidate.2",
   "description": "Watch and analyze online or local video in DSH with frames, audio and captions; cache and export media, reuse site methods, and use yt-dlp as a backup.",
   "type": "module",
   "license": "MIT",

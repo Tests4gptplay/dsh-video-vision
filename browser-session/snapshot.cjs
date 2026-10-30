@@ -8,7 +8,7 @@ const messages = {
   disabled: '默认浏览器授权已关闭。',
   rollback_failed: '登录态恢复记录需要处理；读取已停止。请先清理 VV 副本后重新导入。',
   no_snapshot: '请先在设置中导入登录态。',
-  setup_required: '未找到可用的浏览器连接。请保持已登录的浏览器或 CAH 运行，再点击导入。',
+  setup_required: '未找到可用的浏览器连接。请保持已登录的来源浏览器运行，并确认该浏览器允许连接后重试。',
   connection_failed: '未能连接正在运行的浏览器。请保持来源浏览器运行后重试。',
   timed_out: '等待浏览器确认超时。原登录态未改动，可再次点击刷新。',
   read_failed: '无法读取浏览器 Cookie。原登录态未改动。',

@@ -16,7 +16,8 @@ const React = {
   useRef: () => ({ current: null }), useEffect() {}
 };
 const window = { __ModuleLoader__: { load: module => { factory = module.factory; } } };
-vm.runInNewContext(await readFile(new URL('../client.js', import.meta.url), 'utf8'), { window, dshDesktop: { protocolVersion: 1, browser: {} } });
+const clientSource = await readFile(new URL('../client.js', import.meta.url), 'utf8');
+vm.runInNewContext(clientSource, { window, dshDesktop: { protocolVersion: 1, browser: {} } });
 factory(() => React).apply({ effect: fn => fn(), locale: { register: (_ns, values) => { dictionaries = values; return () => {}; }, bind: () => key => dictionaries.zh[key], getSnapshot: () => ({ active: 'zh' }), subscribe: () => () => {} },
   connection: { rpc: { call: async (_path, method, payload) => {
     calls.push(method); let value;
@@ -34,6 +35,10 @@ factory(() => React).apply({ effect: fn => fn(), locale: { register: (_ns, value
   } } },
   slots: { inject: (_name, callback) => callback(), register: (options, component) => { Component = component; inject = options.inject; } }
 });
+assert.equal(dictionaries.zh.ui48, '保持已登录的浏览器运行；现有的浏览器连接会自动识别。');
+assert.equal(dictionaries.zh.ui53, '已有浏览器连接时，选择来源后导入；需要建立新的Chrome连接时，可使用上方设置。');
+assert.equal(dictionaries.en.ui48, 'Keep your signed-in browser running. Existing browser connections are detected automatically.');
+assert.equal(dictionaries.en.ui53, 'If a browser connection already exists, select its source before importing. Use the settings above to establish a new Chrome connection.');
 states[0] = listing();
 function render() {
   index = 0; const nodes = [];
@@ -75,23 +80,23 @@ console.log('PASS: import/refresh pending-success-failure, effective button disa
 
 // Clear uses an explicit scoped confirmation and never calls media clear or a browser API.
 nodes=render();
-button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();
-assert(nodes.some(n=>n.props.role==='alertdialog' && n.props['aria-label']==='清理 VV 登录态副本'));
+button(nodes,'清理登录态').props.onClick();nodes=render();
+assert(nodes.some(n=>n.props.role==='alertdialog' && n.props['aria-label']==='清理登录态'));
 assert(nodes.some(n=>n.children.some(c=>typeof c==='string'&&c.includes('不退出来源浏览器或 DSH 内置浏览器的登录，也不清理媒体缓存'))));
 button(nodes,'取消').props.onClick();nodes=render();assert(!nodes.some(n=>n.props.role==='alertdialog'));
 assert(!calls.some(c=>c.endsWith('/browser-clear')));
-button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();
+button(nodes,'清理登录态').props.onClick();nodes=render();
 let finishClear;clearPending=new Promise(resolve=>{finishClear=resolve});
 const clearing=button(nodes,'确认删除').props.onClick();nodes=render();
-assert.equal(button(nodes,'正在清理 VV 登录态副本…').props.disabled,true);
+assert.equal(button(nodes,'正在清理登录态…').props.disabled,true);
 finishClear();await clearing;nodes=render();
 assert(nodes.some(n=>n.props.role==='status'&&n.children.includes('VV 登录态副本已清理。来源浏览器、DSH 内置浏览器和媒体缓存未改动。')));
 clearResult={cleared:false,failures:[{path:'synthetic-copy',code:'EACCES'}]};
-button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();
+button(nodes,'清理登录态').props.onClick();nodes=render();
 await button(nodes,'确认删除').props.onClick();nodes=render();
 assert(nodes.some(n=>n.props.role==='alert'&&n.children.some(c=>typeof c==='string'&&c.includes('synthetic-copy: EACCES'))));
 assert(!nodes.some(n=>n.props.role==='status'));
 assert(!calls.some(c=>c.endsWith('/clear')));
-clearResult={cleared:true,failures:[]};button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();await button(nodes,'确认删除').props.onClick();
+clearResult={cleared:true,failures:[]};button(nodes,'清理登录态').props.onClick();nodes=render();await button(nodes,'确认删除').props.onClick();
 assert(render().some(n=>n.props.role==='status'));
 console.log('PASS: clear confirmation/cancel/pending/success/partial failure/retry; no media clear RPC.');

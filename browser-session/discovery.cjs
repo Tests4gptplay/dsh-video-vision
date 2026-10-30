@@ -31,7 +31,7 @@ async function discoverBrowserEndpoints({ signal, commands, portFiles, readFile 
     const port = Number(argument(command, 'remote-debugging-port'));
     if (Number.isInteger(port) && port > 0 && port <= 65535) ports.set(port, profile ? 'profile:' + resolve(profile) : null);
   }
-  // Explicit published ports work without a DevToolsActivePort file (e.g. CAH).
+  // Explicit published ports work without a DevToolsActivePort file (including custom browser profiles).
   for (const [port, identity] of ports) {
     signal?.throwIfAborted();
     try {
