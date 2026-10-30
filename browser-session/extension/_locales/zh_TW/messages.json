@@ -1,8 +1,0 @@
-{
-  "extensionName": {
-    "message": "DSH 本地会话桥"
-  },
-  "extensionDescription": {
-    "message": "使用浏览器官方接口，在本机为 DSH 复用用户授权的站点会话。"
-  }
-}

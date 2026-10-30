@@ -7,7 +7,7 @@ import Sources from '../browser-session/cdp-source.cjs';
 const directory = await mkdtemp(join(tmpdir(), 'vv-cdp-source-'));
 const A = 'ws://127.0.0.1:43123/devtools/browser/aaaaaaaa-1111';
 const B = 'ws://127.0.0.1:43124/devtools/browser/bbbbbbbb-2222';
-const id = endpoint => createHash('sha256').update(endpoint).digest('hex');
+const id = endpoint => createHash('sha256').update('unverified-endpoint:' + endpoint).digest('hex');
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 let endpoints = [A, B], hold, fail = false;
 const calls = [];
@@ -25,7 +25,7 @@ try {
   assert.equal(await source.selected(), null);
   const list = await source.list();
   assert.equal(list.length, 2);
-  assert.ok(list.every(item => Object.keys(item).join(',') === 'id,label'));
+  assert.ok(list.every(item => Object.keys(item).join(',') === 'id,label,available'));
   assert.ok(!JSON.stringify(list).includes('ws://'));
   assert.equal(list[0].id, id(A));
   await assert.rejects(source.capture(), { code: 'browser_source_required' });
@@ -41,11 +41,11 @@ try {
   assert.equal((await source.capture())[0].value, 'synthetic-B');
   pendingHold.release.resolve(); await new Promise(resolve => setImmediate(resolve));
   assert.equal((await source.capture())[0].value, 'synthetic-B');
-  assert.deepEqual(JSON.parse(await readFile(join(directory, 'cdp-selected-source.json'), 'utf8')), { id: id(B), label: list[1].label });
+  assert.equal(JSON.parse(await readFile(join(directory, 'cdp-selected-source.json'), 'utf8')).storageId, id(B));
   source = Sources.createCdpSource(options);
   assert.equal((await source.capture())[0].value, 'synthetic-B');
   endpoints = [A];
-  assert.deepEqual(await source.selected(), { id: id(B), label: list[1].label }, 'Offline selection remains available for snapshot reads');
+  assert.deepEqual(await source.selected(), { id: id(B), storageId: id(B), label: list[1].label }, 'Offline selection remains available for snapshot reads');
   const previousCalls = calls.length;
   await assert.rejects(source.capture(), { code: 'browser_source_unavailable' });
   assert.equal(calls.length, previousCalls, 'Missing selected endpoint does not try another browser');
@@ -66,5 +66,5 @@ try {
   await assert.rejects(source.capture(), { code: 'browser_source_unavailable' });
   await source.select(id(A));
   assert.equal((await source.capture())[0].value, 'synthetic-A');
-  console.log('PASS: hashed endpoint list, explicit selection, persistence, no fallback, source switching, late-result discard, cancellation and retry; injected synthetic discovery/capture only.');
+  console.log('PASS: stable logical-source list, explicit selection, persistence, no fallback, source switching, late-result discard, cancellation and retry; injected synthetic discovery/capture only.');
 } finally { await rm(directory, { recursive: true, force: true }); }

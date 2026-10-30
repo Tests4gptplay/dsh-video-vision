@@ -3,3 +3,7 @@
 node_modules/
 tools/
 test/.cache-tests/
+!tools/
+tools/*
+!tools/legacy-exit.mjs
+!tools/legacy-exit-known-runtime.json

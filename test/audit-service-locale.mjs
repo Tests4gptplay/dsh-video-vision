@@ -9,17 +9,17 @@ const service=new BrowserSessions({browserSessionAuthorized:false},{directory,re
 try {
  await assert.rejects(service.fetch('https://example.test',{uiLanguage:'en'}),/Default browser authorization is off/);
  await assert.rejects(service.fetch('https://example.test',{uiLanguage:'zh'}),/默认浏览器授权已关闭/);
- await service.setAuthorization({enabled:true,syncToNative:false});
+ await service.setAuthorization({enabled:true});
  const [en,zh]=await Promise.all(['en','zh'].map(uiLanguage=>service.fetch('https://example.test',{uiLanguage})));
  const enBody=en.arrayBuffer(),zhBody=zh.arrayBuffer();
  const checks=[assert.rejects(enBody,/Default browser authorization has been disabled or updated/),assert.rejects(zhBody,/默认浏览器授权已关闭或更新/)];
- await service.setAuthorization({enabled:false,syncToNative:false});await Promise.all(checks);
+ await service.setAuthorization({enabled:false});await Promise.all(checks);
  assert.ok(seen.every(options=>!Object.hasOwn(options,'uiLanguage')));
- await service.setAuthorization({enabled:true,syncToNative:false});mode='upstream';
+ await service.setAuthorization({enabled:true});mode='upstream';
  await assert.rejects(service.fetch('https://example.test',{uiLanguage:'en'}),error=>error===upstream&&error.code==='UPSTREAM');
- mode='body';requestError=Object.assign(new Error('本地浏览器桥已断开。'),{code:'BRIDGE_CLOSED'});
- await assert.rejects(service.fetch('https://example.test',{uiLanguage:'en'}),error=>error.cause===requestError&&error.code==='BRIDGE_CLOSED'&&!/[\u4e00-\u9fff]/.test(error.message));
- requestError=new Error('Untouched arbitrary upstream bridge failure');
+ mode='body';requestError=Object.assign(new Error('所选浏览器连接不可用。'),{code:'browser_source_unavailable'});
+ await assert.rejects(service.fetch('https://example.test',{uiLanguage:'en'}),error=>error.cause===requestError&&error.code==='browser_source_unavailable'&&!/[\u4e00-\u9fff]/.test(error.message));
+ requestError=new Error('Untouched arbitrary upstream failure');
  await assert.rejects(service.fetch('https://example.test',{uiLanguage:'en'}),error=>error===requestError);requestError=undefined;
  const again=await service.fetch('https://example.test',{uiLanguage:'en'});await again.body.cancel();
  console.log('PASS explicit zh/en immediate OFF, concurrent localized body OFF, no locale forwarded to network, upstream identity preserved, ON retry');

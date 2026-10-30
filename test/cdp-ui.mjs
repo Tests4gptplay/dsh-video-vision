@@ -5,7 +5,7 @@ const script = await readFile(new URL('../client.js', import.meta.url), 'utf8');
 function fixture(desktop = false) {
  let factory, Component, inject, index = 0, dictionaries, language = 'zh';
  const states = [], calls = [];
- let status = { enabled: true, syncToNative: false, connected: false, imported: false, ready: true,
+ let status = { enabled: true, connected: false, imported: false, ready: true,
   localCapture: true, sourceId: 'A', browser: 'Synthetic A', sources: [{ id: 'A', label: 'Synthetic A' }, { id: 'B', label: 'Synthetic B' }] };
  const listing = () => ({ entries: [], bytes: 0, root: '/synthetic-cache', browser_session: status });
  const React = {
@@ -75,9 +75,9 @@ assert.equal(nodes.filter(n => n.type === 'select' && n.props['aria-label'] === 
 assert.ok(!nodes.some(n => n.props['aria-label'] === 'Sync to the DSH built-in browser'));
 assert.ok(nodes.some(n => n.type === 'option' && n.children.includes('Synthetic A')), 'Source names remain unchanged');
 const desktop = fixture(true);
-assert.ok(desktop.render().some(n => n.props['aria-label'] === '同步至 DSH 内置浏览器'));
+assert.ok(!desktop.render().some(n => n.props['aria-label'] === '同步至 DSH 内置浏览器'));
 desktop.language('en');
-assert.ok(desktop.render().some(n => n.props['aria-label'] === 'Sync to the DSH built-in browser'));
+assert.ok(!desktop.render().some(n => n.props['aria-label'] === 'Sync to the DSH built-in browser'));
 console.log('PASS: VM-rendered Web/Desktop capability visibility, single browser-card source picker, two-source choice, offline-source replacement, one RPC+reload per switch, zh/en labels. Not a real browser GUI test.');
 
 const edge = fixture();
@@ -90,3 +90,20 @@ edge.status({sourceId:'',sources:[{id:'B',label:'Live B'}]});e=edge.render();ass
 const label='<img src=x onerror=boom> & " \'';
 edge.status({sourceId:'A',browser:label,sources:[{id:'B',label}]});e=edge.render();const a=e.find(n=>n.type==='option'&&n.props.value==='A');assert.ok(a.children[0].startsWith(label));assert.equal(a.props.dangerouslySetInnerHTML,undefined);assert.ok(e.find(n=>n.type==='option'&&n.props.value==='B').children.includes(label));assert.equal(edge.calls.length,0);
 console.log('PASS independent VM edges: reappearance/no duplicate/empty list preserves summary/empty selection/text-child labels/no rendering RPC. Not native DOM or GUI proof.');
+
+edge.status({sourceId:'A',sources:[{id:'A',label:'Only source'}]});
+assert.equal(edge.render().filter(n=>n.type==='select').length,1,'Single source remains explicitly selectable');
+for (const [snapshotState, expected] of Object.entries({absent:'未导入',empty:'已导入，当前无登录态',ready:'已保存可读取副本（未验证站点登录）',read_failed:'副本读取失败（不是空登录态）',decrypt_failed:'副本解密失败（不是空登录态）',unknown:'副本状态未知'})) {
+ edge.status({snapshotState});assert(edge.render().some(n=>n.children.some(c=>typeof c==='string'&&c.includes(expected))), snapshotState);
+}
+edge.status({sourceId:null});assert.equal(edge.render().find(n=>n.type==='button'&&n.children[0]==='导入登录态').props.disabled,true);
+console.log('PASS: all snapshot states, explicit single-source selection, no import before selection.');
+edge.status({sourceId:'A',snapshotState:'ready',imported:true,sourceAvailable:undefined,sources:[{id:'A',label:'Saved A',available:false},{id:'B',label:'Live B',available:true}]});
+e=edge.render();
+assert.equal(e.find(n=>n.type==='option'&&n.props.value==='A').props.disabled,undefined,'Saved offline source remains explicitly selectable');
+assert(e.find(n=>n.type==='option'&&n.props.value==='A').children[0].includes('连接不可用'));
+assert.equal(e.find(n=>n.type==='button'&&n.children[0]==='导入登录态').props.disabled,true);
+assert.equal(e.find(n=>n.type==='button'&&n.children[0]==='刷新登录态').props.disabled,true);
+edge.status({sourceAvailable:true});e=edge.render();
+assert.equal(e.find(n=>n.type==='button'&&n.children[0]==='刷新登录态').props.disabled,false,'Explicit runtime availability takes precedence');
+console.log('PASS: saved offline source selectable without enabling capture; runtime availability precedence.');

@@ -1,8 +1,0 @@
-{
-  "extensionName": {
-    "message": "DSH Local Session Bridge"
-  },
-  "extensionDescription": {
-    "message": "Use official browser APIs to reuse authorized website sessions locally in DSH."
-  }
-}

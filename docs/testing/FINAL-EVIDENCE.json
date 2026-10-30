@@ -1,0 +1,541 @@
+{
+  "candidate": "0.10.0-candidate.1",
+  "baseline": "cde7de6d8a83695291b7c6492805fe04d442f5c0",
+  "mainIncluded": "507d5874a2a27a7f01b8fa6e98679b6256dc2582",
+  "sourceTests": {
+    "scope": "source",
+    "results": [
+      {
+        "file": "audio.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-audio-tail.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budget-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budgets.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-cache-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-frame-precision.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-host-pruner.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-response-lifecycle.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-service-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-theme.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "authorization-isolation.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cache.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-source.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "extensions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "frame-endpoints.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-snapshot-dispatch.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-storage.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "legacy-exit.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-default-browser.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-listener-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "macos-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "platform-native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "prepare.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "product-surface.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "session-concurrency.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "smoke.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-recovery.cjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-transactions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "source-identity.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "ui-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "unified-runtime.mjs",
+        "status": "pass",
+        "exitCode": 0
+      }
+    ]
+  },
+  "packedTests": {
+    "scope": "packed-runtime",
+    "results": [
+      {
+        "file": "audio.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-audio-tail.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budget-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-budgets.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-cache-recovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-frame-precision.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-host-pruner.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-response-lifecycle.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-service-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "audit-theme.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "authorization-isolation.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "browser-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cache.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-session.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-source.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "cdp-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "extensions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "frame-endpoints.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-snapshot-dispatch.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "keyring-storage.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "legacy-exit.mjs",
+        "status": "not-in-package",
+        "reason": "Separate explicitly invoked exit tool is source-tested, intentionally excluded from product"
+      },
+      {
+        "file": "linux-default-browser.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "linux-listener-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "macos-discovery.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "platform-native-ui.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "prepare.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "product-surface.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "session-concurrency.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "smoke.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-recovery.cjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "snapshot-transactions.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "source-identity.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "ui-locale.mjs",
+        "status": "pass",
+        "exitCode": 0
+      },
+      {
+        "file": "unified-runtime.mjs",
+        "status": "pass",
+        "exitCode": 0
+      }
+    ]
+  },
+  "package": {
+    "filename": "dsh-video-vision-0.10.0-candidate.1.tgz",
+    "bytes": 81703,
+    "sha256": "b0f2242bf815f74585ecc12b32cf364f763d56fd9177315197c2eb25dba9f5f8",
+    "fileCount": 42,
+    "sourceBytesMatched": true,
+    "retiredExecutablesPresent": false,
+    "oneOffExitToolBundled": false,
+    "nativeStorageDependency": "@napi-rs/keyring retained for system encryption; no old native-host or Electron bridge"
+  },
+  "actualDiscovery": {
+    "timestamp": "2026-10-30T20:23:32.476Z",
+    "count": 0,
+    "cookieImportAttempted": false
+  },
+  "realNetwork": {
+    "bilibili": {
+      "mode": "anonymous fresh network download",
+      "durationSeconds": 211.875,
+      "resolution": "852x480",
+      "frames": 3,
+      "separateAudioDownloaded": true,
+      "signalAnalysisRange": [
+        0,
+        30
+      ],
+      "subtitles": "none",
+      "packedCacheContinuation": {
+        "watchRange": [
+          30,
+          45
+        ],
+        "frames": 2,
+        "audioTailRange": [
+          200,
+          211.875
+        ]
+      }
+    },
+    "youtube": {
+      "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+      "mode": "anonymous yt-dlp official 2026.10.26",
+      "result": "blocked by HTTP429 / sign-in bot challenge",
+      "mediaDownloaded": false,
+      "tlsVerificationDisabled": false,
+      "testEnvironment": "Explicit system CA bundle and cloud environment proxy, not shipped product changes",
+      "accountAuthenticationTestedByPlugin": false
+    }
+  },
+  "realASR": [
+    {
+      "scope": "one newly downloaded Bilibili 30-second vocal clip; official registry/provider pipeline, not yet VV makeTool entrypoint",
+      "route": "Cordis SpeechToText -> official SenseVoice -> official LocalSubprocess -> sherpa-onnx",
+      "inferenceStart": "2026-10-30T20:18:21.703Z",
+      "inferenceEnd": "2026-10-30T20:18:23.101Z",
+      "state": "available",
+      "cached": false,
+      "disposed": true,
+      "transcriptSHA256": "4efa2fc5b20434325786f62286c085cccf44d8e123dd411b341a53fc62ca1c94",
+      "accuracy": "Real provider inference completed; no reference transcript/WER comparison. Recognition of music/lyrics not asserted perfect."
+    },
+    {
+      "scope": "new real video audio 30-45 seconds, VV makeTool plus official provider and registry; no substituted recognizer",
+      "route": "VV makeTool.execute transcribe -> Cordis SpeechToText -> official SenseVoice -> official LocalSubprocess -> sherpa-onnx",
+      "inferenceStart": "2026-10-30T20:19:49.231Z",
+      "inferenceEnd": "2026-10-30T20:19:51.013Z",
+      "state": "available",
+      "cached": false,
+      "disposed": true,
+      "transcriptSHA256": "5582594ddec8548c35adac5ab0832d918294ed58a0d9e41a8b80e5f5d63dd50e",
+      "accuracy": "New real inference through VV and official provider; no word-error-rate ground truth; lyrics/music accuracy not asserted perfect.",
+      "sourceScope": "Source workspace candidate invocation, not frozen npm packed artifact.",
+      "toolArguments": {
+        "action": "transcribe",
+        "start_seconds": 30,
+        "end_seconds": 45,
+        "language": "en"
+      },
+      "segments": [
+        {
+          "start_seconds": 30,
+          "end_seconds": 45,
+          "cached": false,
+          "recognizedWordCount": 15,
+          "textSHA256": "a103579e0bad61db0c1d7198acb4958ae3590b6ce43f0dc5214858b3b2f1812c"
+        }
+      ],
+      "inputClip": {
+        "bytes": 480044,
+        "sha256": "23a5a3d0d34da056bd8dc3b79c2964fae51fd34ae958801d277fd7ff20eb854c"
+      }
+    },
+    {
+      "scope": "packed-runtime/from-tgz: new real video audio 5-20 seconds, VV makeTool plus official provider and registry; no substituted recognizer",
+      "route": "VV makeTool.execute transcribe -> Cordis SpeechToText -> official SenseVoice -> official LocalSubprocess -> sherpa-onnx",
+      "inferenceStart": "2026-10-30T20:36:11.998Z",
+      "inferenceEnd": "2026-10-30T20:36:14.541Z",
+      "state": "available",
+      "cached": false,
+      "disposed": true,
+      "transcriptSHA256": "fc7b04388b54a0f8d346a353db338a879fe131640074acc49499755a6501959f",
+      "accuracy": "Fresh real inference through actual final packed VV and official provider; no reference transcript/WER comparison; music/lyrics accuracy not asserted perfect.",
+      "sourceScope": "packed-runtime/from-auth-isolated-final-tgz",
+      "toolArguments": {
+        "action": "transcribe",
+        "start_seconds": 5,
+        "end_seconds": 20,
+        "language": "en"
+      },
+      "segments": [
+        {
+          "start_seconds": 5,
+          "end_seconds": 20,
+          "cached": false,
+          "recognizedWordCount": 17,
+          "textSHA256": "3f0cc3db109425deab33b837226984c35afadc7daa1fac17b0cca14ef59d1066"
+        }
+      ],
+      "artifact": {
+        "bytes": 81703,
+        "sha256": "b0f2242bf815f74585ecc12b32cf364f763d56fd9177315197c2eb25dba9f5f8"
+      },
+      "inputClip": {
+        "bytes": 480044,
+        "sha256": "1e784d3b79480a3830aa15a68d7e349e89273f57c91307760cd9152ad0d52c76"
+      }
+    }
+  ],
+  "limitations": [
+    "No actual Windows/macOS keyring or browser runtime validation",
+    "No real user-host legacy exit applied",
+    "No real full DSH GUI validation",
+    "Platform test-account browser is not discovered by VV in this executor; no account Cookie import attempted",
+    "Real ASR available, not a measured word-error-rate or perfect-lyrics claim"
+  ],
+  "cleanupScope": {
+    "activeSnapshotsRemoved": true,
+    "mediaAndSourceBrowsersUntouched": true,
+    "manualBackupsRetained": true,
+    "osKeyringEncryptionKeysRetained": true,
+    "reason": "Avoid invalidating explicitly preserved encrypted backups. This is activity-copy deletion/revocation, not all-secret or secure-memory erasure."
+  },
+  "authorizationIsolation": {
+    "modernFile": "vv-plugin-authorization-v1.json",
+    "legacyFile": "authorization.json",
+    "legacyFalseUnchangedAfterModernConstructorTrueToggleAndClear": true,
+    "legacyCookiesAndImportStillDisabled": true,
+    "newSnapshotAndHTTPVerified": true,
+    "legacyAlreadyTrueMustUseExitTool": true,
+    "historicalFixtureCommit": "cde7de6d8a83695291b7c6492805fe04d442f5c0",
+    "startsLegacyIPC": false
+  },
+  "realASRNotes": [
+    "A different 75-90 second segment returned available with empty text during earlier validation; empty output is not claimed as useful recognition.",
+    "Final namespace-isolated package 5-20 second real inference returned 17 words, cached:false; no WER ground truth."
+  ]
+}

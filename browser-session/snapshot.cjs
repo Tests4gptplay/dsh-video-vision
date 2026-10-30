@@ -1,14 +1,12 @@
 // First-party cookie snapshots, captured on explicit user import.
 const fs = require('node:fs/promises');
 const { join } = require('node:path');
-const net = require('node:net');
-const { randomBytes, timingSafeEqual } = require('node:crypto');
 const P = require('./protocol.cjs');
 const { endpointFromPortFile, discoverBrowserEndpoints } = require('./discovery.cjs');
 
 const messages = {
   disabled: '默认浏览器授权已关闭。',
-  sync_disabled: '内置浏览器同步已关闭。',
+  rollback_failed: '登录态恢复记录需要处理；读取已停止。请先清理 VV 副本后重新导入。',
   no_snapshot: '请先在设置中导入登录态。',
   setup_required: '未找到可用的浏览器连接。请保持已登录的浏览器或 CAH 运行，再点击导入。',
   connection_failed: '未能连接正在运行的浏览器。请保持来源浏览器运行后重试。',
@@ -21,9 +19,6 @@ const messages = {
   invalid: '本地会话请求无效。'
 };
 function fault(code) { return Object.assign(new Error(messages[code] || messages.invalid), { code }); }
-function snapshotPath(directory) { return P.socketPath(directory, 'snapshot'); }
-function request(op, payload, options = {}) { return P.request(op, payload, { ...options, channel: 'snapshot', messages }); }
-
 function normalizeCookies(items) {
   if (!Array.isArray(items)) throw fault('read_failed');
   return items.filter(c => typeof c.name === 'string' && typeof c.value === 'string' &&
@@ -38,15 +33,9 @@ function normalizeCookies(items) {
 }
 async function captureCookies({ endpoint, portFile, signal, discover = discoverBrowserEndpoints, WebSocketImpl = globalThis.WebSocket, timeoutMs = 90000 } = {}) {
   signal?.throwIfAborted();
-  const endpoints = endpoint ? [endpoint] : portFile ? [endpointFromPortFile(await fs.readFile(portFile, 'utf8'))] : await discover({ signal });
-  if (!endpoints.length) throw fault('setup_required');
-  let lastError;
-  for (const endpoint of endpoints) {
-    signal?.throwIfAborted();
-    try { return await captureEndpoint({ endpoint, signal, WebSocketImpl, timeoutMs }); }
-    catch (error) { signal?.throwIfAborted(); lastError = error; }
-  }
-  throw lastError;
+  if (!endpoint && !portFile) throw Object.assign(new Error('Select a browser source before capture.'), { code: 'browser_source_required' });
+  const selectedEndpoint = endpoint || endpointFromPortFile(await fs.readFile(portFile, 'utf8'));
+  return captureEndpoint({ endpoint: selectedEndpoint, signal, WebSocketImpl, timeoutMs });
 }
 async function captureEndpoint({ endpoint, signal, WebSocketImpl, timeoutMs }) {
   return new Promise((resolve, reject) => {
@@ -81,128 +70,119 @@ async function captureEndpoint({ endpoint, signal, WebSocketImpl, timeoutMs }) {
 
 function createSnapshotService({ directory = P.root(), safeStorage, capture = captureCookies,
   portFile, filename: storageFilename = 'session-state.bin', source = 'Chrome', authorizationDirectory = directory } = {}) {
-  let snapshot, importing, server, watcher;
-  const sockets = new Set();
+  let snapshot, importing, importDone, blocked = false, snapshotState = 'unknown', clearing = false, generation = 0;
   const filename = join(directory, storageFilename);
   const grant = () => P.authorization(authorizationDirectory);
   async function load() {
-    if (snapshot !== undefined) return;
+    if (blocked || importing || snapshot !== undefined) return;
+    const version = generation;
+    const current = () => generation === version && !blocked;
+    try { await fs.access(filename + '.cleared'); if(current()){blocked = true; snapshotState = 'cleared';} return; } catch(error) { if(error.code !== 'ENOENT') { if(current()) snapshotState = 'read_failed'; return; } }
+    try { await fs.access(filename + '.rollback'); if(current()){blocked=true;snapshotState='rollback_failed';}return; } catch(error){if(error.code!=='ENOENT'){if(current())snapshotState='read_failed';return;}}
     let bytes;
     try { bytes = await fs.readFile(filename); }
-    catch (error) { if (error.code === 'ENOENT') snapshot = null; return; }
+    catch (error) { if(current()){if (error.code === 'ENOENT') { snapshot = null; snapshotState = 'absent'; } else snapshotState = 'read_failed';} return; }
     try {
-      if (!await safeStorage.isEncryptionAvailable()) return;
+      if (!await safeStorage.isEncryptionAvailable()) { if(current()) snapshotState = 'decrypt_failed'; return; }
       const stored = JSON.parse(await safeStorage.decryptString(bytes));
-      if (stored.version === 1 && Array.isArray(stored.cookies)) snapshot = stored;
-    } catch {
-      // Locked storage or temporarily unreadable data can recover. Do not
-      // cache a failure as an empty snapshot or change the stored file.
-    }
+      if (stored.version !== 1 || !Array.isArray(stored.cookies)) throw Error('Invalid snapshot');
+      if(current()){snapshot = stored; snapshotState = stored.cookies.length ? 'ready' : 'empty';}
+    } catch { if(current()) snapshotState = 'decrypt_failed'; }
   }
   async function status() {
     await load();
-    const available = Boolean(snapshot?.cookies.some(c => !c.expirationDate || c.expirationDate > Date.now() / 1000));
-    return { ready: true, connected: available, imported: Boolean(snapshot),
-      cookieCount: snapshot ? snapshot.cookies.length : null,
-      importedAt: snapshot?.importedAt || null, source, importing: Boolean(importing),
-      storageBackend: await safeStorage.getSelectedStorageBackend?.() || null };
+    const available = !blocked && Boolean(snapshot?.cookies.some(c => !c.expirationDate || c.expirationDate > Date.now() / 1000));
+    return { ready: true, connected: available, imported: snapshot === undefined ? null : Boolean(snapshot), snapshotState,
+      cookieCount: snapshot ? snapshot.cookies.length : null, importedAt: snapshot?.importedAt || null,
+      source, importing: Boolean(importing), storageBackend: await safeStorage.getSelectedStorageBackend?.() || null };
+  }
+  async function clear() {
+    generation++; clearing = true; blocked = true; importing?.abort();
+    await importDone;
+    snapshot = undefined; snapshotState = 'unknown';
+    const failures = [];
+    try { await fs.mkdir(directory,{recursive:true}); await fs.writeFile(filename + '.cleared','VV snapshot reads revoked\n',{mode:0o600}); } catch(error) { failures.push({file:storageFilename+'.cleared',code:error.code||'revoke_failed'}); }
+    for (const path of [filename, filename + '.tmp', filename + '.rollback']) {
+      try { await fs.rm(path, { force: true }); try { await fs.access(path); throw Error('File still exists'); } catch (error) { if (error.code !== 'ENOENT') throw error; } }
+      catch (error) { failures.push({ file: require('node:path').basename(path), code: error.code || 'delete_failed' }); }
+    }
+    if (!failures.length) { snapshot = null; snapshotState = 'absent'; }
+    clearing = false; return { cleared: !failures.length, failures };
   }
   async function dispatch(message, signal) {
     if (message.op === 'status') return status();
+    if (message.op === 'clear') return clear();
     if (!grant().enabled) throw fault('disabled');
     if (message.op === 'import') {
-      if (importing) throw fault('busy');
+      if (importing || clearing) throw fault('busy');
+      const version = ++generation;
       const controller = new AbortController();
       importing = controller;
+      let finishImport; importDone = new Promise(resolve => { finishImport = resolve; });
       const cancel = () => controller.abort();
       signal?.addEventListener('abort', cancel, { once: true });
       try {
         signal?.throwIfAborted();
+        try { await fs.access(filename + '.rollback'); throw fault('rollback_failed'); } catch(error){if(error.code !== 'ENOENT')throw error;}
         try { await safeStorage.prepare?.(); } catch { throw fault('storage_unavailable'); }
         if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
         if (!await safeStorage.isEncryptionAvailable()) throw fault('storage_unavailable');
         if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
         const cookies = await capture({ portFile, signal: controller.signal });
         if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
-        // An explicitly successful empty read is a logout/empty snapshot, not
-        // a read failure. Persist it so scoped sync can revoke prior imports.
-        // A failed or malformed read still leaves the encrypted snapshot intact.
+        // Only an explicit successful empty capture replaces the saved snapshot.
         if (!Array.isArray(cookies)) throw fault('read_failed');
         const next = { version: 1, importedAt: new Date().toISOString(), cookies };
         let encrypted;
         try { encrypted = await safeStorage.encryptString(JSON.stringify(next)); } catch { throw fault('storage_unavailable'); }
+        let previous, hadMarker = false, replaced = false;
+        const cancelled = () => controller.signal.aborted || !grant().enabled || generation !== version;
         try {
+          try { previous = await fs.readFile(filename); } catch(error) { if(error.code !== 'ENOENT') throw error; }
+          try { await fs.access(filename + '.cleared'); hadMarker = true; } catch(error) { if(error.code !== 'ENOENT') throw error; }
+          await fs.writeFile(filename + '.rollback', previous || Buffer.alloc(0), {mode:0o600});
           await fs.writeFile(filename + '.tmp', encrypted, { mode: 0o600 });
-          if (controller.signal.aborted || !grant().enabled) throw fault('disabled');
-          await fs.rename(filename + '.tmp', filename);
-          snapshot = next;
+          if (cancelled()) throw fault('disabled');
+          await fs.rename(filename + '.tmp', filename); replaced = true;
+          if (cancelled()) throw fault('disabled');
+          await fs.rm(filename + '.cleared', {force:true});
+          if (cancelled()) throw fault('disabled');
+          // Linearization point: no await between the last cancellation check
+          // and publishing the committed snapshot. Earlier loads cannot win.
+          generation++; blocked = false; snapshot = next; snapshotState = next.cookies.length ? 'ready' : 'empty';
         } catch (error) {
-          await fs.rm(filename + '.tmp', { force: true }).catch(() => {});
+          if (replaced) {
+            try {
+              if(previous) await fs.rename(filename + '.rollback', filename);
+              else await fs.rm(filename, {force:true});
+              if(hadMarker) await fs.writeFile(filename + '.cleared','VV snapshot reads revoked\n',{mode:0o600});
+            } catch(rollbackError) {
+              blocked = true; snapshot = undefined; snapshotState = 'rollback_failed';
+              await fs.writeFile(filename + '.cleared','VV rollback requires review\n',{mode:0o600}).catch(()=>{});
+              throw Object.assign(new Error('Snapshot save cancellation could not restore the previous file; retained rollback evidence requires review.'),{code:'rollback_failed',cause:rollbackError});
+            }
+          }
           throw error.code === 'disabled' ? error : fault('save_failed');
+        } finally {
+          await fs.rm(filename + '.tmp', { force: true }).catch(() => {});
+          if(snapshotState !== 'rollback_failed') {
+            try {await fs.rm(filename + '.rollback',{force:true});}
+            catch {blocked=true;snapshotState='rollback_cleanup_failed';}
+          }
         }
-        return status();
-      } finally { signal?.removeEventListener('abort', cancel); importing = null; }
+        return { ...await status(), committed: true, cleanupPending: snapshotState === 'rollback_cleanup_failed' };
+      } finally { signal?.removeEventListener('abort', cancel); generation++; importing = null; finishImport(); }
     }
-    if (!['cookies', 'sync'].includes(message.op)) throw fault('invalid');
-    if (message.op === 'sync' && !grant().syncToNative) throw fault('sync_disabled');
+    if (message.op !== 'cookies') throw fault('invalid');
     await load();
+    if (blocked) throw fault('no_snapshot');
+    if (snapshot === undefined) throw Object.assign(new Error('Saved browser session could not be read or decrypted.'), { code: snapshotState });
     if (!snapshot) throw fault('no_snapshot');
     const cookies = P.scopedCookies(snapshot.cookies, message.url);
     if (!grant().enabled) throw fault('disabled');
-    if (message.op === 'sync' && !grant().syncToNative) throw fault('sync_disabled');
     return { cookies };
   }
-  async function start() {
-    await fs.mkdir(directory, { recursive: true });
-    let key;
-    try { key = await fs.readFile(join(directory, 'bridge.key'), 'utf8'); }
-    catch {
-      key = randomBytes(32).toString('hex');
-      await fs.writeFile(join(directory, 'bridge.key'), key, { mode: 0o600, flag: 'wx' });
-    }
-    key = key.trim();
-    watcher = require('node:fs').watch(directory, { persistent: false }, (_event, file) => {
-      if (String(file) === 'authorization.json' && !grant().enabled) importing?.abort();
-    });
-    watcher.on('error', () => {});
-    server = net.createServer(socket => {
-      sockets.add(socket); const controller = new AbortController();
-      socket.once('close', () => { sockets.delete(socket); controller.abort(); });
-      socket.on('error', () => {});
-      let received = false;
-      P.frames(socket, message => {
-        if (received) { socket.destroy(); return; } received = true;
-        const candidate = typeof message.key === 'string' ? message.key : '';
-        if (!/^[0-9a-f]{64}$/.test(candidate) || !/^[0-9a-f]{64}$/.test(key) ||
-          !timingSafeEqual(Buffer.from(candidate), Buffer.from(key))) {
-          P.send(socket, { ok: false, code: 'unauthorized' }); return;
-        }
-        void dispatch(message, controller.signal).then(value => {
-          if (!socket.destroyed) P.send(socket, { ok: true, value });
-        }, error => {
-          if (!socket.destroyed) P.send(socket, { ok: false, code: messages[error.code] ? error.code : 'invalid' });
-        });
-      }, () => socket.destroy());
-    });
-    await new Promise((resolve, reject) => { server.once('error', reject); server.listen(snapshotPath(directory), resolve); });
-    server.on('error', () => {});
-    server.unref(); return status();
-  }
-  async function close() {
-    importing?.abort(); watcher?.close();
-    for (const socket of sockets) socket.destroy();
-    if (server?.listening) await new Promise(resolve => server.close(resolve));
-    snapshot = null;
-  }
-  return { start, close, status, dispatch };
+  async function close() { generation++; blocked = true; importing?.abort(); await importDone; snapshot = undefined; }
+  return { close, clear, status, dispatch };
 }
-function startDesktopService() {
-  const { app, safeStorage } = require('electron');
-  const service = createSnapshotService({ safeStorage });
-  app.whenReady().then(() => service.start()).catch(() => {
-    // Connection availability is reported through the status endpoint.
-  });
-  app.once('will-quit', () => { void service.close(); });
-  return service;
-}
-module.exports = { request, snapshotPath, endpointFromPortFile, normalizeCookies, captureCookies, createSnapshotService, startDesktopService };
+module.exports = { endpointFromPortFile, normalizeCookies, captureCookies, createSnapshotService };

@@ -1,0 +1,216 @@
+{
+  "filename": "dsh-video-vision-0.10.0-candidate.1.tgz",
+  "sha256": "b0f2242bf815f74585ecc12b32cf364f763d56fd9177315197c2eb25dba9f5f8",
+  "files": [
+    {
+      "path": "LICENSE",
+      "size": 1070,
+      "mode": 420
+    },
+    {
+      "path": "README.md",
+      "size": 15764,
+      "mode": 420
+    },
+    {
+      "path": "SPONSOR.md",
+      "size": 1365,
+      "mode": 420
+    },
+    {
+      "path": "bin/prepare.mjs",
+      "size": 656,
+      "mode": 420
+    },
+    {
+      "path": "bin/resolver.mjs",
+      "size": 938,
+      "mode": 420
+    },
+    {
+      "path": "bin/video-vision.mjs",
+      "size": 3269,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/cdp-session.cjs",
+      "size": 4713,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/cdp-source.cjs",
+      "size": 6443,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/discovery.cjs",
+      "size": 3432,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/keyring-storage.cjs",
+      "size": 3682,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/platform/darwin.cjs",
+      "size": 3474,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/platform/index.cjs",
+      "size": 360,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/platform/linux.cjs",
+      "size": 4761,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/platform/windows.cjs",
+      "size": 2108,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/protocol.cjs",
+      "size": 1643,
+      "mode": 420
+    },
+    {
+      "path": "browser-session/snapshot.cjs",
+      "size": 12297,
+      "mode": 420
+    },
+    {
+      "path": "client.js",
+      "size": 39646,
+      "mode": 420
+    },
+    {
+      "path": "cordis.patch.yml",
+      "size": 62,
+      "mode": 420
+    },
+    {
+      "path": "index.js",
+      "size": 13757,
+      "mode": 420
+    },
+    {
+      "path": "lib/audio.js",
+      "size": 9428,
+      "mode": 420
+    },
+    {
+      "path": "lib/bilibili.js",
+      "size": 5546,
+      "mode": 420
+    },
+    {
+      "path": "lib/browser-session.js",
+      "size": 10513,
+      "mode": 420
+    },
+    {
+      "path": "lib/budgets.js",
+      "size": 3119,
+      "mode": 420
+    },
+    {
+      "path": "lib/cache.js",
+      "size": 12829,
+      "mode": 420
+    },
+    {
+      "path": "lib/dependencies.js",
+      "size": 701,
+      "mode": 420
+    },
+    {
+      "path": "lib/engine.js",
+      "size": 22362,
+      "mode": 420
+    },
+    {
+      "path": "lib/extensions.js",
+      "size": 7404,
+      "mode": 420
+    },
+    {
+      "path": "lib/native-session.js",
+      "size": 3562,
+      "mode": 420
+    },
+    {
+      "path": "lib/native-ui.js",
+      "size": 6032,
+      "mode": 420
+    },
+    {
+      "path": "lib/prepare.js",
+      "size": 3269,
+      "mode": 420
+    },
+    {
+      "path": "lib/process.js",
+      "size": 3584,
+      "mode": 420
+    },
+    {
+      "path": "lib/settings.js",
+      "size": 7966,
+      "mode": 420
+    },
+    {
+      "path": "lib/ui-locale.js",
+      "size": 6361,
+      "mode": 420
+    },
+    {
+      "path": "lib/windows-ui.ps1",
+      "size": 2234,
+      "mode": 420
+    },
+    {
+      "path": "lib/ytdlp.js",
+      "size": 10234,
+      "mode": 420
+    },
+    {
+      "path": "package.json",
+      "size": 1732,
+      "mode": 420
+    },
+    {
+      "path": "resources/audio.md",
+      "size": 3330,
+      "mode": 420
+    },
+    {
+      "path": "resources/configuration.md",
+      "size": 950,
+      "mode": 420
+    },
+    {
+      "path": "resources/example.mjs.txt",
+      "size": 1224,
+      "mode": 420
+    },
+    {
+      "path": "resources/GUIDANCE.md",
+      "size": 3473,
+      "mode": 420
+    },
+    {
+      "path": "resources/native-session.md",
+      "size": 4622,
+      "mode": 420
+    },
+    {
+      "path": "resources/resolvers.md",
+      "size": 2679,
+      "mode": 420
+    }
+  ]
+}

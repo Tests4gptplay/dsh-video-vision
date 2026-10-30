@@ -32,7 +32,7 @@ try {
   await session.setup(); assert.equal(imports.length, 1);
   const pending = session.fetch('https://example.test/pending');
   await started;
-  await session.setAuthorization({ enabled: true, syncToNative: true });
+  await session.setAuthorization({ enabled: true });
   release(); assert.equal(await (await pending).text(), 'ok');
   assert.equal(await (await session.fetch('https://example.test/post', { method: 'POST', body: 'fixture' })).text(), 'ok');
   assert.equal(calls.at(-1).method, 'POST'); assert.equal(calls.at(-1).body, 'fixture');
@@ -44,7 +44,7 @@ try {
   const manual = await session.fetch('https://example.test/redirect', { redirect: 'manual' });
   assert.equal(manual.status, 302);
   await session.dispose();
-  assert.deepEqual(JSON.parse(await readFile(join(directory, 'authorization.json'))), { enabled: true, syncToNative: true });
+  assert.deepEqual(JSON.parse(await readFile(join(directory, 'vv-plugin-authorization-v1.json'))), { enabled: true });
 
   assert.deepEqual(nativeRequest('/x/player/playurl', { aid: '123', cid: '1', platform: 'html5' }).params,
     { aid: '123', cid: '1', platform: 'html5' });
@@ -60,7 +60,7 @@ try {
   engine.mediaFetch = async () => ++attempts < 3 ? new Response('', { status: 503 }) : new Response('fixture');
   await engine.download(['https://a.test', 'https://b.test', 'https://c.test'], join(directory, 'video.mp4'), 'https://example.test', new AbortController().signal);
   assert.equal(attempts, 3);
-  console.log('PASS: import without browser/version gate, sync updates preserve requests, reload preserves grants, POST/redirect, CDN URLs and all media backups.');
+  console.log('PASS: import without browser/version gate, authorization updates preserve requests, reload preserves grants, POST/redirect, CDN URLs and all media backups.');
 } finally {
   await session.dispose();
   await rm(directory, { recursive: true, force: true });

@@ -1,0 +1,10 @@
+{
+  "sync.cjs": "480d674264da73773f78f7754e50ca873dd08e39cd9b37d55a3fd2c76726e62e",
+  "protocol.cjs": "e637d9296d7d1a89fe40c6146d284aab5b1e8cce7da758bfec80a60a685f294f",
+  "snapshot.cjs": "8d1b78114287d7c5c3fc8f03a3b41c28621348703aad84c9dbd70825f372359e",
+  "discovery.cjs": "d129f1e2e01254f70cbe1f7b0c33b05d2ff829318cdb214caadb7b390fd0393c",
+  "platform/linux.cjs": "21b8257da9f7d461a749d3d015cf08b5c9066ce39766d16d9c5e587ef33a8477",
+  "platform/index.cjs": "7181015666e6d93c02f4cf1d29da324a4aa966bead016a035b81b08492ceedbf",
+  "platform/darwin.cjs": "3a66ba343bd4e386ef287b5061fb381de59b048c40f543f40277a4bcedce9597",
+  "platform/windows.cjs": "e77668db119fa3c3d01a76ec62d724783468e80c798e8b5dc3a8727ea07f39bd"
+}

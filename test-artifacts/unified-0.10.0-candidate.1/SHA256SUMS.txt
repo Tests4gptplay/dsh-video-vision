@@ -1,0 +1,2 @@
+b0f2242bf815f74585ecc12b32cf364f763d56fd9177315197c2eb25dba9f5f8  dsh-video-vision-0.10.0-candidate.1.tgz
+02bc8ec6ce821cb1c17394ce7cf8f7e17e1986ad4b53dfc2da78104f41070793  vv-legacy-exit-0.10.0-candidate.1.zip

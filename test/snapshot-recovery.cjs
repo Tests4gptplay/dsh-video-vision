@@ -12,7 +12,7 @@ const { createSnapshotService } = require(join(resolve(process.argv[2] || '.'), 
  const bytes = Buffer.from('TEST:' + JSON.stringify(fixture));
  const make = async name => {
   const directory = join(root, name); await fs.mkdir(directory);
-  await fs.writeFile(join(directory, 'authorization.json'), JSON.stringify({ enabled: true, syncToNative: true }));
+  await fs.writeFile(join(directory, 'vv-plugin-authorization-v1.json'), JSON.stringify({ enabled: true, syncToNative: true }));
   let available = true, decryptFails = false, encrypts = 0, captures = 0;
   const safeStorage = {
    isEncryptionAvailable: async () => available,
@@ -36,7 +36,9 @@ const { createSnapshotService } = require(join(resolve(process.argv[2] || '.'), 
  try {
   await run('existing snapshot recovers after storage unavailable', async () => {
    const test = await make('storage'); await fs.writeFile(test.file, bytes); test.available(false);
-   assert.equal((await test.service.status()).imported, false);
+   assert.equal((await test.service.status()).imported, null);
+   assert.equal((await test.service.status()).snapshotState, 'decrypt_failed');
+   await assert.rejects(readCookies(test), { code: 'decrypt_failed' });
    test.available(true);
    assert.equal((await readCookies(test)).cookies[0].value, 'synthetic-value');
    assert.equal((await test.service.status()).imported, true);
@@ -44,28 +46,31 @@ const { createSnapshotService } = require(join(resolve(process.argv[2] || '.'), 
   });
   await run('existing snapshot recovers after transient decrypt failure', async () => {
    const test = await make('decrypt'); await fs.writeFile(test.file, bytes); test.decryptFails(true);
-   assert.equal((await test.service.status()).imported, false);
+   assert.equal((await test.service.status()).imported, null);
+   assert.equal((await test.service.status()).snapshotState, 'decrypt_failed');
+   await assert.rejects(readCookies(test), { code: 'decrypt_failed' });
    test.decryptFails(false);
    assert.equal((await readCookies(test)).cookies[0].value, 'synthetic-value');
    assert.deepEqual(await fs.readFile(test.file), bytes); test.checkNoWrites();
   });
-  await run('missing snapshot reports empty without creating one', async () => {
+  await run('missing snapshot reports absent without creating one', async () => {
    const test = await make('missing');
    assert.equal((await test.service.status()).imported, false);
    await assert.rejects(readCookies(test), { code: 'no_snapshot' });
    await assert.rejects(fs.readFile(test.file), { code: 'ENOENT' }); test.checkNoWrites();
   });
-  await run('corrupt snapshot reports empty without rewriting it', async () => {
+  await run('corrupt snapshot reports decrypt_failed without rewriting it', async () => {
    const test = await make('corrupt'); const corrupt = Buffer.from('synthetic damaged data');
    await fs.writeFile(test.file, corrupt);
-   assert.equal((await test.service.status()).imported, false);
-   await assert.rejects(readCookies(test), { code: 'no_snapshot' });
+   assert.equal((await test.service.status()).imported, null);
+   assert.equal((await test.service.status()).snapshotState, 'decrypt_failed');
+   await assert.rejects(readCookies(test), { code: 'decrypt_failed' });
    assert.deepEqual(await fs.readFile(test.file), corrupt); test.checkNoWrites();
   });
   await run('authorization revoke blocks cookie use and retains snapshot', async () => {
    const test = await make('grant'); await fs.writeFile(test.file, bytes);
    assert.equal((await readCookies(test)).cookies.length, 1);
-   await fs.writeFile(join(test.directory, 'authorization.json'), JSON.stringify({ enabled: false, syncToNative: false }));
+   await fs.writeFile(join(test.directory, 'vv-plugin-authorization-v1.json'), JSON.stringify({ enabled: false, syncToNative: false }));
    await assert.rejects(readCookies(test), { code: 'disabled' });
    assert.deepEqual(await fs.readFile(test.file), bytes); test.checkNoWrites();
   });

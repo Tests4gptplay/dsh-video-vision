@@ -1,49 +1,33 @@
-# 浏览器登录态导入与内置浏览器同步
+# 浏览器登录态副本（0.10 候选）
 
-## 平台
+Windows、Linux、macOS 使用同一插件内路径：明确选择来源 → CDP 采集 → 加密快照 → 按请求 URL 过滤 → VV 自身 HTTP。系统适配仅处理浏览器发现、打开连接设置与系统密钥存储。真实 Windows/macOS 运行验证仍须实机；合成测试不代表实机通过。
 
-Windows Desktop 使用下述原会话组件。Linux/macOS 由插件生命周期管理本地会话服务，继续使用设置页的导入/刷新按钮，不要求浏览器扩展。Linux 需要可用的 Secret Service；macOS 使用系统钥匙串，实机验证待补。macOS 内置浏览器同步尚未适配。Web 模式共享会话服务与 Electron 内置浏览器同步是不同能力。
+## 使用
 
-## Desktop 会话组件安装
+1. 开启浏览器登录态授权。保持来源浏览器运行，并在设置中明确选择其连接（只有一个来源也不自动选择）。
+2. 点击导入；需要更新时点击刷新。只有这两项操作读取来源浏览器 Cookie。正常失败保留已有副本；提交回滚或事务清理异常会明确阻断读取并保留恢复证据，不保证异常情况下原文件已恢复。浏览器可能要求用户批准连接。
+3. 导入后即可关闭来源浏览器。VV 日常请求使用自己的加密副本，直到网站使登录态过期/撤销；不需要每次启动 DSH 都开浏览器。
+4. “清理 VV 登录态副本”会先关闭授权，取消本插件使用中的会话操作，清除本插件管理的活动加密快照及暂存副本。失败或部分成功会明确报告，可重试。它不删除源浏览器 Cookie、DSH 内置浏览器独立登录态或媒体缓存，也不自动删除人工备份。
 
-视频插件通过 DSH 原生插件管理器安装。Windows Electron 版 DSH Desktop 的登录态导入与内置浏览器同步使用随包附带的本地会话组件，首次使用时安装一次；升级后运行同一命令更新组件。
+## 来源与状态
 
-先完全退出 DSH Desktop（包括托盘中的主进程），在 PowerShell 中运行以下命令，再重新打开 DSH。示例采用默认安装位置；自定义安装时替换相应路径。
+来源资料目录是稳定逻辑身份；临时 WebSocket token/端口不是资料目录身份。只能发现发布端口而无法确认资料目录时会标注 profile unverified，并按本次临时endpoint隔离；浏览器重启后不能仅凭端口相同复用旧身份，必须重新明确选择。旧副本保留为离线来源，不自动覆盖。自动状态刷新不切来源。
 
-```powershell
-$resources = Join-Path $env:LOCALAPPDATA 'Programs\DeepSeek Harness\resources'
-$plugin = Join-Path $env:USERPROFILE '.dsh\profiles\desktop\node_modules\dsh-video-vision'
-$node = Join-Path $env:USERPROFILE '.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe'
-& $node (Join-Path $plugin 'browser-session\install-desktop.cjs') $resources
-```
+旧非Windows保存目录按旧 endpoint hash 命名，不能简单重命名：系统密钥账户与认证数据绑定原目录。能精确匹配仍在线旧 endpoint 时，显式选源保留原 storageId 并记录持久映射；切换来源/重启后继续使用原密钥命名空间。无法精确匹配时保留旧离线来源及副本，不猜测绑定新浏览器。用户可重新选择新来源并导入；旧副本仍可通过保存的来源选择读用或显式清理。
 
-已安装过组件时，若 Desktop 更新使组件或启动入口缺失，点击“导入登录态”或“刷新登录态”会恢复组件。恢复后完全退出并重新启动 Desktop，再导入；刷新页面或重新加载插件不会重启 Desktop 主进程。
+状态区分未保存、未知、读取失败、解密失败、确实空的成功快照及来源不可用。Cookie 总数不证明任何特定网站登录成功；来源离线不等于保存副本失效。
 
-组件将会话服务接入 Desktop 主进程，并为原始应用文件保留备份。安装完成后，按下面的设置页步骤授权和导入。
+## 安全边界
 
-## 用户操作
+- 系统密钥库保护快照加密密钥：Windows Credential Manager、macOS Keychain、Linux Secret Service。加密失败不改写旧文件。分区 Cookie 尚不导入。
+- Cookie 仅按域、路径、HTTPS 与有效期加入 VV HTTP 请求；重定向每一跳重新过滤。不进入模型、日志、CLI 参数或解析子进程。
+- yt-dlp 及外部站点解析进程继续匿名，不传 Cookie。ASR/视频/字幕/缓存等功能未因本次改动新增凭据通道。
+- 本版本移除“向 DSH 内置浏览器同步登录态”。经检查的官方 rc.5 插件 preload/main IPC/SDK/provider 链未公开合法 Cookie/session 导入接口；这不是仅隐藏 UI，也不代表 B 站登录失败根因已确定。
+- 不含旧同步、旧 Windows IPC、ASAR 安装器或自动恢复 fallback。已经装进宿主的旧 hook 不会因升级插件自动消失，须按独立 [一次性退出说明](../docs/testing/LEGACY-EXIT.md) 审核处理。
+- 旧 Electron safeStorage 密文与新 keyring 格式不可互换；本版本不暗中读取旧 IPC 解密迁移。保留旧数据，需使用新明确来源重新导入；退出工具不迁移/删除旧密文。用户另行明确点击“清理 VV 登录态副本”时，会删除VV活动目录内旧 `session-state.bin` 及新活动快照；人工归档/备份仍不在清理范围。
 
-**保持已登录的浏览器运行，点击“导入登录态”；以后按需刷新。**
+## 与旧宿主授权隔离
 
-1. 在“设置 → 视频视觉”开启 **授权使用默认浏览器登录态**，点击 **导入登录态**。
-2. 插件自动发现正在运行的 Chrome、Edge 等浏览器连接，包括 CAH 使用的自定义资料目录和端口。浏览器若显示连接确认，选择允许即可。
-3. 看到“导入完成”后，登录态已加密保存在本机，本次连接自动结束。**刷新登录态**可手动更新；刷新失败保留原登录态。
-4. Windows Desktop 需要内置浏览器复用时，开启 **同步至 DSH 内置浏览器**。
+新版仅读写 `vv-plugin-authorization-v1.json`，不读写旧桥的 `authorization.json`。即使旧宿主配置保留授权开启，新版构造、开关或清理也不会重新开启已撤销的旧桥授权。若旧桥原本仍开启或仍运行，新授权隔离不等于它已退出：仍需独立退出工具审核并完成撤权、hook/runtime退出及宿主重启。不会为此自动运行旧同步撤销或删除内置Cookie。
 
-若登录态失效，先在来源浏览器登录，再点击“刷新登录态”。已有 CAH 等浏览器连接时直接导入；设置页提供的 Chrome 连接设置用于建立新连接。
-
-两项授权由用户控制；设置页加载、状态检查和窗口获得焦点只读取状态。
-
-## 工作方式
-
-- 从正在运行的浏览器进程识别实际端口与资料目录，同时支持浏览器公布的 `DevToolsActivePort`。连接通过浏览器级 `Storage.getCookies` 读取快照后断开，浏览器继续运行。
-- Windows Desktop 快照由主进程通过系统加密存储保存为 `browser-sessions/session-state.bin`。Linux/macOS 按所选来源独立保存加密快照，并由系统密钥服务保管加密密钥。DSH 重启后可继续使用；刷新由用户点击触发。
-- 共享服务按请求网站、路径、HTTPS 与有效期匹配 Cookie。插件通过 `ctx.browserSessions.fetch(url, options)` / `.json(url, options)` 复用会话，支持请求方法、请求体与重定向选项。工具和设置状态返回授权、导入状态及时间；凭据留在本地服务。
-- **同步至 DSH 内置浏览器**独立控制。开启后，内置浏览器访问网站时从快照导入适用 Cookie（含 HttpOnly）。关闭同步恢复本组件导入前的同键 Cookie。插件卸载过程只结束当前操作，持久化授权由用户设置决定。
-- 快照保存普通 Cookie 会话；分区 Cookie（CHIPS）暂不导入。浏览器资料保留在原位置。
-
-## 凭据与下载
-
-登录态由自有本地服务使用，并发送给 Cookie 所属网站。yt-dlp 和站点解析子进程使用匿名下载路径。凭据保留在系统加密存储中，不进入模型上下文、对话、日志、工程文件、缓存清单或方法笔记。
-
-实现参考：[Playwright 认证状态](https://playwright.dev/docs/auth)、[Chrome 浏览器连接](https://developer.chrome.com/docs/devtools/agents/use-cases/auto-connect)。
+清理的是活动登录态副本，不承诺擦除全部秘密：VV自己的系统加密键仍保留，以免使用户明确保留的加密备份不可恢复。该随机键不含Cookie或账号信息，也不能单独用于网站认证；当前adapter可保留键引用，不承诺安全内存擦除。彻底销毁密钥须另行明确包含备份失效的授权。

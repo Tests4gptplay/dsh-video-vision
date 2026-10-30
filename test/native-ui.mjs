@@ -56,10 +56,10 @@ function walk(node) { if (!node || typeof node !== 'object') return; nodes.push(
 walk(tree);
 const authorization = nodes.find(n => n.type === 'input' && n.props.role === 'switch');
 assert(authorization); assert.equal(authorization.props.checked, false);
-assert.equal(authorization.props.disabled, true, 'Wait for the local bridge capability before enabling');
+assert.equal(authorization.props.disabled, true, 'Wait for settings data before enabling');
 const switches = nodes.filter(n => n.type === 'input' && n.props.role === 'switch');
-assert.equal(switches.length, 2);
-assert.deepEqual(switches.map(n => n.props['aria-label']), ['授权使用默认浏览器登录态', '同步至 DSH 内置浏览器']);
+assert.equal(switches.length, 1);
+assert.deepEqual(switches.map(n => n.props['aria-label']), ['授权使用默认浏览器登录态']);
 assert(switches.every(n => n.props.checked === false));
 const button = nodes.find(n => n.type === 'button' && n.children[0] === '设置缓存目录');
 assert(button); assert.equal(button.props.disabled, false);

@@ -29,17 +29,12 @@ active='en';assert(text(render()).includes('Delete all cached files for “用�
 assert.equal(uiText('请确认删除。','en'),'Confirm deletion.');
 assert.equal(uiText('请确认删除。','zh'),'请确认删除。');
 assert.equal(uiText('用户内容','en'),'用户内容');
-assert.equal(browserStatusUI({browser:'当前平台',componentMessage:'本地组件已安装，等待 Desktop 载入。'},'en').browser,'Current platform');
-const html=await readFile(new URL('../browser-session/extension/popup.html',import.meta.url),'utf8');
-for(const language of ['en-US','zh-CN']) {
- const nodes=[...html.matchAll(/data-i18n="([^"]+)"/g)].map(m=>({dataset:{i18n:m[1]},textContent:''}));const state={textContent:''},connect={};const document={documentElement:{},querySelectorAll:()=>nodes,getElementById:id=>id==='state'?state:connect};
- vm.runInNewContext(await readFile(new URL('../browser-session/extension/popup.js',import.meta.url),'utf8'),{navigator:{language},document,chrome:{runtime:{sendMessage:async()=>({connected:true})}}});await new Promise(resolve=>setImmediate(resolve));
- assert.equal(document.documentElement.lang,language.startsWith('zh')?'zh':'en');assert(nodes.every(n=>n.textContent));assert(state.textContent.includes(language.startsWith('zh')?'已连接':'connected'));
-}
-console.log('PASS: en/zh/en labels, preserved user content, request language, runtime error/status localization, extension en/zh.');
+assert.equal(browserStatusUI({browser:'当前平台',componentMessage:'所选浏览器连接不可用。'},'en').browser,'Current platform');
+console.log('PASS: en/zh/en labels, preserved user content, request language, runtime error/status localization.');
 const { registerCacheTransport } = await import('../lib/settings.js');
-const routes = new Map();let extractedLanguage;
-const manager = { config:{}, browserSessions:{status:async()=>({browser:'当前平台',componentMessage:'本地组件已安装，等待 Desktop 载入。'})}, extract:async(_id,_file,_signal,lang)=>{extractedLanguage=lang;return {canceled:true};}, remove:async()=>{throw new Error('缓存文件不存在，请刷新列表。');} };
+const routes = new Map();let extractedLanguage, cleared = 0;
+const clearResult = { cleared: false, failures: [{ path: 'synthetic-copy', code: 'EACCES' }] };
+const manager = { config:{}, persistAuthorization:async state=>{assert.equal(state.enabled,false);}, browserSessions:{clear:async()=>{cleared++;return clearResult;},status:async()=>({browser:'当前平台',componentMessage:'所选浏览器连接不可用。'})}, extract:async(_id,_file,_signal,lang)=>{extractedLanguage=lang;return {canceled:true};}, remove:async()=>{throw new Error('缓存文件不存在，请刷新列表。');} };
 const dispose=registerCacheTransport({fetch:{register:({path,fetch})=>{routes.set(path,fetch);return()=>routes.delete(path);}}},manager);
 async function request(endpoint,payload){const method='video-vision/cache/'+endpoint;const response=await routes.get('/api/'+method)(new Request('http://localhost/api/'+method,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:'test',method,payload})}));return (await response.json()).result;}
 assert.equal((await request('remove',{confirm:true,uiLanguage:'en'})).error.message,'The cached file does not exist. Refresh the list.');
@@ -47,5 +42,9 @@ assert.equal((await request('remove',{confirm:true,uiLanguage:'zh'})).error.mess
 assert.equal((await request('remove',{confirm:true,uiLanguage:'en'})).error.code,'video_vision_cache');
 await request('extract',{uiLanguage:'en'});assert.equal(extractedLanguage,'en');
 assert.equal((await request('browser-status',{uiLanguage:'en'})).value.browser,'Current platform');
+assert.equal((await request('browser-clear',{uiLanguage:'en'})).error.message,'Confirm clearing VV session copies.');
+assert.equal(cleared,0);
+assert.deepEqual((await request('browser-clear',{confirm:true,uiLanguage:'en'})).value,clearResult);
+assert.equal(cleared,1);
 dispose();assert.equal(routes.size,0);
 console.log('PASS: actual transport handler preserves error codes/Chinese and forwards English to extraction dialog.');

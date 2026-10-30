@@ -3,11 +3,12 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 let factory, Component, inject, index = 0;
 const states = [], calls = [];
-let connected = false, imported = false, enabled = true, syncToNative = false, failRefresh = false, finishImport;
+let connected = false, imported = false, enabled = true, failRefresh = false, finishImport;
 const importResult = new Promise(resolve => { finishImport = resolve; });
-const status = () => ({ enabled, syncToNative, connected, imported, ready: true, supported: false, browser: 'Google Chrome', desktopIntegration: false });
+const status = () => ({ enabled, connected, imported, snapshotState: imported ? "ready" : "absent", sourceId: "A", sourceAvailable: true, ready: true, supported: false, browser: 'Google Chrome', desktopIntegration: false });
 const listing = () => ({ entries: [], bytes: 0, root: 'C:\\fixture-cache', browser_session: status() });
-let dictionaries;
+let dictionaries, clearResult = { cleared: true, failures: [] }, clearPending;
+
 const React = {
   useSyncExternalStore: (_subscribe, getSnapshot) => getSnapshot(),
   createElement: (type, props, ...children) => ({ type, props: props || {}, children }),
@@ -24,8 +25,9 @@ factory(() => React).apply({ effect: fn => fn(), locale: { register: (_ns, value
       if (failRefresh) return { ok: false, error: { message: '浏览器未确认，原登录态未改动。' } };
       connected = imported = true; value = status();
     }
+    else if (method.endsWith('/browser-clear')) { await clearPending; value = clearResult; if (value.cleared) connected = imported = false; }
     else if (method.endsWith('/browser-status')) value = status();
-    else if (method.endsWith('/browser-authorization')) { enabled = payload.enabled; syncToNative = payload.syncToNative; value = status(); }
+    else if (method.endsWith('/browser-authorization')) { enabled = payload.enabled; value = status(); }
     else if (method.endsWith('/list')) value = listing();
     else throw new Error(method);
     return { ok: true, value };
@@ -43,7 +45,7 @@ let nodes = render();
 assert.equal(calls.length, 0, 'Rendering never starts browser import or opens a window');
 assert.equal(button(nodes, '导入登录态').props.disabled, false);
 assert.equal(button(nodes, '刷新登录态').props.disabled, true);
-assert.equal(nodes.find(n => n.props['aria-label'] === '同步至 DSH 内置浏览器').props.disabled, false);
+assert(!nodes.some(n => n.props['aria-label'] === '同步至 DSH 内置浏览器'));
 assert(nodes.some(n => n.type === 'strong' && n.props.className === 'vv-first-use'));
 assert.match(nodes.find(n => n.type === 'style').children[0], /vv-first-use\{[^}]*font-size:inherit;[^}]*font-weight:700/);
 assert(nodes.some(n => n.props.className === 'vv-sub' && n.children.includes('若登录态失效，请点击“刷新登录态”。')));
@@ -66,7 +68,30 @@ assert(nodes.some(n => n.props.role === 'status' && n.children.includes('刷新�
 connected = false;
 await button(nodes, '检查状态').props.onClick(); nodes = render();
 assert.equal(button(nodes, '导入登录态').props.disabled, false);
-await nodes.find(n => n.props['aria-label'] === '同步至 DSH 内置浏览器').props.onChange({ target: { checked: true } });
-assert(render().some(n => n.props.role === 'status' && n.children.includes('已保存：默认浏览器授权开启，内置浏览器同步开启。')));
+await nodes.find(n => n.props['aria-label'] === '授权使用默认浏览器登录态').props.onChange({ target: { checked: false } });
+assert(render().some(n => n.props.role === 'status' && n.children.includes('已保存：浏览器登录态授权关闭。')));
 assert(!calls.some(c => c.endsWith('/browser-settings')));
-console.log('PASS: import/refresh pending-success-failure, effective button disabled, refresh available, reminder, bold font, independent sync, no automatic browser opening.');
+console.log('PASS: import/refresh pending-success-failure, effective button disabled, refresh available, reminder, bold font, no built-in sync, no automatic browser opening.');
+
+// Clear uses an explicit scoped confirmation and never calls media clear or a browser API.
+nodes=render();
+button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();
+assert(nodes.some(n=>n.props.role==='alertdialog' && n.props['aria-label']==='清理 VV 登录态副本'));
+assert(nodes.some(n=>n.children.some(c=>typeof c==='string'&&c.includes('不退出来源浏览器或 DSH 内置浏览器的登录，也不清理媒体缓存'))));
+button(nodes,'取消').props.onClick();nodes=render();assert(!nodes.some(n=>n.props.role==='alertdialog'));
+assert(!calls.some(c=>c.endsWith('/browser-clear')));
+button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();
+let finishClear;clearPending=new Promise(resolve=>{finishClear=resolve});
+const clearing=button(nodes,'确认删除').props.onClick();nodes=render();
+assert.equal(button(nodes,'正在清理 VV 登录态副本…').props.disabled,true);
+finishClear();await clearing;nodes=render();
+assert(nodes.some(n=>n.props.role==='status'&&n.children.includes('VV 登录态副本已清理。来源浏览器、DSH 内置浏览器和媒体缓存未改动。')));
+clearResult={cleared:false,failures:[{path:'synthetic-copy',code:'EACCES'}]};
+button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();
+await button(nodes,'确认删除').props.onClick();nodes=render();
+assert(nodes.some(n=>n.props.role==='alert'&&n.children.some(c=>typeof c==='string'&&c.includes('synthetic-copy: EACCES'))));
+assert(!nodes.some(n=>n.props.role==='status'));
+assert(!calls.some(c=>c.endsWith('/clear')));
+clearResult={cleared:true,failures:[]};button(nodes,'清理 VV 登录态副本').props.onClick();nodes=render();await button(nodes,'确认删除').props.onClick();
+assert(render().some(n=>n.props.role==='status'));
+console.log('PASS: clear confirmation/cancel/pending/success/partial failure/retry; no media clear RPC.');

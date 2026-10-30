@@ -8,7 +8,7 @@ import Session from '../browser-session/cdp-session.cjs';
 const directory = await mkdtemp(join(tmpdir(), 'vv-cdp-session-'));
 const A = 'ws://127.0.0.1:43123/devtools/browser/aaaaaaaa-test';
 const B = 'ws://127.0.0.1:43124/devtools/browser/bbbbbbbb-test';
-const id = endpoint => createHash('sha256').update(endpoint).digest('hex');
+const id = endpoint => createHash('sha256').update('unverified-endpoint:' + endpoint).digest('hex');
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 const safeStorage = {
  prepare: async () => {}, isEncryptionAvailable: async () => true,
@@ -29,12 +29,13 @@ const make = root => {
  const session = Session.createCdpSession({ directory: root, source, createStorage: async () => safeStorage });
  sessions.push(session); return session;
 };
-const grant = (root, enabled) => writeFile(join(root, 'authorization.json'), JSON.stringify({ enabled, syncToNative: enabled }));
+const grant = (root, enabled) => writeFile(join(root, 'vv-plugin-authorization-v1.json'), JSON.stringify({ enabled, syncToNative: enabled }));
 const cookies = session => session.request('cookies', { url: 'https://example.test/' });
 try {
  const one = join(directory, 'one'); await mkdir(one); await grant(one, true);
  const single = make(one);
- assert.equal((await single.status()).sourceId, id(A), 'One endpoint is selected automatically at session level');
+ assert.equal((await single.status()).sourceId, null, 'Even one endpoint requires explicit selection');
+ await single.select(id(A));
  await single.request('import'); assert.equal((await cookies(single)).cookies[0].value, 'synthetic-A');
  const many = join(directory, 'many'); await mkdir(many); await grant(many, true); endpoints = [A, B];
  let session = make(many);
@@ -95,5 +96,5 @@ try {
  await selectionRead.promise;
  await raced.select(id(B)); releaseSelection.resolve(); await raceRejection;
  assert.deepEqual(writes, [], 'Selection change while chosen() awaits must stop before any target snapshot dispatch');
- console.log('PASS: single auto-selection, multiple explicit selection, isolated snapshots, switching capture cancellation, offline persistence, grant disable/reenable with files preserved; real core with injected synthetic storage/discovery/capture, no sockets.');
+ console.log('PASS: single explicit selection, multiple explicit selection, isolated snapshots, switching capture cancellation, offline persistence, grant disable/reenable with files preserved; real core with injected synthetic storage/discovery/capture, no sockets.');
 } finally { await Promise.all(sessions.map(session => session.close())); await rm(directory, { recursive: true, force: true }); }

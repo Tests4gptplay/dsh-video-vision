@@ -10,12 +10,16 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
   capture: captureEndpoint = Snapshot.captureCookies, io = fs } = {}) {
   const selectionFile = join(directory, 'cdp-selected-source.json');
   const active = new Set();
-  let selectedId = null, selectedLabel = null, epoch = 0, selectionError;
+  let selectedId = null, selectedLabel = null, storageId = null, epoch = 0, selectionError, records = {};
   let selectionTail = (async () => {
     try {
       const value = JSON.parse(await io.readFile(selectionFile, 'utf8'));
       if (!/^[0-9a-f]{64}$/.test(value.id || '')) throw fault('browser_source_unavailable', '已保存的浏览器选择无效，请重新选择。');
-      selectedId = value.id; selectedLabel = typeof value.label === 'string' ? value.label : 'Browser';
+      if (value.records && typeof value.records === 'object') for (const [id, record] of Object.entries(value.records)) {
+        if (/^[0-9a-f]{64}$/.test(id) && /^[0-9a-f]{64}$/.test(record?.storageId || '')) records[id] = {storageId: record.storageId, label: String(record.label || 'Saved browser')};
+      }
+      selectedId = value.id; storageId = /^[0-9a-f]{64}$/.test(value.storageId || '') ? value.storageId : value.id; selectedLabel = typeof value.label === 'string' ? value.label : 'Browser';
+      records[selectedId] = { storageId, label: selectedLabel };
     } catch (error) {
       if (error.code !== 'ENOENT') selectionError = error instanceof SyntaxError
         ? fault('browser_source_unavailable', '已保存的浏览器选择无效，请重新选择。') : error;
@@ -25,26 +29,27 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
     signal?.throwIfAborted();
     const endpoints = await discover({ signal });
     signal?.throwIfAborted();
-    return [...new Set(endpoints)].map(endpoint => {
-      const id = createHash('sha256').update(endpoint).digest('hex');
-      let label = 'Browser';
-      try {
-        const url = new URL(endpoint);
-        const browserId = url.pathname.match(/\/devtools\/browser\/([a-zA-Z0-9-]+)/)?.[1]?.slice(0, 8);
-        label = 'Browser' + (url.port ? ' :' + url.port : '') + (browserId ? ' · ' + browserId : '');
-      } catch {}
-      return { id, label, endpoint };
+    return endpoints.map(item => {
+      // Old injected discoveries remain distinguishable; never silently use their
+      // changing WebSocket token as a new storage account.
+      const endpoint = typeof item === 'string' ? item : item.endpoint;
+      const identity = typeof item === 'string' ? 'unverified-endpoint:' + endpoint : item.identity;
+      const id = createHash('sha256').update(identity).digest('hex');
+      const legacyId = createHash('sha256').update(endpoint).digest('hex');
+      return { id, legacyId, label: typeof item === 'string' ? new URL(endpoint).host + ' (profile unverified)' : item.label, endpoint };
     });
   }
-  async function list() { return (await sources()).map(({ id, label }) => ({ id, label })); }
+  async function list() { await selectionTail; const live = (await sources()).map(({ id, label }) => ({ id, label, available: true }));
+    return [...live, ...Object.entries(records).filter(([id])=>!live.some(item=>item.id===id)).map(([id,value])=>({id,label:value.label,available:false}))]; }
   async function selected() {
     await selectionTail;
     if (selectionError) throw selectionError;
-    return selectedId ? { id: selectedId, label: selectedLabel } : null;
+    return selectedId ? { id: selectedId, storageId, label: selectedLabel } : null;
   }
   function select(id) {
     const operation = selectionTail.then(async () => {
-      const source = (await sources()).find(source => source.id === id);
+      const source = (await sources()).find(source => source.id === id) || (records[id] ? {id,label:records[id].label} : null);
+      const nextStorageId = records[id]?.storageId || (selectedId === source?.legacyId ? storageId : (selectedId === id ? storageId : id));
       if (!source) throw fault('browser_source_unavailable', '所选浏览器连接不可用。');
       if (selectedId === id && selectedLabel === source.label && !selectionError) return { id, label: source.label };
       epoch++;
@@ -53,9 +58,13 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
       selectedId = null;
       try {
         await io.mkdir(directory, { recursive: true });
-        await io.writeFile(selectionFile + '.tmp', JSON.stringify({ id, label: source.label }), { mode: 0o600 });
+        const nextRecords = {...records, [id]: {storageId: nextStorageId,label:source.label}};
+        // A proven legacy-endpoint mapping is one source, not two independent
+        // mutable accounts pointing at the same encrypted file.
+        for(const [oldId,record] of Object.entries(nextRecords)) if(oldId!==id && record.storageId===nextStorageId) delete nextRecords[oldId];
+        await io.writeFile(selectionFile + '.tmp', JSON.stringify({ id, storageId: nextStorageId, label: source.label, records: nextRecords }), { mode: 0o600 });
         await io.rename(selectionFile + '.tmp', selectionFile);
-        selectedId = id; selectedLabel = source.label; selectionError = undefined;
+        selectedId = id; storageId = nextStorageId; selectedLabel = source.label; records = nextRecords; selectionError = undefined;
       } catch (error) { selectedId = previous; throw error; }
       return { id, label: source.label };
     });
