@@ -12,11 +12,22 @@ SHA-256：`178044e27ce60628cb6407242a31457d883eeaa707ad19804b47d11d93410a36`
 
 安装说明已按官方 rc5 新来源保配置升级路径核实。
 
-## 安装前
+## 从 Git 下载、安装并确认版本
 
-核对交付 TGZ 的版本与 SHA-256（见同目录清单）。保留现有设置、登录态副本、缓存、观看进度和方法文件。不重复已完成的旧桥退出；独立 fix1 工具未变。不要清理浏览器数据、复制 profile、读取密码库或把 Cookie/账号资料发到日志、聊天或测试报告。
+**主安装来源是上面的固定 Git 提交下载链接。附件 ZIP 只作备用，不替代本次从 Git 下载的步骤。**
 
-DSH Desktop 的候选包放在“插件 → 添加插件”的“包名或地址”，不是“安装源”；按插件管理器提示升级，核对实际显示 0.10.0-candidate.3。详细安装升级步骤以包内 README 为准；这里只验证本轮新增路径。
+1. 在本地已获准的工作目录下载 TGZ；不要复用旧缓存包。Windows PowerShell 示例（目录可换为自己的工作区）：
+
+```powershell
+New-Item -ItemType Directory -Force 'E:\VV-candidate3-test' | Out-Null
+Invoke-WebRequest 'https://raw.githubusercontent.com/Tests4gptplay/dsh-video-vision/4a186300c04dfac64365e9ad8aec667b9d40950b/test-artifacts/unified-0.10.0-candidate.3/dsh-video-vision-0.10.0-candidate.3.tgz' -OutFile 'E:\VV-candidate3-test\dsh-video-vision-0.10.0-candidate.3.tgz'
+(Get-FileHash 'E:\VV-candidate3-test\dsh-video-vision-0.10.0-candidate.3.tgz' -Algorithm SHA256).Hash
+```
+
+2. 将结果与上方 SHA-256 逐字核对；不一致就停止安装并报告，不跳过校验。
+3. 打开 DSH **插件 → 添加插件**（或 **安装第三方插件**），在 **包名或地址** 填入刚下载的 TGZ 完整路径，点击 **安装**。升级使用这个新版本来源，保留设置和用户文件；只有宿主明确提示时才处理对应旧插件条目，不删除设置、登录态、缓存或目录。
+4. 安装后 **立即启用**；本次重启验证前完全退出并重新打开 DSH。到插件列表及 **设置 → 视频视觉** 核对实际版本为 **0.10.0-candidate.3**，再开始以下测试。仍显示旧版则停止，不把旧版结果记入本候选。
+5. 不重复已完成的旧桥退出；独立 fix1 工具未变。不要清理浏览器数据、复制 profile、读取密码库或把 Cookie/账号资料发到日志、聊天或测试报告。
 
 ## 只需补测以下实际边界
 
