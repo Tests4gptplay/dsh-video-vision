@@ -1,0 +1,192 @@
+{
+  "version": "0.10.0-candidate.5",
+  "sha256": "4e506765304447c68f8ec85115d43d99cc17ca5928e9f9a23b9beffd39d4203a",
+  "bytes": 89226,
+  "file_count": 46,
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 1070
+    },
+    {
+      "path": "browser-session/cdp-session.cjs",
+      "bytes": 5569
+    },
+    {
+      "path": "browser-session/cdp-source.cjs",
+      "bytes": 8503
+    },
+    {
+      "path": "browser-session/platform/darwin.cjs",
+      "bytes": 3474
+    },
+    {
+      "path": "browser-session/discovery.cjs",
+      "bytes": 3457
+    },
+    {
+      "path": "browser-session/platform/index.cjs",
+      "bytes": 360
+    },
+    {
+      "path": "browser-session/keyring-storage.cjs",
+      "bytes": 3682
+    },
+    {
+      "path": "browser-session/platform/linux.cjs",
+      "bytes": 4761
+    },
+    {
+      "path": "browser-session/playwright-capture.cjs",
+      "bytes": 5152
+    },
+    {
+      "path": "browser-session/playwright-source.cjs",
+      "bytes": 4845
+    },
+    {
+      "path": "browser-session/playwright-worker.cjs",
+      "bytes": 3273
+    },
+    {
+      "path": "browser-session/protocol.cjs",
+      "bytes": 1643
+    },
+    {
+      "path": "browser-session/snapshot.cjs",
+      "bytes": 12332
+    },
+    {
+      "path": "browser-session/platform/windows.cjs",
+      "bytes": 2108
+    },
+    {
+      "path": "lib/audio.js",
+      "bytes": 9428
+    },
+    {
+      "path": "lib/bilibili.js",
+      "bytes": 5787
+    },
+    {
+      "path": "lib/browser-session.js",
+      "bytes": 10622
+    },
+    {
+      "path": "lib/budgets.js",
+      "bytes": 3119
+    },
+    {
+      "path": "lib/cache-refresh.js",
+      "bytes": 6550
+    },
+    {
+      "path": "lib/cache.js",
+      "bytes": 12829
+    },
+    {
+      "path": "client.js",
+      "bytes": 43958
+    },
+    {
+      "path": "lib/dependencies.js",
+      "bytes": 701
+    },
+    {
+      "path": "lib/engine.js",
+      "bytes": 25180
+    },
+    {
+      "path": "lib/extensions.js",
+      "bytes": 7404
+    },
+    {
+      "path": "index.js",
+      "bytes": 15377
+    },
+    {
+      "path": "lib/native-session.js",
+      "bytes": 3572
+    },
+    {
+      "path": "lib/native-ui.js",
+      "bytes": 6032
+    },
+    {
+      "path": "lib/prepare.js",
+      "bytes": 3269
+    },
+    {
+      "path": "lib/process.js",
+      "bytes": 3584
+    },
+    {
+      "path": "lib/settings.js",
+      "bytes": 9207
+    },
+    {
+      "path": "lib/ui-locale.js",
+      "bytes": 6441
+    },
+    {
+      "path": "lib/ytdlp.js",
+      "bytes": 10489
+    },
+    {
+      "path": "package.json",
+      "bytes": 1950
+    },
+    {
+      "path": "resources/audio.md",
+      "bytes": 3330
+    },
+    {
+      "path": "resources/configuration.md",
+      "bytes": 950
+    },
+    {
+      "path": "resources/GUIDANCE.md",
+      "bytes": 4180
+    },
+    {
+      "path": "resources/native-session.md",
+      "bytes": 5628
+    },
+    {
+      "path": "README.md",
+      "bytes": 7537
+    },
+    {
+      "path": "resources/resolvers.md",
+      "bytes": 2939
+    },
+    {
+      "path": "SPONSOR.md",
+      "bytes": 1365
+    },
+    {
+      "path": "bin/prepare.mjs",
+      "bytes": 656
+    },
+    {
+      "path": "bin/resolver.mjs",
+      "bytes": 938
+    },
+    {
+      "path": "bin/video-vision.mjs",
+      "bytes": 3269
+    },
+    {
+      "path": "lib/windows-ui.ps1",
+      "bytes": 2234
+    },
+    {
+      "path": "resources/example.mjs.txt",
+      "bytes": 1224
+    },
+    {
+      "path": "cordis.patch.yml",
+      "bytes": 62
+    }
+  ]
+}

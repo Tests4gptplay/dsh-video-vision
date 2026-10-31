@@ -26,12 +26,14 @@ export function renderVideo(_args, value) {
 export function makeTool(ctx, settings = {}, nativeSession) {
   const tool = {
     name: 'video_vision',
-    description: 'Watch online or local videos with timestamped frames AND audio. open/watch automatically analyze up to 30 seconds of audio and transcribe speech/lyrics with the prepared DSH recognizer; inspect audio.analyzed_range_seconds and continue relevant ranges with action=audio (up to 60 seconds). audio_mode=analyze returns signal analysis only; off requests frames only. Audio includes a playable WAV, loudness, quiet ranges, onset times and estimated pulse tempo. transcribe returns 15-second recognition windows; language=ja/zh/en improves lyric recognition. transcript reads platform captions separately. audio_source distinguishes embedded, separately cached and on-demand audio; a video-only cache can still have sound. Use methods for current audio and resolver guidance, needs_method or new sites; resolver=yt-dlp is anonymous-only: never provide it cookies, tokens, passwords or browser login data. Browser login state is imported and refreshed by the user in Settings; only Video Vision-managed encrypted copies are used, with no built-in-browser synchronization. watch uses the saved visual cursor when start is omitted. status shows cached media and recognizer availability.',
+    description: 'Watch online or local videos with timestamped frames AND audio. open/watch automatically analyze up to 30 seconds of audio and transcribe speech/lyrics with the prepared DSH recognizer; inspect audio.analyzed_range_seconds and continue relevant ranges with action=audio (up to 60 seconds). audio_mode=analyze returns signal analysis only; off requests frames only. Audio includes a playable WAV, loudness, quiet ranges, onset times and estimated pulse tempo. transcribe returns 15-second recognition windows; language=ja/zh/en improves lyric recognition. transcript reads platform captions separately. audio_source distinguishes embedded, separately cached and on-demand audio; a video-only cache can still have sound. Use methods for current audio and resolver guidance, needs_method or new sites; resolver=yt-dlp is anonymous-only: never provide it cookies, tokens, passwords or browser login data. Browser login state is imported and refreshed by the user in Settings; only Video Vision-managed encrypted copies are used, with no built-in-browser synchronization. watch uses the saved visual cursor when start is omitted. status shows cached media and recognizer availability. open defaults to cached media; for a requested quality upgrade or updated source use refresh=true, optionally max_height=1080 (a ceiling, not a guarantee). Check actual resolution and cache.state. duration_seconds is the cached file duration, not analyzed coverage or proof of complete source coverage; source_reported_duration_seconds is optional source metadata. If only 15 seconds were analyzed but the file is longer, continue watch/audio ranges; if the file itself is only a short excerpt, refresh can reacquire it but source availability still governs the result.',
     parameters: {
       type: 'object',
       properties: {
         action: { type: 'string', enum: ['open', 'watch', 'audio', 'transcript', 'transcribe', 'status', 'methods'], description: 'Default: open when source is given, otherwise watch.' },
         source: { type: 'string', description: 'Video URL (Bilibili, YouTube, Vimeo and other supported sites), BV id, or local video path. Needed for open.' },
+        refresh: { type: 'boolean', description: 'open only: fetch the source again and replace its cached media after acquisition succeeds. Use for a requested quality upgrade or updated source; default false reuses cache. Failure preserves the previous cache and viewing progress.' },
+        max_height: { type: 'integer', minimum: 0, description: 'open acquisition only: per-request source height ceiling, 0 means unlimited. Does not change saved settings or guarantee this quality is available. Use refresh=true to replace an existing low-quality cache; inspect returned actual resolution and cache.state.' },
         video_id: { type: 'string', description: 'Returned by open. Omit to use the last video opened in this workspace.' },
         resolver: { type: 'string', description: 'auto (default) uses the native Bilibili route or saved methods; yt-dlp is always an anonymous backup. Native user authorization never permits passing credentials to a third-party resolver. A saved method id explicitly tests that method, including disabled drafts.' },
         start_seconds: { type: 'number', description: 'Range start in seconds. watch defaults to the saved cursor.' },
@@ -50,6 +52,7 @@ export function makeTool(ctx, settings = {}, nativeSession) {
       const config = liveConfig(settings);
       const engine = new VideoVision(cwd, config, nativeSession);
       const action = args.action ?? (args.source ? 'open' : 'watch');
+      if (action !== 'open' && (args.refresh !== undefined || args.max_height !== undefined)) throw new Error('refresh and max_height apply only to open.');
       if (action === 'methods') {
         const listing = await listMethods(config, /^https?:/i.test(args.source || '') ? args.source : undefined);
         return { action, ...listing, guidance: await readFile(listing.builtinGuidancePath, 'utf8'),
@@ -67,7 +70,7 @@ export function makeTool(ctx, settings = {}, nativeSession) {
         state: provider?.preparation?.phase ?? 'not-mounted', automatic_model_download: false };
       let asset;
       if (action === 'open') {
-        try { asset = await engine.open(args.source, exec.signal, args.resolver); }
+        try { asset = await engine.open(args.source, exec.signal, args.resolver, { refresh: args.refresh, max_height: args.max_height }); }
         catch (error) {
           if (!(error instanceof MethodNeeded)) throw error;
           const listing = await listMethods(config);
@@ -79,10 +82,10 @@ export function makeTool(ctx, settings = {}, nativeSession) {
       else if (action === 'status' && !args.video_id) {
         try { asset = await engine.load(); } catch (e) {
           if (e.code !== 'ENOENT' && !/Open a video first/.test(e.message)) throw e;
-          return { action, plugin_version: '0.10.0-candidate.4', video: null, speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([key, value]) => key !== 'cookieFile' && value !== undefined)) };
+          return { action, plugin_version: '0.10.0-candidate.5', video: null, speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([key, value]) => key !== 'cookieFile' && value !== undefined)) };
         }
       } else asset = await engine.load(args.video_id);
-      if (action === 'status') return { action, plugin_version: '0.10.0-candidate.4', ...engine.summary(asset), speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config) };
+      if (action === 'status') return { action, plugin_version: '0.10.0-candidate.5', ...engine.summary(asset), speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config) };
       if (action === 'transcript') return { action, ...engine.summary(asset), transcript: engine.transcript(asset, args.start_seconds, args.end_seconds) };
       if (['audio', 'transcribe'].includes(action)) {
         const audio = await inspectAudio(engine, asset, { ...args, audio_mode: action === 'transcribe' ? 'auto' : args.audio_mode }, speech, speechState, exec.signal);
@@ -136,6 +139,9 @@ export function apply(ctx, config = {}) {
   const execute = tool.execute;
   tool.execute = async (args, exec) => {
     const cwd = exec.agent ? await ctx.workingDirectory.ensure(exec.agent, exec.signal) : process.cwd();
+    if (args.refresh === true && (args.action ?? (args.source ? 'open' : 'watch')) === 'open') {
+      return cache.change(async () => { cache.cwd = cwd; return execute(args, exec); });
+    }
     return cache.use(cwd, () => execute(args, exec));
   };
   ctx.tools.register(tool);

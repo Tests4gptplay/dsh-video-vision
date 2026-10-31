@@ -15,7 +15,8 @@
 
 ## 使用顺序
 
-1. 先调用 `video_vision open`。已缓存的视频、B 站内置方法及启用的站点扩展优先复用。
+1. 先调用 `video_vision open`。已缓存的视频、B 站内置方法及启用的站点扩展优先复用。用户要求提高画质或更新内容时，可直接传 `refresh: true` 重新获取并成功后覆盖，不必让用户先清缓存；`max_height: 1080` 是仅本次采集的上限，`0` 不限，不保证源站有该质量。检查返回的实际 `resolution` 和 `cache.state`。
+   `duration_seconds` 是文件时长；`sampled_range_seconds` 和 `audio.analyzed_range_seconds` 才是本次分析范围。只分析 15 秒但文件更长时继续区间读取，别因此重复下载。`source_reported_duration_seconds` 仅在已有真实源元数据时提供，未知不是完整性证明；自定义方法可能返回片段，不能把片段本地时间轴当成原视频覆盖。
 2. 返回 `needs_method` 时，调用 `video_vision methods` 获取扩展目录、现有方法和本指导。
 3. 使用当前宿主提供的网页读取、浏览器、脚本和文件工具调查本次网址。先看现有方法和具体错误，不重复无变化的失败请求。
 4. 获取该页面的播放器数据、公开视频接口、媒体清单及必要请求头。参考本插件 B 站的路线：识别 BV 和分 P，pagelist 取得 cid，playurl 选择视频轨，按需取得字幕与音频。
