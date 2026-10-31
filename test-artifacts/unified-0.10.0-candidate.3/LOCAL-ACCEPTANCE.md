@@ -6,7 +6,11 @@
 
 SHA-256：`178044e27ce60628cb6407242a31457d883eeaa707ad19804b47d11d93410a36`
 
-安装说明已按官方 rc5 新来源保配置升级路径核实；下载链接在测试分支推送并核验后补入，不使用未核验地址。
+[下载候选 TGZ（固定提交）](https://raw.githubusercontent.com/Tests4gptplay/dsh-video-vision/4a186300c04dfac64365e9ad8aec667b9d40950b/test-artifacts/unified-0.10.0-candidate.3/dsh-video-vision-0.10.0-candidate.3.tgz)
+
+源码提交：`4a186300c04dfac64365e9ad8aec667b9d40950b`，原测试分支；匿名下载已核 HTTP 200、84152 字节、上述 SHA-256。main 与市场未变。该提交未发现 CI workflow run 或 status，不把云端自测称作 GitHub CI 通过。
+
+安装说明已按官方 rc5 新来源保配置升级路径核实。
 
 ## 安装前
 

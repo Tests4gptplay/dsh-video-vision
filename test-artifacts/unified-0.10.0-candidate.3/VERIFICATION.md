@@ -11,3 +11,5 @@
 - Previous candidate.2 and standalone legacy-exit fix1 are unchanged. No marketplace/main publication.
 
 An initial packed harness run omitted the historical Git fixture path and failed that fixture setup; supplying its documented VV_LEGACY_TEST_SOURCE resolved it. This was not counted as a passed run.
+
+Publication: test branch commit `4a186300c04dfac64365e9ad8aec667b9d40950b`, tree `80ba4460684522b566b7928b00b875017e71b0f6`. Anonymous fixed-commit TGZ download returned HTTP 200 and the exact SHA-256 above. Main remained `507d5874a2a27a7f01b8fa6e98679b6256dc2582`. No workflow runs/statuses were found for the commit; local tests are not GitHub CI.
