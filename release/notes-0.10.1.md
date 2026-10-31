@@ -1,5 +1,45 @@
 ## Video Vision 0.10.1
 
+## 安装与升级 / Install and update
+
+### 中文
+
+推荐安装来源（可直接复制到 DSH 的“包名或地址”）：
+
+```text
+github:Tests4gptplay/dsh-video-vision#v0.10.1
+```
+
+也可使用本次正式安装包：[dsh-video-vision-0.10.1.tgz](https://github.com/Tests4gptplay/dsh-video-vision/releases/download/v0.10.1/dsh-video-vision-0.10.1.tgz)。下载后无需解压；可填本机 TGZ 完整路径或上述下载地址。[SHA-256 校验文件](https://github.com/Tests4gptplay/dsh-video-vision/releases/download/v0.10.1/SHA256SUMS-0.10.1.txt)：
+
+```text
+ad30f5f225459af0b38bcf59e690eae9767ee5aee5ff0e3a7c0ff0098515faf7  dsh-video-vision-0.10.1.tgz
+```
+
+**DSH Desktop**
+1. 打开侧栏 **插件 → 添加插件**，或箭头菜单中的 **安装第三方插件**。
+2. 在 **包名或地址** 填入上面的 GitHub 来源、TGZ 下载地址，或运行 DSH 电脑上的 TGZ 完整路径。
+3. 点击 **安装**，确认版本为 **0.10.1**，然后 **立即启用**。
+
+**已有版本升级**：同样填写本版来源，安装成功后确认版本并启用。保留设置、登录态、缓存、观看进度与用户文件；不要手动删除目录。若宿主提示已安装或要求先卸载，只按提示处理对应插件条目；是否重启以 DSH 提示为准。
+
+**DSH Web**：先停止对应 profile，在服务所在环境执行，成功后重启（profile 名不是 `web` 时换成实际名称）：
+
+```sh
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.10.1'
+```
+
+Desktop 与 Web 分别安装。运行依赖与平台条件见 [README](https://github.com/Tests4gptplay/dsh-video-vision/blob/v0.10.1/README.md)；曾安装旧宿主桥的用户参阅[一次性退出说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/v0.10.1/docs/testing/LEGACY-EXIT.md)，已完成者不必重复。
+
+### English
+
+In **DSH Desktop → Plugins → Add plugin** (or **Install third-party plugin**), paste the GitHub source above into the package/address field. Alternatively, use the linked release TGZ URL or its full local path on the DSH computer; do not unpack it. Install, verify **0.10.1**, and enable the plugin.
+
+To update, install from this version's source and verify the enabled version. Preserve settings, imported login state, cache, viewing progress and user files; do not manually delete directories. If DSH requires removal of the existing plugin entry, follow its prompt for that entry only. Restart only as requested by DSH.
+
+For **DSH Web**, stop the relevant profile, run the command above in the server environment (replace `web` with the actual profile name if different), then restart. Desktop and Web installations are separate. Verify the downloaded archive against the SHA-256 value above. See the linked README for dependencies/platform requirements and the legacy-exit guide only if applicable.
+
+
 多站点在线视频与本地视频分析：结合时间戳画面、音频、字幕与语音转写，支持接续观看、积累站点解析方法、导入登录态、管理缓存与提取保存。
 
 ### 新功能与改进
