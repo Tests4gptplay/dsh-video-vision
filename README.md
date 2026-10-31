@@ -4,7 +4,7 @@
 
 结合带时间戳的画面、音频、字幕与语音转写分析内容；按时间细看、接续观看，复用站点解析方法和登录态，并缓存、提取保存视频素材。
 
-当前正式版 **0.10.0** · [发行说明与安装包](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.0)。
+当前正式版 **0.10.1** · [发行说明与安装包](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.1)。
 
 ## 能做什么
 
@@ -38,10 +38,10 @@
 推荐安装来源：
 
 ```text
-github:Tests4gptplay/dsh-video-vision#v0.10.0
+github:Tests4gptplay/dsh-video-vision#v0.10.1
 ```
 
-也可从[正式发行页](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.0)下载 `dsh-video-vision-0.10.0.tgz`，核对发行页 SHA-256，无需解压。
+也可从[正式发行页](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.1)下载 `dsh-video-vision-0.10.1.tgz`，核对发行页 SHA-256，无需解压。
 
 **DSH Desktop**：在侧栏打开 **插件 → 添加插件**（或箭头菜单 **安装第三方插件**），在 **包名或地址** 填入上方 GitHub 来源；也可填运行 DSH 电脑上的 TGZ 完整路径或正式发行页的 TGZ 下载地址。点击 **安装**，核对版本后 **立即启用**。
 
@@ -50,7 +50,7 @@ github:Tests4gptplay/dsh-video-vision#v0.10.0
 **DSH Web**：先停止对应 profile，在服务所在环境执行，成功后重启：
 
 ```sh
-dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.10.0'
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.10.1'
 ```
 
 Web 与 Desktop 分别安装。曾安装旧宿主桥的用户，另见[一次性退出说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/LEGACY-EXIT.md)；已完成者不必重复。
@@ -90,13 +90,13 @@ Web 与 Desktop 分别安装。曾安装旧宿主桥的用户，另见[一次性
 - 语音转写需要先在 DSH 语音设置中准备识别器；没有平台字幕或识别器时，仍可查看画面和分析可用音频。
 - 站点访问效果取决于链接、解析方法和网站限制，不保证所有视频均可获取；直播请使用已结束的回放。
 - 登录态可能被网站过期、撤销或要求重新验证；备用解析方式不使用导入的登录态。Linux 的加密存储需要可用的 Secret Service，系统文件窗口需要 Zenity 或 KDialog。
-- 备用解析器仅在需要时准备。不同平台与本版本的实际验证范围见[验证说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/RELEASE-0.10.0.md)。
+- 备用解析器仅在需要时准备。不同平台与本版本的实际验证范围见[验证说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/RELEASE-0.10.1.md)。
 
 站点方法接口、参数、目录结构、命令行与实现原理见 [GitHub 技术文档](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/TECHNICAL-REFERENCE.md)。
 
 ## English overview
 
-Video Vision helps AI analyze multi-site online and local video through timestamped frames, audio, captions and speech transcription. Resume viewing, reuse site methods, import and manage encrypted browser-session copies, refresh cached media on request, and export video or individual files. Source quality, available captions and transcription depend on the site and prepared recognizer. Install version 0.10.0 from the release archive or `github:Tests4gptplay/dsh-video-vision#v0.10.0`.
+Video Vision helps AI analyze multi-site online and local video through timestamped frames, audio, captions and speech transcription. Resume viewing, reuse site methods, import and manage encrypted browser-session copies, refresh cached media on request, and export video or individual files. Source quality, available captions and transcription depend on the site and prepared recognizer. Install version 0.10.1 from the release archive or `github:Tests4gptplay/dsh-video-vision#v0.10.1`.
 
 ## License
 
