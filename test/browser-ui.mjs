@@ -96,7 +96,7 @@ let finishClear;clearPending=new Promise(resolve=>{finishClear=resolve});
 const clearing=button(nodes,'确认删除').props.onClick();nodes=render();
 assert.equal(button(nodes,'正在清理登录态…').props.disabled,true);
 finishClear();await clearing;nodes=render();
-assert(nodes.some(n=>n.props.role==='status'&&n.children.includes('VV 登录态副本已清理。来源浏览器、DSH 内置浏览器和媒体缓存未改动。')));
+assert(nodes.some(n=>n.props.role==='status'&&n.children.includes('Video Vision 登录态副本已清理。来源浏览器、DSH 内置浏览器和媒体缓存未改动。')));
 clearResult={cleared:false,failures:[{path:'synthetic-copy',code:'EACCES'}]};
 button(nodes,'清理登录态').props.onClick();nodes=render();
 await button(nodes,'确认删除').props.onClick();nodes=render();

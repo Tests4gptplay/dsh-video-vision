@@ -20,11 +20,11 @@ async function collectCookies(selection, dependencies = {}) {
   let browser;
   try {
     const info = await tools.createBrowserWithInfo(config,
-      { clientName: 'VV login state import' },
+      { clientName: 'Video Vision browser session import' },
       { browser: 'chrome',
         ...(selection.executablePath === undefined ? {} : { executablePath: selection.executablePath }),
         ...(selection.profileDirectory === undefined ? {} : { profileDirName: selection.profileDirectory }) },
-      { title: 'VV login state import' });
+      { title: 'Video Vision browser session import' });
     browser = info.browser;
     if (info.ownership !== 'attached' || !browser || typeof browser.unbind !== 'function') throw failure('incompatible');
     // createBrowserWithInfo implicitly binds a second control endpoint. Remove

@@ -1,6 +1,6 @@
 {
   "name": "dsh-video-vision",
-  "version": "0.10.0-candidate.3",
+  "version": "0.10.0-candidate.4",
   "description": "Analyze multi-site online and local video with frames, audio, subtitles and speech transcription; resume viewing, reuse site methods, import login state, and cache or export media.",
   "type": "module",
   "license": "MIT",

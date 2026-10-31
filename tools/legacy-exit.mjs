@@ -128,7 +128,7 @@ export async function run({ resources, state, expectedSha, apply = false, hostSt
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2), value = name => args[args.indexOf(name) + 1];
-  if (!args.includes('--resources') || !args.includes('--state')) throw Error('Usage: node legacy-exit.mjs --resources DIR --state VV_HOME [--apply --host-stopped --expect-sha256 HASH]');
+  if (!args.includes('--resources') || !args.includes('--state')) throw Error('Usage: node legacy-exit.mjs --resources DIR --state STATE_DIRECTORY [--apply --host-stopped --expect-sha256 HASH]');
   const result = await run({ resources: value('--resources'), state: value('--state'), expectedSha: args.includes('--expect-sha256') ? value('--expect-sha256') : null, apply: args.includes('--apply'), hostStopped: args.includes('--host-stopped') });
   console.log(JSON.stringify(result, null, 2));
   if (result.failures.length) process.exitCode = 1;

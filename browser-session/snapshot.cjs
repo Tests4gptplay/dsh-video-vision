@@ -6,7 +6,7 @@ const { endpointFromPortFile, discoverBrowserEndpoints } = require('./discovery.
 
 const messages = {
   disabled: '默认浏览器授权已关闭。',
-  rollback_failed: '登录态恢复记录需要处理；读取已停止。请先清理 VV 副本后重新导入。',
+  rollback_failed: '登录态恢复记录需要处理；读取已停止。请先清理 Video Vision 副本后重新导入。',
   no_snapshot: '请先在设置中导入登录态。',
   setup_required: '未找到可用的浏览器连接。请保持已登录的来源浏览器运行，并确认该浏览器允许连接后重试。',
   connection_failed: '未能连接正在运行的浏览器。请保持来源浏览器运行后重试。',

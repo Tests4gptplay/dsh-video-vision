@@ -17,6 +17,8 @@ function official({ version = VERSION, ownership = 'attached', failAt } = {}) {
     if (id.endsWith('package.json')) return { version };
     return { tools: { async createBrowserWithInfo(config, client, cli, bind) {
       calls.push('create');
+      assert.equal(client.clientName, 'Video Vision browser session import');
+      assert.equal(bind.title, 'Video Vision browser session import');
       assert.equal(config.extension, true); assert.equal(config.browser.isolated, undefined);
       assert.equal(config.browser.userDataDir, selection.userDataDir); assert.equal(config.timeouts.idle, 0);
       assert.deepEqual(cli, { browser: 'chrome', profileDirName: 'Default' });

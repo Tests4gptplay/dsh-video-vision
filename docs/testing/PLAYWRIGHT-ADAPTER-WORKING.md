@@ -4,9 +4,9 @@ This local development snapshot is not a published candidate. It reuses the Micr
 
 ## Dependency boundary
 
-The official `@playwright/mcp@0.0.83` distribution pins `playwright-core@1.64.0-alpha-1790635538000`. VV pins that exact core version and calls its exported, but internal and non-stable, `tools.createBrowserWithInfo`. Public cookie-list output omits required cookie fields; storage-state output writes additional browser storage; the generic tool response path may inspect page snapshots/console. The narrow adapter instead calls the attached context's `cookies()` and uses the existing VV encrypted snapshot and URL-filtered HTTP pipeline.
+The official `@playwright/mcp@0.0.83` distribution pins `playwright-core@1.64.0-alpha-1790635538000`. Video Vision pins that exact core version and calls its exported, but internal and non-stable, `tools.createBrowserWithInfo`. Public cookie-list output omits required cookie fields; storage-state output writes additional browser storage; the generic tool response path may inspect page snapshots/console. The narrow adapter instead calls the attached context's `cookies()` and uses the existing Video Vision encrypted snapshot and URL-filtered HTTP pipeline.
 
-The official browser connection initializes an attached tab (including Page/Runtime/Log protocol domains); it is not a single Storage-only CDP command. VV does not collect page console output, export storageState, or read a password database. Extension authorization applies to the browser context, not just the selected tab.
+The official browser connection initializes an attached tab (including Page/Runtime/Log protocol domains); it is not a single Storage-only CDP command. Video Vision does not collect page console output, export storageState, or read a password database. Extension authorization applies to the browser context, not just the selected tab.
 
 The official API implicitly binds a control endpoint. A short-lived worker isolates its temporary registry using the pinned internal `PWTEST_SERVER_REGISTRY` variable, unbinds before collecting cookies, closes the transport, and removes only its own temporary directory before returning data. This variable is not a supported public integration contract. The temporary descriptor is sensitive control metadata; no claim of zero temporary files is made. Cookie values travel only through process memory/IPC, not logs, command-line arguments, or unencrypted files. Windows ACL behavior is not yet validated on Windows.
 
@@ -26,7 +26,7 @@ The ordinary entry is now an explicit “Google Chrome (confirm in browser)” s
 
 When the physical profile is unknown, installation status remains unknown and does not block import. Successful extension capture supplies connection evidence for the current session; a subsequent explicit check may return unknown again. The store action opens the official page in detected Chrome, does not install anything, and does not mark installation complete.
 
-Partitioned cookies continue to be excluded by the existing common snapshot normalization, because VV's ordinary HTTP requests do not reproduce a browser's partition context. Adapter field fidelity is tested before this intentional shared filter; no claim is made that every browser cookie is replayable by HTTP.
+Partitioned cookies continue to be excluded by the existing common snapshot normalization, because Video Vision's ordinary HTTP requests do not reproduce a browser's partition context. Adapter field fidelity is tested before this intentional shared filter; no claim is made that every browser cookie is replayable by HTTP.
 
 ## Current local verification (2026-10-30)
 

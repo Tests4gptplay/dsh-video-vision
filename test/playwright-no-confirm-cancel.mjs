@@ -28,6 +28,7 @@ require('node:child_process').spawn = (executable, args, options) => {
   assert.equal(url.protocol, 'chrome-extension:');
   assert.equal(url.hostname, 'mmlmfjhmonkocbjadbfplnigmagldckm');
   assert.equal(url.pathname, '/connect.html');
+  assert.equal(JSON.parse(url.searchParams.get('client')).name, 'Video Vision browser session import');
   assert.equal(url.searchParams.has('token'), false);
   assert.equal(options.shell, false);
   process.send({ fixture: 'confirmation-opened' });
