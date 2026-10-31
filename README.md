@@ -4,7 +4,7 @@
 
 结合带时间戳的画面、音频、字幕与语音转写分析内容；按时间细看、接续观看，复用站点解析方法和登录态，并缓存、提取保存视频素材。
 
-**0.10.0 正式发布准备中。** 本页供发布前确认；正式标签和安装包尚未发布，下方正式安装来源在发行后启用。
+当前正式版 **0.10.0** · [发行说明与安装包](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.0)。
 
 ## 能做什么
 
@@ -35,13 +35,13 @@
 
 ## 安装与升级
 
-正式发行后，推荐安装来源：
+推荐安装来源：
 
 ```text
 github:Tests4gptplay/dsh-video-vision#v0.10.0
 ```
 
-也可从 GitHub Releases 下载 `dsh-video-vision-0.10.0.tgz`，核对发行页 SHA-256，无需解压。当前尚未发布，暂不要使用上述来源安装。
+也可从[正式发行页](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.0)下载 `dsh-video-vision-0.10.0.tgz`，核对发行页 SHA-256，无需解压。
 
 **DSH Desktop**：在侧栏打开 **插件 → 添加插件**（或箭头菜单 **安装第三方插件**），在 **包名或地址** 填入上方 GitHub 来源；也可填运行 DSH 电脑上的 TGZ 完整路径或正式发行页的 TGZ 下载地址。点击 **安装**，核对版本后 **立即启用**。
 
@@ -96,7 +96,7 @@ Web 与 Desktop 分别安装。曾安装旧宿主桥的用户，另见[一次性
 
 ## English overview
 
-Video Vision helps AI analyze multi-site online and local video through timestamped frames, audio, captions and speech transcription. Resume viewing, reuse site methods, import and manage encrypted browser-session copies, refresh cached media on request, and export video or individual files. Source quality, available captions and transcription depend on the site and prepared recognizer. Version 0.10.0 is being prepared; its release tag and installation archive are not available yet.
+Video Vision helps AI analyze multi-site online and local video through timestamped frames, audio, captions and speech transcription. Resume viewing, reuse site methods, import and manage encrypted browser-session copies, refresh cached media on request, and export video or individual files. Source quality, available captions and transcription depend on the site and prepared recognizer. Install version 0.10.0 from the release archive or `github:Tests4gptplay/dsh-video-vision#v0.10.0`.
 
 ## License
 

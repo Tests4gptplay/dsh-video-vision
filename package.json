@@ -66,6 +66,5 @@
   "scripts": {
     "test": "node test/run-all.mjs",
     "setup:resolver": "node bin/prepare.mjs"
-  },
-  "private": true
+  }
 }

@@ -1,0 +1,47 @@
+name: Release Video Vision 0.10.0
+on:
+  push:
+    branches: [main]
+    paths: [release/0.10.0.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-video-vision-0.10.0
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - name: Use matching pack toolchain
+        run: npm install --global npm@11.9.0 --ignore-scripts
+      - name: Pack and verify frozen payload
+        run: |
+          node -e "const p=require('./package.json'),r=require('./release/0.10.0.json');if(p.version!=='0.10.0'||r.version!=='0.10.0'||p.private)process.exit(1)"
+          npm pack --ignore-scripts --json > pack-result.json
+          python3 release/verify-package-0.10.0.py dsh-video-vision-0.10.0.tgz release/0.10.0.json
+          sha256sum dsh-video-vision-0.10.0.tgz > SHA256SUMS-0.10.0.txt
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view v0.10.0 --json tagName >/dev/null 2>&1; then
+            mkdir existing-release
+            gh release download v0.10.0 --pattern dsh-video-vision-0.10.0.tgz --dir existing-release
+            python3 release/verify-package-0.10.0.py existing-release/dsh-video-vision-0.10.0.tgz release/0.10.0.json
+            echo 'Existing release matches frozen payload; no changes made.'
+          else
+            if git ls-remote --exit-code --tags origin refs/tags/v0.10.0 > existing-tag.txt; then
+              test "$(cut -f1 existing-tag.txt)" = "$GITHUB_SHA" || { echo 'Tag already targets another commit'; exit 1; }
+            fi
+            gh release create v0.10.0 --target "$GITHUB_SHA" --title 'DSH Video Vision 0.10.0' --notes-file release/notes-0.10.0.md dsh-video-vision-0.10.0.tgz SHA256SUMS-0.10.0.txt
+          fi
