@@ -1,0 +1,210 @@
+{
+  "scope": "source",
+  "results": [
+    {
+      "file": "audio.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-audio-tail.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-budget-recovery.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-budgets.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-cache-recovery.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-frame-precision.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-host-pruner.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-response-lifecycle.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-service-locale.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "audit-theme.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "authorization-isolation.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "browser-clear-scroll.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "browser-session.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "browser-ui.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "cache.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "cdp-session.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "cdp-source.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "cdp-ui.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "extensions.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "frame-endpoints.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "keyring-snapshot-dispatch.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "keyring-storage.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "legacy-exit.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "linux-default-browser.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "linux-discovery.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "linux-listener-discovery.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "macos-discovery.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "native-ui.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "platform-native-ui.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "playwright-capture.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "playwright-no-confirm-cancel.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "playwright-source.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "prepare.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "product-surface.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "session-concurrency.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "smoke.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "snapshot-recovery.cjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "snapshot-transactions.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "source-identity.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "ui-locale.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "file": "unified-runtime.mjs",
+      "status": "pass",
+      "exitCode": 0
+    }
+  ]
+}

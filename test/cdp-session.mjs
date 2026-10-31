@@ -48,7 +48,7 @@ try {
  await assert.rejects(cookies(session), { code: 'no_snapshot' });
  await session.request('import');
  const bFile = join(many, 'cdp', id(B), 'session-state-keyring.bin');
- const bSaved = await readFile(bFile);
+ let bSaved = await readFile(bFile);
  assert.equal((await cookies(session)).cookies[0].value, 'synthetic-B');
  await session.select(id(A)); assert.equal((await cookies(session)).cookies[0].value, 'synthetic-A');
  const hold = { started: deferred(), release: deferred() }; pendingHold = hold;
@@ -58,6 +58,13 @@ try {
  assert.deepEqual(await readFile(aFile), aSaved, 'Cancelled A refresh does not overwrite its snapshot');
  assert.deepEqual(await readFile(bFile), bSaved, 'Cancelled A capture never writes B snapshot');
  assert.equal((await cookies(session)).cookies[0].value, 'synthetic-B');
+ const cancelHold = {started: deferred(), release: deferred()}; pendingHold = cancelHold;
+ const cancellable = session.request('import'); const cancelled = assert.rejects(cancellable, /cancelled|aborted/);
+ await cancelHold.started.promise; session.cancelImport(); await cancelled;
+ assert.equal((await cookies(session)).cookies[0].value, 'synthetic-B', 'Cancelling import does not revoke saved snapshot reads');
+ cancelHold.release.resolve(); await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(await readFile(bFile), bSaved, 'Late cancelled capture does not overwrite previous snapshot');
+ await session.request('import'); assert.equal((await cookies(session)).cookies[0].value, 'synthetic-B', 'A later explicit import is usable'); bSaved = await readFile(bFile);
  endpoints = []; const count = captures;
  assert.equal((await session.status()).sourceId, id(B));
  assert.equal((await cookies(session)).cookies[0].value, 'synthetic-B');

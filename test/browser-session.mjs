@@ -65,3 +65,10 @@ try {
   await session.dispose();
   await rm(directory, { recursive: true, force: true });
 }
+{
+ const root=await mkdtemp(join(tmpdir(),'vv-cancel-before-ready-'));let imported=0,cancelled=0;
+ const local={request:async op=>{if(op==='import'){imported++;return{imported:true}}return{ready:true}},cancelImport(){cancelled++},cancel(){},async close(){}};
+ const s=new BrowserSessions({browserSessionAuthorized:true},{directory:root,localSession:local});
+ try{const pending=s.setup();s.cancelImport();await assert.rejects(pending,/cancelled/);assert.equal(imported,0);assert.equal(cancelled,1);assert.equal(s.enabled(),true);await s.setup();assert.equal(imported,1)}finally{await s.dispose();await rm(root,{recursive:true,force:true})}
+ console.log('PASS explicit cancel during authorization persistence cannot miss the pending import; authorization preserved and retry allowed.');
+}

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 let factory, Component, inject, index = 0;
-const states = [], calls = [];
+const states = [], calls = [], callPayloads = [];
 let connected = false, imported = false, enabled = true, failRefresh = false, finishImport;
 const importResult = new Promise(resolve => { finishImport = resolve; });
 const status = () => ({ enabled, connected, imported, snapshotState: imported ? "ready" : "absent", sourceId: "A", sourceAvailable: true, ready: true, supported: false, browser: 'Google Chrome', desktopIntegration: false });
@@ -20,13 +20,14 @@ const clientSource = await readFile(new URL('../client.js', import.meta.url), 'u
 vm.runInNewContext(clientSource, { window, dshDesktop: { protocolVersion: 1, browser: {} } });
 factory(() => React).apply({ effect: fn => fn(), locale: { register: (_ns, values) => { dictionaries = values; return () => {}; }, bind: () => key => dictionaries.zh[key], getSnapshot: () => ({ active: 'zh' }), subscribe: () => () => {} },
   connection: { rpc: { call: async (_path, method, payload) => {
-    calls.push(method); let value;
+    calls.push(method); callPayloads.push({method,payload}); let value;
     if (method.endsWith('/browser-setup')) { await importResult; connected = imported = true; value = status(); }
     else if (method.endsWith('/browser-refresh')) {
       if (failRefresh) return { ok: false, error: { message: '浏览器未确认，原登录态未改动。' } };
       connected = imported = true; value = status();
     }
     else if (method.endsWith('/browser-clear')) { await clearPending; value = clearResult; if (value.cleared) connected = imported = false; }
+    else if (method.endsWith('/browser-cancel')) value = {cancellationRequested:true};
     else if (method.endsWith('/browser-status')) value = status();
     else if (method.endsWith('/browser-authorization')) { enabled = payload.enabled; value = status(); }
     else if (method.endsWith('/list')) value = listing();
@@ -36,9 +37,9 @@ factory(() => React).apply({ effect: fn => fn(), locale: { register: (_ns, value
   slots: { inject: (_name, callback) => callback(), register: (options, component) => { Component = component; inject = options.inject; } }
 });
 assert.equal(dictionaries.zh.ui48, '保持已登录的浏览器运行；现有的浏览器连接会自动识别。');
-assert.equal(dictionaries.zh.ui53, '已有浏览器连接时，选择来源后导入；需要建立新的Chrome连接时，可使用上方设置。');
+assert.equal(dictionaries.zh.ui53, '安装后，在浏览器内确认连接；再次导入会更新此处保存的登录态。');
 assert.equal(dictionaries.en.ui48, 'Keep your signed-in browser running. Existing browser connections are detected automatically.');
-assert.equal(dictionaries.en.ui53, 'If a browser connection already exists, select its source before importing. Use the settings above to establish a new Chrome connection.');
+assert.equal(dictionaries.en.ui53, 'After installation, confirm the connection in the browser. Importing again updates the login state saved here.');
 states[0] = listing();
 function render() {
   index = 0; const nodes = [];
@@ -57,6 +58,10 @@ assert(nodes.some(n => n.props.className === 'vv-sub' && n.children.includes('�
 const pending = button(nodes, '导入登录态').props.onClick();
 nodes = render();
 assert.equal(button(nodes, '正在导入登录态…').props.disabled, true);
+assert.equal(button(nodes, '取消导入').props.disabled, false);
+await button(nodes, '取消导入').props.onClick();
+assert.equal(calls.filter(x=>x.endsWith('/browser-cancel')).length,1);
+assert.equal(button(render(), '正在导入登录态…').props.disabled,true,'Cancellation request does not prematurely unlock the pending import');
 finishImport(); await pending;
 nodes = render();
 assert.equal(button(nodes, '登录态已导入').props.disabled, true);
@@ -72,6 +77,7 @@ await button(nodes, '刷新登录态').props.onClick(); nodes = render();
 assert(nodes.some(n => n.props.role === 'status' && n.children.includes('刷新完成：登录态已更新。')));
 connected = false;
 await button(nodes, '检查状态').props.onClick(); nodes = render();
+assert.equal(callPayloads.findLast(c=>c.method.endsWith('/browser-status')).payload.checkExtension,true,'Explicit status check requests selected-source installation confirmation');
 assert.equal(button(nodes, '导入登录态').props.disabled, false);
 await nodes.find(n => n.props['aria-label'] === '授权使用默认浏览器登录态').props.onChange({ target: { checked: false } });
 assert(render().some(n => n.props.role === 'status' && n.children.includes('已保存：浏览器登录态授权关闭。')));

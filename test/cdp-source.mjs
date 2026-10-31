@@ -45,7 +45,7 @@ try {
   source = Sources.createCdpSource(options);
   assert.equal((await source.capture())[0].value, 'synthetic-B');
   endpoints = [A];
-  assert.deepEqual(await source.selected(), { id: id(B), storageId: id(B), label: list[1].label }, 'Offline selection remains available for snapshot reads');
+  assert.deepEqual(await source.selected(), { id: id(B), storageId: id(B), label: list[1].label, extensionInstallation: {state: 'unknown'} }, 'Offline selection remains available for snapshot reads');
   const previousCalls = calls.length;
   await assert.rejects(source.capture(), { code: 'browser_source_unavailable' });
   assert.equal(calls.length, previousCalls, 'Missing selected endpoint does not try another browser');

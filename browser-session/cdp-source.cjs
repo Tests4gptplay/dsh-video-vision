@@ -4,12 +4,15 @@ const { createHash } = require('node:crypto');
 const { discoverBrowserEndpoints } = require('./discovery.cjs');
 const Snapshot = require('./snapshot.cjs');
 const P = require('./protocol.cjs');
+const Extension = require('./playwright-source.cjs');
 const fault = (code, message) => Object.assign(new Error(message), { code });
 const switched = () => fault('browser_source_changed', '浏览器来源已切换，请重试。');
 function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpoints,
-  capture: captureEndpoint = Snapshot.captureCookies, io = fs } = {}) {
+  capture: captureEndpoint = Snapshot.captureCookies, io = fs,
+  discoverExtensions = discover === discoverBrowserEndpoints ? Extension.browserConfirmedSources : () => [],
+  captureExtension = Extension.captureExtension, inspectExtension = Extension.inspectInstallation } = {}) {
   const selectionFile = join(directory, 'cdp-selected-source.json');
-  const active = new Set();
+  const active = new Set(), installation = new Map();
   let selectedId = null, selectedLabel = null, storageId = null, epoch = 0, selectionError, records = {};
   let selectionTail = (async () => {
     try {
@@ -27,7 +30,7 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
   })();
   async function sources(signal) {
     signal?.throwIfAborted();
-    const endpoints = await discover({ signal });
+    const endpoints = [...await discover({ signal }), ...await discoverExtensions()];
     signal?.throwIfAborted();
     return endpoints.map(item => {
       // Old injected discoveries remain distinguishable; never silently use their
@@ -35,8 +38,9 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
       const endpoint = typeof item === 'string' ? item : item.endpoint;
       const identity = typeof item === 'string' ? 'unverified-endpoint:' + endpoint : item.identity;
       const id = createHash('sha256').update(identity).digest('hex');
-      const legacyId = createHash('sha256').update(endpoint).digest('hex');
-      return { id, legacyId, label: typeof item === 'string' ? new URL(endpoint).host + ' (profile unverified)' : item.label, endpoint };
+      const legacyId = endpoint ? createHash('sha256').update(endpoint).digest('hex') : null;
+      return { id, legacyId, label: typeof item === 'string' ? new URL(endpoint).host + ' (profile unverified)' : item.label, endpoint,
+        ...(typeof item === 'object' && item.kind === 'playwright-extension' ? {kind: item.kind, extension: item.extension} : {}) };
     });
   }
   async function list() { await selectionTail; const live = (await sources()).map(({ id, label }) => ({ id, label, available: true }));
@@ -44,7 +48,8 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
   async function selected() {
     await selectionTail;
     if (selectionError) throw selectionError;
-    return selectedId ? { id: selectedId, storageId, label: selectedLabel } : null;
+    return selectedId ? { id: selectedId, storageId, label: selectedLabel,
+      extensionInstallation: installation.get(selectedId) || {state: 'unknown'} } : null;
   }
   function select(id) {
     const operation = selectionTail.then(async () => {
@@ -84,7 +89,7 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
       controller.signal.throwIfAborted();
       if (selectedId !== boundId || epoch !== generation) throw switched();
     };
-    let abortListener;
+    let abortListener, extensionWork = false;
     const stopped = new Promise((_, reject) => {
       abortListener = () => reject(controller.signal.reason);
       controller.signal.addEventListener('abort', abortListener, { once: true });
@@ -94,17 +99,40 @@ function createCdpSource({ directory = P.root(), discover = discoverBrowserEndpo
         const source = (await sources(controller.signal)).find(source => source.id === boundId);
         check();
         if (!source) throw fault('browser_source_unavailable', '所选浏览器连接不可用。');
-        const cookies = await captureEndpoint({ endpoint: source.endpoint, signal: controller.signal });
+        // Installation evidence is not a permission/connection gate. The
+        // official extension still asks the user to allow this import.
+        extensionWork = source.kind === 'playwright-extension';
+        const cookies = source.kind === 'playwright-extension'
+          ? await captureExtension(source, { signal: controller.signal })
+          : await captureEndpoint({ endpoint: source.endpoint, signal: controller.signal });
         check();
+        if (source.kind === 'playwright-extension') installation.set(boundId, {state: 'installed', evidence: 'successful_extension_connection', connection: 'verified_for_last_import'});
         return cookies;
       })();
-      return await Promise.race([work, stopped]);
+      try { return await Promise.race([work, stopped]); }
+      catch (error) {
+        // The extension adapter acknowledges cancellation only after its worker
+        // closes and its private temporary artifacts are removed. Keep the UI
+        // pending until that cleanup settles; legacy CDP retains its late guard.
+        if (extensionWork) { try { await work; } catch (settledError) { if (settledError?.code === 'cleanup_failed') throw settledError; } }
+        throw error;
+      }
     } finally {
       active.delete(controller);
       signal?.removeEventListener('abort', abort);
       controller.signal.removeEventListener('abort', abortListener);
     }
   }
-  return { list, selected, select, capture };
+  async function inspectSelected() {
+    await selectionTail;
+    const id = selectedId;
+    if (!id) return {state: 'unknown'};
+    // Constructing selected-source metadata does not enumerate browser profiles.
+    const source = (await discoverExtensions()).find(item => createHash('sha256').update(item.identity).digest('hex') === id);
+    const state = source ? await inspectExtension(source) : {state: 'not_applicable'};
+    if (selectedId === id) installation.set(id, state);
+    return state;
+  }
+  return { list, selected, select, capture, inspectSelected };
 }
 module.exports = { createCdpSource };

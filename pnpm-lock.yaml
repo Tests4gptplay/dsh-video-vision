@@ -14,6 +14,9 @@ importers:
       '@napi-rs/keyring':
         specifier: ^2.1.2
         version: 2.1.2
+      playwright-core:
+        specifier: 1.64.0-alpha-1790635538000
+        version: 1.64.0-alpha-1790635538000
 
 packages:
 
@@ -107,6 +110,11 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
+  playwright-core@1.64.0-alpha-1790635538000:
+    resolution: {integrity: sha512-pNwaXirhXMRLaRQs4NQ18EpTdtDoFwyPH9FOaaDC7YXG4hpwE2xmwCic/1srbuExVQC7zT9LJSJpDBAru+Vo9A==}
+    engines: {node: '>=20'}
+    hasBin: true
+
 snapshots:
 
   '@deepseek-ai/cosmokit@1.8.6': {}
@@ -168,3 +176,5 @@ snapshots:
       '@napi-rs/keyring-win32-x64-msvc': 2.1.2
 
   '@standard-schema/spec@1.1.0': {}
+
+  playwright-core@1.64.0-alpha-1790635538000: {}

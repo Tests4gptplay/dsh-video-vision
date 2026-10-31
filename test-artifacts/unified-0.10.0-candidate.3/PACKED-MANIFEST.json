@@ -1,0 +1,246 @@
+{
+  "version": "0.10.0-candidate.3",
+  "filename": "dsh-video-vision-0.10.0-candidate.3.tgz",
+  "sha256": "178044e27ce60628cb6407242a31457d883eeaa707ad19804b47d11d93410a36",
+  "size": 84152,
+  "fileCount": 45,
+  "files": [
+    {
+      "path": "LICENSE",
+      "size": 1070,
+      "sha256": "a4c4241100b108ce611d06f7163e6f21cfe7d85180ddde5edf8b8a0c6268aadd"
+    },
+    {
+      "path": "README.md",
+      "size": 6417,
+      "sha256": "684276c29dd37ecd5e195115a9bd961421a4e8e55608ec34fa5bb75f9525dbc9"
+    },
+    {
+      "path": "SPONSOR.md",
+      "size": 1365,
+      "sha256": "19975eeff42c52a68c00dbd79e4cff113ff10d977c92e1ea71299cb1df23a110"
+    },
+    {
+      "path": "bin/prepare.mjs",
+      "size": 656,
+      "sha256": "30c88aed3e6166ef613386265fdf9b7bd926f3cf02a0780ed22f098fd1558081"
+    },
+    {
+      "path": "bin/resolver.mjs",
+      "size": 938,
+      "sha256": "1c1c016d1e87e58a103614548493f393fd94f26f25565ad1a6d48bfacc05304e"
+    },
+    {
+      "path": "bin/video-vision.mjs",
+      "size": 3269,
+      "sha256": "c6d4c4f4b2f4f47a74f89c5b000de983ac5335e2b2ad8cc32a0e2a997c88ea59"
+    },
+    {
+      "path": "browser-session/cdp-session.cjs",
+      "size": 5179,
+      "sha256": "401ee746abdb327188882bb5f64b3b01d62b087e3741d8ee03f5fc85523a4088"
+    },
+    {
+      "path": "browser-session/cdp-source.cjs",
+      "size": 8503,
+      "sha256": "246d9ca944314403153b8096f552d328a8d8d8438322903b8b6a4d0bb3bf69ed"
+    },
+    {
+      "path": "browser-session/discovery.cjs",
+      "size": 3457,
+      "sha256": "a597841f7fa3180f40b64199d62f22bb43398ed5c09c6814a15d0c1ca15dbf42"
+    },
+    {
+      "path": "browser-session/keyring-storage.cjs",
+      "size": 3682,
+      "sha256": "1ca946f28bfcab02b75ddd9c22c72dd24cf03affed9787e11ee9ea4fc59ee0df"
+    },
+    {
+      "path": "browser-session/platform/darwin.cjs",
+      "size": 3474,
+      "sha256": "3a66ba343bd4e386ef287b5061fb381de59b048c40f543f40277a4bcedce9597"
+    },
+    {
+      "path": "browser-session/platform/index.cjs",
+      "size": 360,
+      "sha256": "7181015666e6d93c02f4cf1d29da324a4aa966bead016a035b81b08492ceedbf"
+    },
+    {
+      "path": "browser-session/platform/linux.cjs",
+      "size": 4761,
+      "sha256": "21b8257da9f7d461a749d3d015cf08b5c9066ce39766d16d9c5e587ef33a8477"
+    },
+    {
+      "path": "browser-session/platform/windows.cjs",
+      "size": 2108,
+      "sha256": "e77668db119fa3c3d01a76ec62d724783468e80c798e8b5dc3a8727ea07f39bd"
+    },
+    {
+      "path": "browser-session/playwright-capture.cjs",
+      "size": 5152,
+      "sha256": "109a28188f756f34c0aa76a7992232c04763941eca280625f2b426315f9c4918"
+    },
+    {
+      "path": "browser-session/playwright-source.cjs",
+      "size": 4845,
+      "sha256": "24aa882e82171ac2f23397e8505cce3cf69c4872c75ec8ea1508127b64e94b67"
+    },
+    {
+      "path": "browser-session/playwright-worker.cjs",
+      "size": 3245,
+      "sha256": "f48a414bfb2836070b984fb8f558fbc210f9653ceea1524f3901c3a7ad9b3153"
+    },
+    {
+      "path": "browser-session/protocol.cjs",
+      "size": 1643,
+      "sha256": "7bf7b8c8d09a30a961a588bc8afce031ebe5dc3b50a6a6e95b91915eee2fa82f"
+    },
+    {
+      "path": "browser-session/snapshot.cjs",
+      "size": 12322,
+      "sha256": "d763d69afb7e53237c53f5bfcf3009eeeaf1dbfcfcba5f57fbdff305931a7176"
+    },
+    {
+      "path": "client.js",
+      "size": 41365,
+      "sha256": "e5137a4af143b5f32033e4616bbdfc647c4930561ea61b1f72020175b49d0b33"
+    },
+    {
+      "path": "cordis.patch.yml",
+      "size": 62,
+      "sha256": "a38788af39b42991345fcd9c1023e8b8d9c8c2dbb65af6262223e7ddad374ea5"
+    },
+    {
+      "path": "index.js",
+      "size": 13757,
+      "sha256": "ebde431f07c81a963aded9ecc409d068df8a22cbfc820c58f36a3e3870e8db3b"
+    },
+    {
+      "path": "lib/audio.js",
+      "size": 9428,
+      "sha256": "1a0f16f64131484540d20f1fd53645cb4b0c264974f50c7a7792847370773e1c"
+    },
+    {
+      "path": "lib/bilibili.js",
+      "size": 5546,
+      "sha256": "a0dceda59fec4ac5e72e4a47463b2f37475a5ca34f5773e39a073d523eef0b8f"
+    },
+    {
+      "path": "lib/browser-session.js",
+      "size": 10487,
+      "sha256": "baf50d3d28f0d7a7ce69c39701fb40c6ef6df69efff6c4339678ff912978a0ac"
+    },
+    {
+      "path": "lib/budgets.js",
+      "size": 3119,
+      "sha256": "99f7ecd8ccc2eef57cbd95a3381eb13b4d6195193b575282558c64a04f68d583"
+    },
+    {
+      "path": "lib/cache.js",
+      "size": 12829,
+      "sha256": "4fc620a73a52bf2d5672b14ed7d6c95f5de6d4c1c80d2f2708630b861cc0d523"
+    },
+    {
+      "path": "lib/dependencies.js",
+      "size": 701,
+      "sha256": "64951cf02cf11768bae82415cbe5cde50c6abce8f65a5152d474a8318c5c4be5"
+    },
+    {
+      "path": "lib/engine.js",
+      "size": 22362,
+      "sha256": "e119c88d0759f46af4767c76bd4e700a6bf4567683c83d112fa96edf67260dc1"
+    },
+    {
+      "path": "lib/extensions.js",
+      "size": 7404,
+      "sha256": "2bf3b7741a3319d94216027113b0bdfe9e9014f9b8fc64eac3ea56ab7d54bcd4"
+    },
+    {
+      "path": "lib/native-session.js",
+      "size": 3562,
+      "sha256": "a6a98ed678c5087ef61c7cf73f7f1398236fb4e6835b4cce43d0bb2ebed95884"
+    },
+    {
+      "path": "lib/native-ui.js",
+      "size": 6032,
+      "sha256": "d42297fae43e59574b4bc50abc62a7ae2a3e34ca9d5286c0c2be1844a7ae9589"
+    },
+    {
+      "path": "lib/prepare.js",
+      "size": 3269,
+      "sha256": "9a411d206a177e059ec0b6a30787d5145c7e5974dce1db8fa31b76d9259a519f"
+    },
+    {
+      "path": "lib/process.js",
+      "size": 3584,
+      "sha256": "a34fd0bdc1fac6432ac4af5e82373e6a708eeca1a756c5bb8791762b7fc7b0c5"
+    },
+    {
+      "path": "lib/settings.js",
+      "size": 8122,
+      "sha256": "9894f2869d4387b37989e5397393dc37ff428a3fd8248eadffda2816f972081a"
+    },
+    {
+      "path": "lib/ui-locale.js",
+      "size": 6421,
+      "sha256": "9358b13de6125674ccee109526b500eb8471e024b92b9f0285a600fffa50948b"
+    },
+    {
+      "path": "lib/windows-ui.ps1",
+      "size": 2234,
+      "sha256": "b00e801bee1c7705a6335ce4a153d2972781fbb987f941163f46eb0f4ba5aa56"
+    },
+    {
+      "path": "lib/ytdlp.js",
+      "size": 10234,
+      "sha256": "ae3462ca4ec6c995724d8cc36905bf682e76b8c06b8edb743dd0581fb02536f6"
+    },
+    {
+      "path": "package.json",
+      "size": 1950,
+      "sha256": "0012325f5ec462163f0adf6f0bbf346ae55b38d4050428c081a17b5a243c797f"
+    },
+    {
+      "path": "resources/audio.md",
+      "size": 3330,
+      "sha256": "266cd69af65bfb7d3c0991fbc674e6313d9dfccc0af2f43f5f7586ac136fea06"
+    },
+    {
+      "path": "resources/configuration.md",
+      "size": 950,
+      "sha256": "52afde6d9b202eb5e941cad2c3b0fffbc1c0572d04f094b56710beaf66795af2"
+    },
+    {
+      "path": "resources/example.mjs.txt",
+      "size": 1224,
+      "sha256": "71ee6bd5a2ddc5745ae9998fea7c48ab357955bdeb0a0f6c457a6d4b8bdc469f"
+    },
+    {
+      "path": "resources/GUIDANCE.md",
+      "size": 3473,
+      "sha256": "94e10684cc8e6d6cd0ce1acfb72b7cbaf182b7529863f222b19b76b14d64210a"
+    },
+    {
+      "path": "resources/native-session.md",
+      "size": 5568,
+      "sha256": "a33215992a69fc590acdcfa3e05d5b7be899f4d86563592f624b34f259423599"
+    },
+    {
+      "path": "resources/resolvers.md",
+      "size": 2679,
+      "sha256": "0b7982961c20a1b15b3684d37ca4ed00abafae5bec8bdaba46771eaf707ab4c9"
+    }
+  ],
+  "checks": {
+    "allPackedBytesMatchSource": true,
+    "markdownLinksAndExportsChecked": true,
+    "issues": [],
+    "changeFromTestedArchive": [
+      "README.md",
+      "package.json"
+    ],
+    "packageMetadataChange": "description only",
+    "other43FilesByteIdentical": true,
+    "testedArchiveSha256": "2ffbe78cd9ae12c988b572f1df1f7a5968dcbac2d6c979a2161e1def2f55c2b2"
+  }
+}

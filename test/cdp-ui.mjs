@@ -24,6 +24,7 @@ function fixture(desktop = false) {
  }, connection: { rpc: { call: async (_path, method, payload) => {
   calls.push({ method, payload }); let value;
   if (method.endsWith('/browser-source')) { status = { ...status, sourceId: payload.sourceId, browser: status.sources.find(item => item.id === payload.sourceId)?.label }; value = status; }
+  else if (method.endsWith('/browser-settings')) value = { opened: true };
   else if (method.endsWith('/list')) value = listing();
   else throw new Error(method);
   return { ok: true, value };
@@ -107,3 +108,30 @@ assert.equal(e.find(n=>n.type==='button'&&n.children[0]==='刷新登录态').pro
 edge.status({sourceAvailable:true});e=edge.render();
 assert.equal(e.find(n=>n.type==='button'&&n.children[0]==='刷新登录态').props.disabled,false,'Explicit runtime availability takes precedence');
 console.log('PASS: saved offline source selectable without enabling capture; runtime availability precedence.');
+
+const extension=fixture();
+const findButton=(nodes,label)=>nodes.find(n=>n.type==='button'&&n.children[0]===label);
+extension.status({sourceAvailable:true,extensionInstallation:{state:'not_installed'}});
+let extensionNodes=extension.render();
+assert.equal(findButton(extensionNodes,'安装 Chrome 扩展').props.disabled,false);
+assert.equal(extension.calls.length,0,'Rendering never probes extension installation');
+await findButton(extensionNodes,'安装 Chrome 扩展').props.onClick();extensionNodes=extension.render();
+assert.equal(extension.calls.filter(c=>c.method.endsWith('/browser-settings')).length,1);
+assert(!findButton(extensionNodes,'已安装'),'Opening store does not establish installation');
+assert(extensionNodes.some(n=>n.props.role==='status'&&n.children.includes('已打开扩展商店页面。')));
+extension.status({extensionInstallation:{state:'installed'}});extensionNodes=extension.render();
+assert.equal(findButton(extensionNodes,'已安装').props.disabled,true);
+assert.equal(findButton(extensionNodes,'导入登录态').props.disabled,false,'Verified installation disables only installation button');
+for(const state of ['unknown','failed']) {
+ extension.status({extensionInstallation:{state}});extensionNodes=extension.render();
+ assert.equal(findButton(extensionNodes,'安装 Chrome 扩展').props.disabled,false);
+ assert.equal(findButton(extensionNodes,'导入登录态').props.disabled,false,'Unknown installation does not block an available source');
+ assert(extensionNodes.some(n=>n.children.includes('安装状态尚未确认。')));
+}
+extension.status({extensionInstallation:{state:'checking'}});extensionNodes=extension.render();
+assert.equal(findButton(extensionNodes,'正在检查安装状态…').props.disabled,true);
+extension.language('en');extension.status({extensionInstallation:{state:'installed'}});
+assert.equal(findButton(extension.render(),'Installed').props.disabled,true);
+extension.status({extensionInstallation:{state:'unknown'}});
+assert.equal(findButton(extension.render(),'Install Chrome extension').props.disabled,false);
+console.log('PASS: verified installation/absent/unknown/failed/checking zh/en UI, only install button gated, store opening is not installation, no render probe. VM only.');

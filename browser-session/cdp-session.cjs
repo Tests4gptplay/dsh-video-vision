@@ -4,20 +4,21 @@ const {createCdpSource}=require('./cdp-source.cjs');
 const {createSnapshotService}=require('./snapshot.cjs');
 const {createKeyringStorage}=require('./keyring-storage.cjs');
 function createCdpSession({directory,source=createCdpSource({directory}),createStorage=createKeyringStorage,createService=createSnapshotService}={}) {
- const services=new Map(),controllers=new Set();let closed=false, clearing=false;
+ const services=new Map(),controllers=new Set(),importControllers=new Set();let closed=false, clearing=false;
  async function chosen(){return source.selected();}
  async function serviceFor(value){const key=value.storageId || value.id;if(!services.has(key)){const dir=join(directory,'cdp',value.storageId || value.id);const task=(async()=>{await fs.mkdir(dir,{recursive:true,mode:0o700});const safeStorage=await createStorage({directory:dir});return createService({directory:dir,authorizationDirectory:directory,filename:'session-state-keyring.bin',source:value.label,safeStorage,capture:async options=>{const current=await source.selected();if((current?.storageId || current?.id)!==key)throw Error('浏览器来源已切换，请重试。');options.signal?.throwIfAborted();return source.capture(options);}});})();services.set(key,task);task.catch(()=>services.delete(key));}return services.get(key);}
  function cancel(){for(const c of controllers)c.abort(new Error('浏览器来源已切换或授权已关闭。'));controllers.clear();}
+ function cancelImport(){for(const c of importControllers)c.abort(new Error('Browser import cancelled.'));}
  async function select(id){if(clearing)throw Error('Login-state cleanup is in progress.');cancel();await source.select(id);return status();}
- async function status(){let items=[],discoveryError;try{items=await source.list();}catch(error){discoveryError=error.code||'source_discovery_failed';}const value=await chosen();const state=value?await(await serviceFor(value)).status():{ready:true,connected:false,imported:false,importedAt:null,snapshotState:'absent'};return {...state,discoveryError:discoveryError||null,sourceAvailable:items.some(item=>item.id===value?.id && item.available!==false),localCapture:true,sourceId:value?.id||null,source:value?.label||'',sources:items};}
+ async function status({checkExtension=false}={}){if(checkExtension)await source.inspectSelected?.();let items=[],discoveryError;try{items=await source.list();}catch(error){discoveryError=error.code||'source_discovery_failed';}const value=await chosen();const state=value?await(await serviceFor(value)).status():{ready:true,connected:false,imported:false,importedAt:null,snapshotState:'absent'};return {...state,discoveryError:discoveryError||null,extensionInstallation:value?.extensionInstallation || {state:"unknown"},sourceAvailable:items.some(item=>item.id===value?.id && item.available!==false),localCapture:true,sourceId:value?.id||null,source:value?.label||'',sources:items};}
  async function request(op,payload={},options={}){
   if(clearing)throw Error('Login-state cleanup is in progress.');
   if(closed)throw Error('浏览器会话服务已关闭。');
-  if(op==='status')return status();
-  const controller=new AbortController();controllers.add(controller);
+  if(op==='status')return status(payload);
+  const controller=new AbortController();controllers.add(controller);if(op==='import')importControllers.add(controller);
   const signal=AbortSignal.any([controller.signal,...(options.signal?[options.signal]:[])]);
-  try{signal.throwIfAborted();const value=await chosen();signal.throwIfAborted();if(!value)throw Error('请选择来源浏览器连接。');const service=await serviceFor(value);signal.throwIfAborted();if((await source.selected())?.id!==value.id)throw Error('浏览器来源已切换，请重试。');const result=await service.dispatch({...payload,op},signal);if(result?.committed)return {...result,committedSourceId:value.id};signal.throwIfAborted();if((await source.selected())?.id!==value.id)throw Error('浏览器来源已切换，请重试。');return result;}
-  finally{controllers.delete(controller);}
+  try{signal.throwIfAborted();const value=await chosen();signal.throwIfAborted();if(!value)throw Error('请选择来源浏览器连接。');if(op==='import')await source.inspectSelected?.();signal.throwIfAborted();const service=await serviceFor(value);signal.throwIfAborted();if((await source.selected())?.id!==value.id)throw Error('浏览器来源已切换，请重试。');const result=await service.dispatch({...payload,op},signal);if(result?.committed)return {...result,committedSourceId:value.id};signal.throwIfAborted();if((await source.selected())?.id!==value.id)throw Error('浏览器来源已切换，请重试。');return result;}
+  finally{controllers.delete(controller);importControllers.delete(controller);}
  }
  async function clear(){
   if(clearing)throw Error('Login-state cleanup is in progress.');
@@ -31,6 +32,6 @@ function createCdpSession({directory,source=createCdpSource({directory}),createS
   clearing=false; return {cleared:failures.length===0,failures};
  }
  async function close(){closed=true;cancel();await source.close?.();await Promise.allSettled([...services.values()].map(async p=>(await p).close()));services.clear();}
- return {request,status,select,cancel,clear,close};
+ return {request,status,select,cancel,cancelImport,clear,close};
 }
 module.exports={createCdpSession};

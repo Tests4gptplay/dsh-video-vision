@@ -1,7 +1,7 @@
 {
   "name": "dsh-video-vision",
-  "version": "0.10.0-candidate.2",
-  "description": "Watch and analyze online or local video in DSH with frames, audio and captions; cache and export media, reuse site methods, and use yt-dlp as a backup.",
+  "version": "0.10.0-candidate.3",
+  "description": "Analyze multi-site online and local video with frames, audio, subtitles and speech transcription; resume viewing, reuse site methods, import login state, and cache or export media.",
   "type": "module",
   "license": "MIT",
   "author": "Tests4gptplay",
@@ -40,7 +40,10 @@
     "browser-session/keyring-storage.cjs",
     "browser-session/cdp-source.cjs",
     "browser-session/cdp-session.cjs",
-    "SPONSOR.md"
+    "SPONSOR.md",
+    "browser-session/playwright-source.cjs",
+    "browser-session/playwright-capture.cjs",
+    "browser-session/playwright-worker.cjs"
   ],
   "dsh": {
     "bundle": {
@@ -57,7 +60,8 @@
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.2",
-    "@napi-rs/keyring": "^2.1.2"
+    "@napi-rs/keyring": "^2.1.2",
+    "playwright-core": "1.64.0-alpha-1790635538000"
   },
   "scripts": {
     "test": "node test/run-all.mjs",
