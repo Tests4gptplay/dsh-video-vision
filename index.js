@@ -82,10 +82,10 @@ export function makeTool(ctx, settings = {}, nativeSession) {
       else if (action === 'status' && !args.video_id) {
         try { asset = await engine.load(); } catch (e) {
           if (e.code !== 'ENOENT' && !/Open a video first/.test(e.message)) throw e;
-          return { action, plugin_version: '0.10.0-candidate.5', video: null, speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([key, value]) => key !== 'cookieFile' && value !== undefined)) };
+          return { action, plugin_version: '0.10.0', video: null, speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config), configuration: Object.fromEntries(Object.entries({ ...DEFAULTS, ...config, proxy: config.proxy ? 'configured' : undefined }).filter(([key, value]) => key !== 'cookieFile' && value !== undefined)) };
         }
       } else asset = await engine.load(args.video_id);
-      if (action === 'status') return { action, plugin_version: '0.10.0-candidate.5', ...engine.summary(asset), speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config) };
+      if (action === 'status') return { action, plugin_version: '0.10.0', ...engine.summary(asset), speech: speechState, browser_session: await nativeSession?.status() || { enabled: config.browserSessionAuthorized === true, connected: false }, configuration_directory: configurationDirectory(config) };
       if (action === 'transcript') return { action, ...engine.summary(asset), transcript: engine.transcript(asset, args.start_seconds, args.end_seconds) };
       if (['audio', 'transcribe'].includes(action)) {
         const audio = await inspectAudio(engine, asset, { ...args, audio_mode: action === 'transcribe' ? 'auto' : args.audio_mode }, speech, speechState, exec.signal);

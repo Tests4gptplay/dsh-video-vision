@@ -99,3 +99,9 @@ npm test
 - [旧宿主桥一次性退出](testing/LEGACY-EXIT.md)
 - [全量覆盖记录](testing/FULL-COVERAGE.md)
 - [历史测试用例](testing/CASEBOOK.md)
+
+## 显式重新获取与单次清晰度
+
+`open` 默认复用缓存。需要内容更新或画质升级时传 `refresh: true`；可传 `max_height: 1080`（仅本次采集上限，0 不限），不修改全局配置。以返回的实际 `resolution` 和 `cache.state` 为准。采集成功后整项替换；提交前失败或取消保留原缓存与进度，提交后取消不撤回已完成的替换。
+
+`duration_seconds` 是实际文件时长，`source_reported_duration_seconds` 仅有真实源元数据时提供；画面 `sampled_range_seconds` 与音频 `analyzed_range_seconds` 单独表示分析范围，未知源时长不是完整性证明。
