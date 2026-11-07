@@ -41,6 +41,8 @@
 github:Tests4gptplay/dsh-video-vision#v0.10.1
 ```
 
+**npm 安装：** 也可在 **包名或地址** 中填入 `@tests4gptplay/dsh-video-vision@0.10.1`。
+
 也可从[正式发行页](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.1)下载 `dsh-video-vision-0.10.1.tgz`，核对发行页 SHA-256，无需解压。
 
 **DSH Desktop**：在侧栏打开 **插件 → 添加插件**（或箭头菜单 **安装第三方插件**），在 **包名或地址** 填入上方 GitHub 来源；也可填运行 DSH 电脑上的 TGZ 完整路径或正式发行页的 TGZ 下载地址。点击 **安装**，核对版本后 **立即启用**。

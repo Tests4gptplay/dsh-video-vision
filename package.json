@@ -1,5 +1,5 @@
 {
-  "name": "dsh-video-vision",
+  "name": "@tests4gptplay/dsh-video-vision",
   "version": "0.10.1",
   "description": "Analyze multi-site online and local video with frames, audio, subtitles and speech transcription; resume viewing, reuse site methods, import login state, and cache or export media.",
   "type": "module",
@@ -66,5 +66,9 @@
   "scripts": {
     "test": "node test/run-all.mjs",
     "setup:resolver": "node bin/prepare.mjs"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

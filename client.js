@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-video-vision',
+  id: '@tests4gptplay/dsh-video-vision',
   factory: require => {
     const React = require('react');
     const h = React.createElement;
