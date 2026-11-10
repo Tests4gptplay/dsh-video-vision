@@ -45,6 +45,28 @@ test('single-frame and explicit zero-frame requests',async()=>{
   assert.equal((await e.frames(a,{frames:1,start_seconds:1,end_seconds:1},signal)).length,1);
   assert.equal((await e.frames(a,{frames:0,start_seconds:1,end_seconds:2},signal)).length,0);
 });
+test('audio-only zero-frame watch reports no visual range and retains real audio coverage',async()=>{
+  const e=makeEngine();const a=await e.open(longSource,signal);
+  const result=await make(e).execute({action:'watch',video_id:a.id,start_seconds:20,end_seconds:35,
+    frames:0,audio_mode:'auto'},exec);
+  assert.deepEqual(result.frames,[]);
+  assert.equal(result.sampled_range_seconds,null);
+  assert.equal(result.audio.state,'available');
+  assert.deepEqual(result.audio.analyzed_range_seconds,[20,35]);
+});
+test('open with zero frames and audio off never asserts that the last frame was sampled',async()=>{
+  const e=makeEngine();const result=await make(e).execute({action:'open',source:longSource,
+    frames:0,audio_mode:'off'},exec);
+  assert.deepEqual(result.frames,[]);
+  assert.equal(result.sampled_range_seconds,null);
+  assert.equal(result.audio.state,'not-requested');
+});
+test('ordinary video sampling still reports the actual sampled times',async()=>{
+  const e=makeEngine();const result=await make(e).execute({action:'open',source,frames:2,
+    start_seconds:0,end_seconds:1,audio_mode:'off'},exec);
+  assert.equal(result.frames.length,2);
+  assert.deepEqual(result.sampled_range_seconds, result.frames.map(frame=>frame.seconds));
+});
 test('a requested batch can exceed the old twelve-frame default',async()=>{
   const e=makeEngine();const a=await e.open(source,signal);
   assert.equal((await e.frames(a,{frames:19,start_seconds:0,end_seconds:2},signal)).length,19);
