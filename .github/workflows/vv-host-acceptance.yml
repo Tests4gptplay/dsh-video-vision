@@ -1,0 +1,110 @@
+name: VV packed host contract acceptance
+on:
+  push:
+    branches: [test/host-contract-20261110]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: controller
+      - uses: actions/checkout@v4
+        with:
+          ref: 26f389fdb16cee610c3c7f4dc3707ee8d2fda8db
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: 26f389fdb16cee610c3c7f4dc3707ee8d2fda8db
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          repository: Tests4gptplay/deepseek-harness
+          ref: 562d10a963a41f31a7793441ab0f20ef521dcc24
+          path: dsh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.28.5
+      - name: Install media tooling
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Apply reviewed runtime changes and preserve current package identity
+        run: python3 controller/.github/vv-host-acceptance/prepare.py
+      - name: Install actual VV dependencies
+        working-directory: candidate
+        run: npm ci --ignore-scripts
+      - name: Reproduce failures on the public runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          ln -s "$PWD/candidate/node_modules" baseline/node_modules
+          cd candidate
+          set +e
+          VV_TARGET_ROOT="$GITHUB_WORKSPACE/baseline" VV_LEGACY_ROOT="$GITHUB_WORKSPACE/baseline" node --test test/host-contract-regression.mjs > ../out/before.log 2>&1
+          status=$?
+          set -e
+          cat ../out/before.log
+          test "$status" -ne 0
+      - name: Run all candidate regression tests
+        working-directory: candidate
+        env:
+          VV_LEGACY_ROOT: ${{ github.workspace }}/baseline
+          VV_TEST_REPORT: ${{ github.workspace }}/out/source-tests.json
+        run: set -o pipefail; npm test 2>&1 | tee ../out/source-tests.log
+      - name: Pack and inspect exact VV install files
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd candidate
+          npm pack --ignore-scripts --pack-destination ../out --json > ../out/pack.json
+          cd ..
+          mkdir -p out/vv-unpacked
+          tar xzf out/tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz -C out/vv-unpacked
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path('out/vv-unpacked/package'); src=Path('candidate'); rows=[]
+          for f in sorted(p.rglob('*')):
+           if not f.is_file():continue
+           r=f.relative_to(p);assert 'test' not in r.parts and 'node_modules' not in r.parts and '.github' not in r.parts,r
+           assert f.read_bytes()==(src/r).read_bytes(),r
+           rows.append({'path':str(r),'sha256':hashlib.sha256(f.read_bytes()).hexdigest(),'bytes':f.stat().st_size})
+          Path('out/vv-manifest.json').write_text(json.dumps(rows,indent=2)+'\n')
+          assert json.loads((p/'package.json').read_text())['name']=='@tests4gptplay/dsh-video-vision'
+          assert (p/'README.md').read_bytes()==Path('baseline/README.md').read_bytes()
+          print('PACK_FILES_MATCH_SOURCE',len(rows))
+          PY
+          ln -s "$PWD/candidate/node_modules" out/vv-unpacked/package/node_modules
+          cd candidate
+          VV_TARGET_ROOT="$GITHUB_WORKSPACE/out/vv-unpacked/package" VV_LEGACY_ROOT="$GITHUB_WORKSPACE/baseline" node --test test/host-contract-regression.mjs 2>&1 | tee ../out/packed-tests.log
+      - name: Install locked DSH source dependencies
+        working-directory: dsh
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Test actual DSH attachment module and packed VV host integration
+        shell: bash
+        env:
+          VV_TARGET_ROOT: ${{ github.workspace }}/out/vv-unpacked/package
+        run: |
+          set -euo pipefail
+          cp controller/.github/vv-host-acceptance/vv-package-host.spec.ts dsh/packages/attachment/attachment-local/tests/vv-package-host.spec.ts
+          cd dsh
+          pnpm exec vitest run packages/attachment/attachment-local/tests --reporter=verbose 2>&1 | tee ../out/dsh-source-tests.log
+          pnpm exec tsc -b packages/attachment/attachment-local/tsconfig.json 2>&1 | tee ../out/dsh-compile.log
+      - name: Preserve source candidate and exact evidence
+        if: always()
+        run: |
+          mkdir -p out
+          git -C candidate diff --binary > out/candidate-tracked.patch
+          tar --exclude=node_modules --exclude=.git -czf out/vv-source-candidate.tar.gz -C candidate .
+          (cd out && sha256sum *.tgz *.tar.gz > SHA256SUMS.txt) || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vv-host-acceptance-${{ github.run_id }}
+          path: out/
+          if-no-files-found: error
