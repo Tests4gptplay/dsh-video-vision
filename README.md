@@ -4,7 +4,7 @@
 
 结合带时间戳的画面、音频、字幕与语音转写分析内容；按时间细看、接续观看，复用站点解析方法和登录态，并缓存、提取保存视频素材。
 
-本分支及本安装包对应 **0.10.2-review.6 候选版**；[本轮验收与配套 DSH 修复](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。当前正式版为 **0.10.1** · [正式发行说明与安装包](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.1)。
+本分支及本安装包对应 **0.10.2-review.7 候选版**，修复零帧操作的视觉采样范围元数据；[前一候选版的实机与 DSH 联合验收](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。当前正式版为 **0.10.1** · [正式发行说明与安装包](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.1)。
 
 ## 能做什么
 
@@ -60,15 +60,21 @@ dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.10.1'
 
 Web 与 Desktop 分别安装。曾安装旧宿主桥的用户，另见[一次性退出说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/LEGACY-EXIT.md)；已完成者不必重复。
 
-### 0.10.2-review.6 候选包（本分支）
+### 0.10.2-review.7 候选版（本分支）
 
-在 DSH Desktop 的 **插件 → 添加插件** 中，使用候选安装包 `tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz` 的本机完整路径安装，启用后确认插件版本为 `0.10.2-review.6`。DSH Web 可在停止对应 profile 后运行：
+在 DSH Desktop 的 **插件 → 添加插件 → 包名或地址** 中直接输入：
 
-```sh
-dsh plugin --profile web add '/absolute/path/tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz'
+```text
+github:Tests4gptplay/dsh-video-vision#prepare/v0.10.2-review.7
 ```
 
-候选安装包与源码分支、DSH 集成验收记录对应：[0.10.2-review.6 验收详情](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。安装测试使用验收产物中的 TGZ，准备分支名称不是已发布的 Release tag 或 npm 发行版本。
+安装并启用后确认显示版本 `0.10.2-review.7`。如果宿主仍显示已安装旧版本，请核对当前加载的插件包与实际版本。也可使用候选安装包 `tests4gptplay-dsh-video-vision-0.10.2-review.7.tgz` 的完整本机路径。DSH Web 可在停止对应 profile 后运行：
+
+```sh
+dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#prepare/v0.10.2-review.7'
+```
+
+上一候选版的完整 DSH 集成验收资料：[0.10.2-review.6 验收详情](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。安装测试使用验收产物中的 TGZ，准备分支名称不是已发布的 Release tag 或 npm 发行版本。
 
 Android/Termux 用户反馈的 [Issue #2](https://github.com/Tests4gptplay/dsh-video-vision/issues/2)（附件保存）与 [Issue #3](https://github.com/Tests4gptplay/dsh-video-vision/issues/3)（sharp 后端）位于 **DSH 附件组件**。针对 DSH `0.2.2-rc.1` 的验收资料另提供 `deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz` 和对应源码补丁；它们与 VV 候选包分别安装、分别验证。两项修复及已覆盖环境见[验收记录](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。
 
