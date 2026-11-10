@@ -95,7 +95,7 @@ try {
     assert.deepEqual((await result.json()).result, { ok: true, value: { path: configuration } });
   }
   assert.deepEqual(openedPaths.slice(-2), [configuration, configuration]);
-  assert((await readFile(join(configuration, 'GUIDANCE.md'), 'utf8')).includes('needs_method'));
+  assert((await readFile(join(configuration, 'BUILTIN_GUIDANCE.md'), 'utf8')).includes('needs_method'));
   const revealRoute = routes.find(r => r.path.endsWith('/reveal'));
   for (const payload of [{}, { videos: true }]) {
     const result = await revealRoute.fetch(new Request('http://localhost' + revealRoute.path, { method: 'POST',

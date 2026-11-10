@@ -1,0 +1,161 @@
+name: Release Video Vision 0.10.2
+on:
+  push:
+    branches: [release/v0.10.2]
+    paths: [.github/workflows/release-0.10.2.yml, scripts/prepare-release-0.10.2.py]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: video-vision-release-0.10.2
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: Tests4gptplay/deepseek-harness
+          ref: 562d10a963a41f31a7793441ab0f20ef521dcc24
+          path: dsh
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.28.5
+      - name: Prepare release files and media tools
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          git fetch --no-tags origin cde7de6d8a83695291b7c6492805fe04d442f5c0
+          python3 scripts/prepare-release-0.10.2.py
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          git show 26f389fdb16cee610c3c7f4dc3707ee8d2fda8db:resources/GUIDANCE.md > "$GITHUB_WORKSPACE/out/legacy-GUIDANCE.md"
+      - name: Verify source with real dependencies
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          VV_TEST_REPORT="$GITHUB_WORKSPACE/out/source-tests.json" npm test | tee "$GITHUB_WORKSPACE/out/source-tests.log"
+          node --test test/host-contract-regression.mjs | tee "$GITHUB_WORKSPACE/out/host-contract.log"
+          node --check index.js
+          node --check client.js
+      - name: Build and inspect exact production tarball
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE/out" --json > "$GITHUB_WORKSPACE/out/pack.json"
+          mkdir -p "$GITHUB_WORKSPACE/out/vv-unpacked"
+          tar -xzf "$GITHUB_WORKSPACE/out/tests4gptplay-dsh-video-vision-0.10.2.tgz" -C "$GITHUB_WORKSPACE/out/vv-unpacked"
+          ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/out/vv-unpacked/package/node_modules"
+          VV_TARGET_ROOT="$GITHUB_WORKSPACE/out/vv-unpacked/package" node --test test/host-contract-regression.mjs | tee "$GITHUB_WORKSPACE/out/packed-contract.log"
+          python3 - <<'PY'
+          import os, pathlib, json, tarfile, hashlib
+          root=pathlib.Path('.')
+          out=pathlib.Path(os.environ['GITHUB_WORKSPACE'])/'out'
+          archive=out/'tests4gptplay-dsh-video-vision-0.10.2.tgz'
+          rows=[]
+          with tarfile.open(archive) as t:
+              for item in t:
+                  if not item.isfile(): continue
+                  rel=item.name.removeprefix('package/')
+                  data=t.extractfile(item).read()
+                  assert data==(root/rel).read_bytes(), rel
+                  assert not any(x in pathlib.Path(rel).parts for x in ['test','tests','node_modules','.github','scripts']), rel
+                  rows.append({'path':rel,'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)})
+                  if rel=='package.json':
+                      p=json.loads(data)
+                      assert p['name']=='@tests4gptplay/dsh-video-vision' and p['version']=='0.10.2'
+                  if rel in ('README.md','client.js','index.js'):
+                      assert '0.10.2-review.' not in data.decode()
+          assert len(rows)==52, len(rows)
+          assert 'SPONSOR.md' in [r['path'] for r in rows]
+          assert root.joinpath('README.md').read_text().rfind('## 支持项目') > root.joinpath('README.md').read_text().rfind('## License')
+          (out/'production-manifest.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print('FINAL_PACKAGE_FILES_VERIFIED',len(rows))
+          PY
+      - name: Verify final package on actual DSH source services
+        working-directory: dsh
+        env:
+          VV_TARGET_ROOT: ${{ github.workspace }}/out/vv-unpacked/package
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile --ignore-scripts
+          cp ../candidate/test/integration/dsh-host.spec.ts packages/attachment/attachment-local/tests/vv-package-host.spec.ts
+          pnpm exec vitest run packages/attachment/attachment-local/tests --reporter=verbose | tee ../out/dsh-source-tests.log
+          pnpm exec tsc -b packages/attachment/attachment-local/tsconfig.json | tee ../out/dsh-compile.log
+      - name: Verify clean installation with tested Android companion package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/Tests4gptplay/dsh-video-vision/actions/artifacts/13749906210/zip > "$RUNNER_TEMP/previous-acceptance.zip"
+          unzip -j "$RUNNER_TEMP/previous-acceptance.zip" deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz dsh-android-attachment-source.patch -d out
+          echo '34aeeec550bc17f0f1b1398f98c2519de1315e49a53f778e965739295889328b  out/deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz' | sha256sum -c -
+          mkdir clean-install
+          python3 - <<'PY'
+          import json,pathlib
+          r=pathlib.Path.cwd()
+          d={'private':True,'type':'module','dependencies':{'@tests4gptplay/dsh-video-vision':'file:'+str(r/'out/tests4gptplay-dsh-video-vision-0.10.2.tgz'),'@deepseek-ai/dsh-attachment-local':'file:'+str(r/'out/deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz')}}
+          (r/'clean-install/package.json').write_text(json.dumps(d,indent=2)+'\n')
+          PY
+          cd clean-install
+          npm install --ignore-scripts --omit=optional --no-audit --no-fund
+          cp ../candidate/test/integration/companion-smoke.mjs smoke.mjs
+          node smoke.mjs | tee ../out/clean-install.log
+      - name: Commit verified release and merge into main
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package.json package-lock.json index.js client.js README.md CHANGELOG.md docs/TECHNICAL-REFERENCE.md docs/releases/v0.10.2.md docs/ANDROID-TERMUX.md resources
+          git diff --cached --check
+          git commit -m 'release: Video Vision 0.10.2 from verified review.7' || test -z "$(git status --porcelain --untracked-files=no)"
+          git push origin HEAD:refs/heads/release/v0.10.2
+          git fetch origin main
+          git checkout -B main origin/main
+          git merge --no-ff origin/release/v0.10.2 -m 'Merge verified Video Vision 0.10.2 release'
+          git push origin main
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/out/RELEASE_COMMIT.txt"
+          git diff --exit-code origin/release/v0.10.2 HEAD -- package.json package-lock.json index.js client.js README.md CHANGELOG.md lib resources browser-session cordis.patch.yml
+      - name: Publish immutable-version release and verify downloaded bytes
+        working-directory: candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp ../out/tests4gptplay-dsh-video-vision-0.10.2.tgz ../out/dsh-video-vision-0.10.2.tgz
+          (cd ../out && sha256sum dsh-video-vision-0.10.2.tgz deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz dsh-android-attachment-source.patch > SHA256SUMS-0.10.2.txt)
+          test "$(gh api repos/Tests4gptplay/dsh-video-vision/git/ref/heads/main --jq .object.sha)" = "$(cat ../out/RELEASE_COMMIT.txt)"
+          if gh release view v0.10.2 --repo Tests4gptplay/dsh-video-vision >/dev/null 2>&1; then
+            mkdir -p ../out/downloaded
+            gh release download v0.10.2 --repo Tests4gptplay/dsh-video-vision --pattern dsh-video-vision-0.10.2.tgz --dir ../out/downloaded
+            cmp ../out/dsh-video-vision-0.10.2.tgz ../out/downloaded/dsh-video-vision-0.10.2.tgz
+          else
+            gh release create v0.10.2 --repo Tests4gptplay/dsh-video-vision --target "$(cat ../out/RELEASE_COMMIT.txt)" --title 'DSH Video Vision 0.10.2' --notes-file docs/releases/v0.10.2.md --latest ../out/dsh-video-vision-0.10.2.tgz ../out/SHA256SUMS-0.10.2.txt ../out/production-manifest.json ../out/deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz ../out/dsh-android-attachment-source.patch
+            mkdir -p ../out/downloaded
+            gh release download v0.10.2 --repo Tests4gptplay/dsh-video-vision --pattern dsh-video-vision-0.10.2.tgz --dir ../out/downloaded
+            cmp ../out/dsh-video-vision-0.10.2.tgz ../out/downloaded/dsh-video-vision-0.10.2.tgz
+          fi
+          echo RELEASE_PUBLISHED_AND_BYTES_VERIFIED
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video-vision-0.10.2-release-evidence
+          path: |
+            out/*.json
+            out/*.log
+            out/*.txt
+            out/*.tgz
+            out/*.patch
+          if-no-files-found: warn

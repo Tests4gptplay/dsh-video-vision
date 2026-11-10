@@ -1,0 +1,2 @@
+34aeeec550bc17f0f1b1398f98c2519de1315e49a53f778e965739295889328b  deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz
+4210dd0cedbf60448146b84fac0c5db97574d6e2e5d17047ffa2cfb619bf46fb  tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz

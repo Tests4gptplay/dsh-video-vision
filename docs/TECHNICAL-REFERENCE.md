@@ -40,7 +40,7 @@ video-vision/
 | `status` | 查看当前视频、缓存、配置目录和语音识别状态 |
 | `methods` | 按需读取方法指导，列出站点扩展及其路径和错误 |
 
-`open` / `watch` 默认处理最多 30 秒音频。读取 `audio.analyzed_range_seconds` 后，可用 `audio` 继续所需区间，单次默认上限 60 秒。`audio_mode: "analyze"` 只做信号分析，`audio_mode: "off"` 用于纯画面任务。日语歌使用 `language: "ja"`，歌词结合相应画面或平台字幕核对。`audio_source` 明确列出内嵌、独立缓存或待获取的音轨。
+`open` / `watch` 默认处理最多 30 秒音频。读取 `audio.analyzed_range_seconds` 后，可用 `audio` 处理明确指定的完整区间；`maxAudioSeconds: 0` 表示未设置插件侧时长预算，正数是用户选择的预算。`audio_mode: "analyze"` 只做信号分析，`audio_mode: "off"` 用于纯画面任务。日语歌使用 `language: "ja"`，歌词结合相应画面或平台字幕核对。`audio_source` 明确列出内嵌、独立缓存或待获取的音轨。
 
 `tempo` 是起音包络的脉冲速度估计，返回候选 BPM 和周期性分数；与 `prominent_onsets_seconds` 一起辅助卡点。没有稳定脉冲时 BPM 返回 null。音频分析详见 [音频使用指导](../resources/audio.md)。
 
@@ -54,13 +54,13 @@ video-vision/
 ffmpegPath: ffmpeg
 ffprobePath: ffprobe
 cacheDirectory: .dsh-video-vision
-maxHeight: 720
-frameWidth: 1280
-maxFrames: 12
-maxDownloadMB: 1024
-downloadTimeoutMs: 300000
-processTimeoutMs: 60000
-maxAudioSeconds: 60
+maxHeight: 0
+frameWidth: 0
+maxFrames: 0
+maxDownloadMB: 0
+downloadTimeoutMs: 0
+processTimeoutMs: 0
+maxAudioSeconds: 0
 speechProvider: sensevoice-local
 # configDirectory: 'D:\VideoVisionConfig'
 # ytDlpPath: 'D:\VideoTools\yt-dlp.exe'
@@ -68,9 +68,11 @@ speechProvider: sensevoice-local
 # proxy: 'http://127.0.0.1:7890'
 ```
 
-默认使用当前会话工作目录的 `.dsh-video-vision`；设置页显示最近使用的视频会话缓存位置，尚未观看时使用 DSH 默认工作目录。可在设置页改为固定的绝对路径，让各会话共享同一缓存位置。`maxHeight` 是优先选择的清晰度，结果会列出实际分辨率。`maxDownloadMB` 设置文件大小预算，`downloadTimeoutMs` 设置解析或下载单次任务的最长时间。
+默认使用当前会话工作目录的 `.dsh-video-vision`；设置页显示最近使用的视频会话缓存位置，尚未观看时使用 DSH 默认工作目录。可在设置页改为固定的绝对路径，让各会话共享同一缓存位置。`maxHeight` 是源素材高度上限，默认 `0` 表示不限制，正数为用户选择的上限；返回值会列出实际分辨率。`maxFrames`、`maxDownloadMB`、`maxAudioSeconds` 及两个超时设置中的 `0` 表示未设置该项插件预算，正数为用户配置的预算。发送给 DSH 的图片按运行中的附件服务规格单独适配，不修改原始视频与缓存帧。
 
-字幕优先使用平台提供的人工字幕，其次使用自动字幕，结果标明语言和来源。使用语音转写前，在 DSH 的语音设置中准备好识别器，默认使用 `sensevoice-local`。转写以短片段为单位，默认每段最长 60 秒。
+字幕优先使用平台提供的人工字幕，其次使用自动字幕，结果标明语言和来源。使用语音转写前，在 DSH 的语音设置中准备好识别器，默认使用 `sensevoice-local`。转写以短窗为单位，现有窗口为 15 秒；如 DSH 服务明确返回容量拒绝，则对该窗口继续分段。
+
+本候选版与 DSH 的接口和测试情况见[宿主契约说明](HOST-CONTRACT-20261110.md)及[验收记录](acceptance/REVIEW-20261110.zh.md)。
 
 ## 命令行与开发
 

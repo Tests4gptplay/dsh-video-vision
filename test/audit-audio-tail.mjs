@@ -7,5 +7,6 @@ const tiny=await e.audioClip(asset,0.198,0.2,signal);assert.ok(tiny.pcm.length>0
 await assert.rejects(e.audioClip(asset,0.2,0.2,signal),/empty/);await assert.rejects(e.audioClip(asset,0.21,0.22,signal),/between/);
 assert.ok((await e.audioClip(asset,0,0.01,signal)).pcm.length>0);
 const pcm=Buffer.alloc(40*16000*2);for(let i=0;i<40*16000;i++)if(i%16000>=8000)pcm.writeInt16LE(Math.round(20000*Math.sin(i/7)),i*2);
-const a=analyzePcm(pcm);assert.ok(a.quiet_range_count>32);assert.equal(a.quiet_ranges.length,32);assert.equal(a.quiet_ranges_truncated,true);assert.equal(typeof a.prominent_onsets_truncated,'boolean');
+const a=analyzePcm(pcm);assert.ok(a.quiet_range_count>32);assert.equal(a.quiet_ranges.length,a.quiet_range_count);assert.equal(a.quiet_ranges_truncated,false);
+const capped=analyzePcm(pcm,0,16000,{audio_detail_limit:32});assert.equal(capped.quiet_ranges.length,32);assert.equal(capped.quiet_ranges_truncated,true);assert.equal(typeof a.prominent_onsets_truncated,'boolean');
 console.log('PASS valid audio tail/tiny range, explicit empty/invalid range, recovery, visible summary truncation');

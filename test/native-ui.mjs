@@ -44,7 +44,7 @@ plugin.apply({
     Component = component; section = options;
   } }
 });
-assert.equal(moduleId, 'dsh-video-vision');
+assert.equal(moduleId, '@tests4gptplay/dsh-video-vision');
 assert.equal(section.id, 'video-vision-cache');
 assert.equal(section.locale, 'video-vision');
 await section.inject().rpc('list');

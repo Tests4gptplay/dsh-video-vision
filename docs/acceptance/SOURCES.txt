@@ -1,0 +1,3 @@
+Acceptance run: https://github.com/Tests4gptplay/dsh-video-vision/actions/runs/42785690042
+DSH source: 562d10a963a41f31a7793441ab0f20ef521dcc24
+VV baseline: 26f389fdb16cee610c3c7f4dc3707ee8d2fda8db

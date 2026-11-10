@@ -7,7 +7,8 @@ import { Config } from '../lib/settings.js';
 import { selectStreams, playback } from '../lib/bilibili.js';
 import { downloadWeb } from '../lib/ytdlp.js';
 assert.equal(DEFAULTS.maxHeight, 0);
-assert.equal(DEFAULTS.frameWidth, 1280); // Source limit must not silently change frame sizing.
+assert.equal(DEFAULTS.frameWidth, 0); // Host delivery adapts separately.
+assert.equal(new VideoVision('.', { frameWidth: 1280 }).config.frameWidth, 1280);
 assert.equal(new VideoVision('.').config.maxHeight, 0);
 assert.equal(new VideoVision('.', { maxHeight: 720 }).config.maxHeight, 720);
 assert.equal(Config({}).maxHeight, 0);
