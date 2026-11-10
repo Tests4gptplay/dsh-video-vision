@@ -4,7 +4,7 @@ on:
     branches: [test/host-contract-20261110]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   package-host:
     runs-on: ubuntu-latest
@@ -32,9 +32,12 @@ jobs:
         with:
           version: 11.28.5
       - name: Install media tooling
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-      - name: Apply reviewed runtime changes and preserve current package identity
-        run: python3 controller/.github/vv-host-acceptance/prepare.py
+        run: sudo apt-get install -y -qq ffmpeg
+      - name: Prepare candidate and required historical test source
+        run: |
+          python3 controller/.github/vv-host-acceptance/prepare.py
+          python3 controller/.github/vv-host-acceptance/followup.py
+          git -C candidate fetch --no-tags --depth=1 origin cde7de6d8a83695291b7c6492805fe04d442f5c0
       - name: Install actual VV dependencies
         working-directory: candidate
         run: npm ci --ignore-scripts
@@ -85,7 +88,7 @@ jobs:
       - name: Install locked DSH source dependencies
         working-directory: dsh
         run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Test actual DSH attachment module and packed VV host integration
+      - name: Test actual DSH source services with packed VV
         shell: bash
         env:
           VV_TARGET_ROOT: ${{ github.workspace }}/out/vv-unpacked/package
@@ -95,12 +98,36 @@ jobs:
           cd dsh
           pnpm exec vitest run packages/attachment/attachment-local/tests --reporter=verbose 2>&1 | tee ../out/dsh-source-tests.log
           pnpm exec tsc -b packages/attachment/attachment-local/tsconfig.json 2>&1 | tee ../out/dsh-compile.log
-      - name: Preserve source candidate and exact evidence
+      - name: Build companion and test both exact packages in a clean installation
+        run: set -o pipefail; python3 controller/.github/vv-host-acceptance/build-companion.py 2>&1 | tee out/companion-build-smoke.log
+      - name: Prepare tested source branch without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p candidate/test/integration candidate/docs/acceptance
+          cp controller/.github/vv-host-acceptance/vv-package-host.spec.ts candidate/test/integration/dsh-host.spec.ts
+          cp controller/.github/vv-host-acceptance/build-companion.py candidate/test/integration/build-companion.py
+          cp controller/.github/vv-host-acceptance/companion-smoke.mjs candidate/test/integration/companion-smoke.mjs
+          cp out/source-tests.json out/vv-manifest.json out/attachment-manifest.json candidate/docs/acceptance/
+          cp out/dsh-android-attachment-source.patch candidate/docs/acceptance/
+          (cd out && sha256sum *.tgz > SHA256SUMS.txt)
+          cp out/SHA256SUMS.txt candidate/docs/acceptance/
+          printf 'Acceptance run: https://github.com/Tests4gptplay/dsh-video-vision/actions/runs/%s\nDSH source: 562d10a963a41f31a7793441ab0f20ef521dcc24\nVV baseline: 26f389fdb16cee610c3c7f4dc3707ee8d2fda8db\n' "$GITHUB_RUN_ID" > candidate/docs/acceptance/SOURCES.txt
+          git -C candidate diff --check
+          git -C candidate checkout -b prepare/v0.10.2-review.6
+          git -C candidate config user.name 'github-actions[bot]'
+          git -C candidate config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C candidate add index.js client.js lib resources test docs package.json package-lock.json
+          git -C candidate commit -m 'fix: adapt VV media delivery to actual DSH contracts and preserve requested ranges'
+          git -C candidate push origin HEAD:refs/heads/prepare/v0.10.2-review.6
+          git -C candidate rev-parse HEAD > out/PREPARED_COMMIT.txt
+      - name: Preserve source and exact evidence
         if: always()
         run: |
           mkdir -p out
-          git -C candidate diff --binary > out/candidate-tracked.patch
-          tar --exclude=node_modules --exclude=.git -czf out/vv-source-candidate.tar.gz -C candidate .
+          git -C candidate diff --binary 26f389fdb16cee610c3c7f4dc3707ee8d2fda8db > out/candidate-tracked.patch
+          tar --exclude=node_modules --exclude=.git --exclude=.cache-tests -czf out/vv-source-candidate.tar.gz -C candidate .
+          rm -rf out/vv-unpacked out/attachment-base out/attachment-staged out/attachment-unpacked
           (cd out && sha256sum *.tgz *.tar.gz > SHA256SUMS.txt) || true
       - uses: actions/upload-artifact@v4
         if: always()
