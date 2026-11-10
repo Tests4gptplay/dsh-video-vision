@@ -1,0 +1,75 @@
+name: VV candidate pnpm install check
+on:
+  push:
+    branches: [prepare/v0.10.2-review.6]
+    paths:
+      - .github/workflows/vv-candidate-pnpm-check.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  pnpm-installed-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.28.5
+      - uses: actions/download-artifact@v4
+        with:
+          name: vv-host-acceptance-42785690042
+          run-id: 42785690042
+          github-token: ${{ github.token }}
+          path: acceptance
+      - name: Install media tooling
+        run: command -v ffmpeg || sudo apt-get install -y -qq ffmpeg
+      - name: Verify exact package hashes
+        working-directory: acceptance
+        run: sha256sum --check SHA256SUMS.txt
+      - name: Install both TGZs with pnpm and omit native optional binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p clean-pnpm evidence
+          node --input-type=module <<'JS'
+          import {writeFileSync} from 'node:fs';
+          import {resolve} from 'node:path';
+          writeFileSync('clean-pnpm/package.json',JSON.stringify({private:true,type:'module',dependencies:{
+            '@deepseek-ai/dsh-attachment-local':'file:'+resolve('acceptance/deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz'),
+            '@tests4gptplay/dsh-video-vision':'file:'+resolve('acceptance/tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz')
+          }},null,2)+'\n');
+          JS
+          cd clean-pnpm
+          pnpm install --ignore-scripts --no-optional 2>&1 | tee ../evidence/pnpm-install.log
+      - name: Execute the installed VV and DSH attachment components
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp test/integration/companion-smoke.mjs clean-pnpm/smoke.mjs
+          # Resolve Cordis from the owning component rather than relying on root hoisting.
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('clean-pnpm/smoke.mjs');s=p.read_text()
+          s=s.replace("import {Context} from '@deepseek-ai/cordis';",'')
+          s=s.replace("const sharp=localRequire('sharp');", "const {Context}=localRequire('@deepseek-ai/cordis');\nconst sharp=localRequire('sharp');")
+          p.write_text(s)
+          PY
+          cd clean-pnpm
+          node smoke.mjs 2>&1 | tee ../evidence/pnpm-smoke.log
+          node --input-type=module <<'JS' | tee ../evidence/resolution.json
+          import {createRequire} from 'node:module';
+          const root=createRequire(import.meta.url);
+          const owner=createRequire(root.resolve('@deepseek-ai/dsh-attachment-local'));
+          const sharp=createRequire(owner.resolve('sharp'));
+          console.log(JSON.stringify({node:process.version,attachment:root.resolve('@deepseek-ai/dsh-attachment-local'),sharp:owner.resolve('sharp'),wasm:sharp.resolve('@img/sharp-wasm32')},null,2));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vv-pnpm-install-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: warn
