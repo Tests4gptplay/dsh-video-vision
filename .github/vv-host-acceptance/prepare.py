@@ -1,16 +1,22 @@
 from pathlib import Path
-import gzip, hashlib, json, subprocess, os
+import gzip, hashlib, json, subprocess, os, re
 root=Path(os.environ['GITHUB_WORKSPACE'])
 control=root/'controller/.github/vv-host-acceptance'
 out=root/'out'; out.mkdir(exist_ok=True)
 a=(control/'runtime.patch.gz.part1').read_bytes()
 b=bytearray((control/'runtime.patch.gz.part2').read_bytes())
-# Repair the two checked transport bytes before verifying the original patch.
 b[2874:2876]=bytes([106,110])
 patch=gzip.decompress(a+bytes(b))
 assert hashlib.sha256(patch).hexdigest()=='77d3ab213c9abcc69b6d7a94daa0b41178dcc65cfe26e41ee6c298601edd1259'
 (out/'runtime.patch').write_bytes(patch)
 candidate=root/'candidate'
+# The local reconstruction tracked empty placeholders for these new files.
+# Materialize only those empty-base hunks before applying the exact checked diff.
+for section in patch.decode().split('diff --git ')[1:]:
+ if '\nindex e69de29..' in section:
+  name=section.split('\n',1)[0].split(' b/',1)[1]
+  p=candidate/name
+  if not p.exists():p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b'')
 subprocess.run(['git','apply','--unidiff-zero',str(out/'runtime.patch')],cwd=candidate,check=True)
 version='0.10.2-review.6'
 for name in ['package.json','package-lock.json']:
@@ -18,7 +24,6 @@ for name in ['package.json','package-lock.json']:
  if name=='package-lock.json': j['packages']['']['version']=version
  p.write_text(json.dumps(j,ensure_ascii=False,indent=2)+'\n')
 p=candidate/'client.js'; p.write_text(p.read_text().replace('0.10.1',version))
-# Preserve current scoped package identity, bundle entry, public README and sponsor copy.
 p=candidate/'docs/TECHNICAL-REFERENCE.md'
 s=p.read_text().replace('frameWidth: 1280','frameWidth: 0').replace('maxFrames: 12','maxFrames: 0').replace('maxAudioSeconds: 60','maxAudioSeconds: 0')
 p.write_text(s)
