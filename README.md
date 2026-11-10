@@ -4,12 +4,13 @@
 
 结合带时间戳的画面、音频、字幕与语音转写分析内容；按时间细看、接续观看，复用站点解析方法和登录态，并缓存、提取保存视频素材。
 
-当前正式版 **0.10.1** · [发行说明与安装包](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.1)。
+本分支及本安装包对应 **0.10.2-review.6 候选版**；[本轮验收与配套 DSH 修复](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。当前正式版为 **0.10.1** · [正式发行说明与安装包](https://github.com/Tests4gptplay/dsh-video-vision/releases/tag/v0.10.1)。
 
 ## 能做什么
 
 - **在线视频与本地文件**：发送视频链接、媒体直链或本地文件路径。Bilibili、YouTube 等只是站点示例；可通过站点方法扩展更多来源。
 - **画面与声音一起分析**：查看全片概览、指定片段或精确时间点，结合音轨理解动作、屏幕文字和演示过程。
+- **按请求覆盖、按宿主接入**：默认六帧、30 秒音频是快速概览；明确指定的画面与音频范围可继续处理。保留源视频和缓存画面，发送给 AI 时根据运行中的 DSH 附件规格生成兼容的图像副本。
 - **字幕与语音转写**：读取平台字幕；语音识别器就绪时，转写对白或歌词，并标明时间和来源。
 - **音频与音乐辅助**：查看电平、停顿、明显起音和估计节拍，辅助选择剪辑或转场时间点。
 - **接续观看**：保存观看进度，下次从上次位置继续；已处理的画面、音频和转写可复用。
@@ -35,6 +36,8 @@
 
 ## 安装与升级
 
+### 当前正式版 0.10.1
+
 推荐安装来源：
 
 ```text
@@ -56,6 +59,18 @@ dsh plugin --profile web add 'github:Tests4gptplay/dsh-video-vision#v0.10.1'
 ```
 
 Web 与 Desktop 分别安装。曾安装旧宿主桥的用户，另见[一次性退出说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/LEGACY-EXIT.md)；已完成者不必重复。
+
+### 0.10.2-review.6 候选包（本分支）
+
+在 DSH Desktop 的 **插件 → 添加插件** 中，使用候选安装包 `tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz` 的本机完整路径安装，启用后确认插件版本为 `0.10.2-review.6`。DSH Web 可在停止对应 profile 后运行：
+
+```sh
+dsh plugin --profile web add '/absolute/path/tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz'
+```
+
+候选安装包与源码分支、DSH 集成验收记录对应：[0.10.2-review.6 验收详情](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。安装测试使用验收产物中的 TGZ，准备分支名称不是已发布的 Release tag 或 npm 发行版本。
+
+Android/Termux 用户反馈的 [Issue #2](https://github.com/Tests4gptplay/dsh-video-vision/issues/2)（附件保存）与 [Issue #3](https://github.com/Tests4gptplay/dsh-video-vision/issues/3)（sharp 后端）位于 **DSH 附件组件**。针对 DSH `0.2.2-rc.1` 的验收资料另提供 `deepseek-ai-dsh-attachment-local-0.2.2-rc.1.termux.1.tgz` 和对应源码补丁；它们与 VV 候选包分别安装、分别验证。两项修复及已覆盖环境见[验收记录](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。
 
 ## 导入与管理登录态
 
@@ -86,19 +101,21 @@ Web 与 Desktop 分别安装。曾安装旧宿主桥的用户，另见[一次性
 - **清空缓存**：清理 Video Vision 媒体缓存，保留已提取文件、本地原视频和目录中的其他文件。
 - **方法文件夹**：查看站点方法、使用指导和笔记。升级插件或清空视频缓存会保留个人方法与笔记；只启用自己信任的扩展代码。
 
-## 必要依赖与使用限制
+## 运行环境与宿主接入
 
 - 使用 Node.js 22+（可使用 DSH 自带版本），并准备 FFmpeg、ffprobe；可放入 PATH 或在插件设置中指定路径。
+- 发送图片时遵循当前 DSH 附件服务的媒体类型、字节数、像素数和单边尺寸要求。插件按实际规格准备交付图像，源视频和源帧缓存保留原有内容；模型请求的容量由 DSH 管理。
+- 默认观看概览为六帧和最多 30 秒音频。可明确指定时间点、片段与音频范围；配置中的正数预算按用户设置生效，`0` 表示未设置插件侧预算。语音识别按短窗交给 DSH 服务。
 - 语音转写需要先在 DSH 语音设置中准备识别器；没有平台字幕或识别器时，仍可查看画面和分析可用音频。
 - 站点访问效果取决于链接、解析方法和网站限制，不保证所有视频均可获取；直播请使用已结束的回放。
 - 登录态可能被网站过期、撤销或要求重新验证；备用解析方式不使用导入的登录态。Linux 的加密存储需要可用的 Secret Service，系统文件窗口需要 Zenity 或 KDialog。
-- 备用解析器仅在需要时准备。不同平台与本版本的实际验证范围见[验证说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/RELEASE-0.10.1.md)。
+- 备用解析器仅在需要时准备。正式版环境见[0.10.1 验证说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/RELEASE-0.10.1.md)；本候选版实际测试范围见[review.6 验收记录](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/acceptance/REVIEW-20261110.zh.md)。
 
-站点方法接口、参数、目录结构、命令行与实现原理见 [GitHub 技术文档](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/TECHNICAL-REFERENCE.md)。
+站点方法接口、参数、目录结构、命令行与实现原理见 [本分支技术文档](https://github.com/Tests4gptplay/dsh-video-vision/blob/prepare/v0.10.2-review.6/docs/TECHNICAL-REFERENCE.md)。
 
 ## English overview
 
-Video Vision helps AI analyze multi-site online and local video through timestamped frames, audio, captions and speech transcription. Resume viewing, reuse site methods, import and manage encrypted browser-session copies, refresh cached media on request, and export video or individual files. Source quality, available captions and transcription depend on the site and prepared recognizer. Install version 0.10.1 from the release archive or `github:Tests4gptplay/dsh-video-vision#v0.10.1`.
+Video Vision helps AI analyze multi-site online and local video with timestamped frames, audio, captions and speech transcription. Resume viewing, reuse site methods, manage authorized encrypted browser-session copies, refresh cached media and export video or individual files. The 0.10.2-review.6 candidate handles explicitly requested frame/audio ranges while adapting image delivery to the running DSH attachment service. The default six-frame/30-second overview is a starting strategy, and user-selected budgets remain configurable. The current stable release is 0.10.1 (`github:Tests4gptplay/dsh-video-vision#v0.10.1`); install the review.6 candidate from its verified local TGZ. Android/Termux attachment and sharp fixes have a separate DSH companion package for the tested host version.
 
 ## License
 
