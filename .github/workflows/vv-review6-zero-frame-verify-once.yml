@@ -1,0 +1,74 @@
+name: VV review.6 zero-frame fix verify (one-shot)
+on:
+  push:
+    branches: ['prepare/v0.10.2-review.6']
+    paths: ['.github/workflows/vv-review6-zero-frame-verify-once.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - name: Install media utilities
+        run: |
+          set -euo pipefail
+          ffmpeg -version | head -1
+          ffprobe -version | head -1
+      - name: Restore historical regression reference
+        run: git fetch --no-tags origin cde7de6d8a83695291b7c6492805fe04d442f5c0
+      - name: Install dependencies and run full source regressions
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test | tee out/vv-source-tests.log
+          node --test test/host-contract-regression.mjs | tee out/vv-host-contract.log
+      - name: Pack and verify exact review.6 candidate
+        run: |
+          set -euo pipefail
+          npm pack --ignore-scripts --json > out/pack.json
+          filename="$(node -p 'JSON.parse(require("node:fs").readFileSync("out/pack.json","utf8"))[0].filename')"
+          mkdir -p out/vv-unpacked
+          tar -xzf "$filename" -C out/vv-unpacked
+          ln -s "$GITHUB_WORKSPACE/node_modules" out/vv-unpacked/package/node_modules
+          VV_TARGET_ROOT="$GITHUB_WORKSPACE/out/vv-unpacked/package" node --test test/host-contract-regression.mjs | tee out/vv-packed-contract.log
+          python3 - <<'PY'
+          import json,tarfile,hashlib,pathlib,subprocess
+          root=pathlib.Path('.')
+          obj=json.loads((root/'out/pack.json').read_text())[0]
+          archive=root/obj['filename']
+          with tarfile.open(archive) as t:
+              files=[x for x in t if x.isfile()]
+              assert len(files)==51, len(files)
+              checks=[]
+              for x in files:
+                  rel=x.name.removeprefix('package/')
+                  actual=t.extractfile(x).read()
+                  src=(root/rel).read_bytes()
+                  assert actual==src, rel
+                  checks.append({'name':rel,'sha256':hashlib.sha256(actual).hexdigest()})
+          manifest={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'files':checks,'archive_sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'archive_file':archive.name}
+          (root/'out/pack-verification.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          (root/'out/SHA256SUMS.txt').write_text(manifest['archive_sha256']+'  '+archive.name+'\n')
+          print('PACKAGE_VERIFIED',archive.name,len(files),manifest['archive_sha256'])
+          PY
+      - name: Preserve exact candidate and verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vv-review6-zero-frame-verification
+          path: |
+            tests4gptplay-dsh-video-vision-0.10.2-review.6.tgz
+            out/SHA256SUMS.txt
+            out/pack.json
+            out/pack-verification.json
+            out/vv-source-tests.log
+            out/vv-host-contract.log
+            out/vv-packed-contract.log
+          if-no-files-found: warn
