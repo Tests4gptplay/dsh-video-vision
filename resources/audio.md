@@ -4,7 +4,7 @@
 ## 一起看画面和声音
 
 1. 调用 `video_vision open`，同时查看图片和 `audio`。默认处理从选定起点开始的最多 30 秒音频；`audio.analyzed_range_seconds` 是实际处理范围。
-2. 看歌曲、对白、教程或需要卡点时，用 `action: "audio"` 继续相关区间，每次最多 `maxAudioSeconds`（默认 60 秒）。看完关键段再总结；用户要求整段分析时顺序覆盖所需区间。
+2. 看歌曲、对白、教程或需要卡点时，用 `action: "audio"` 继续相关区间。明确指定的音频范围按请求处理；`maxAudioSeconds` 默认为 `0`（未设置插件侧总时长预算），用户设为正数时按该预算执行。看完关键段再总结；用户要求整段分析时覆盖所需区间。
 3. `audio_source` 区分嵌入音轨、独立音频缓存和待获取音轨。B 站 DASH 常把声音单独保存：`has_audio_in_cached_video: false` 只描述视频容器；接着看 `audio_source` 和 `audio.state`。
 4. `audio.clip_path` 是可播放 WAV；`analysis` 来自真实解码信号；`transcript` 来自 DSH 语音识别器。平台字幕仍通过顶层 `transcript` 或 `action: "transcript"` 读取。
 5. 只研究构图等纯画面任务时可用 `audio_mode: "off"`；只需声音强弱、起音和节奏时用 `audio_mode: "analyze"`。
@@ -23,7 +23,7 @@
 `analysis` 提供：
 - `level_timeline`：每秒 RMS 电平，单位 dBFS，用于观察声音强弱变化。
 - `quiet_ranges`：低电平片段，便于寻找停顿。
-- `prominent_onsets_seconds`：最明显的最多 32 个起音位置，时间相对于原视频。
+- `prominent_onsets_seconds`：检测到的起音位置，时间相对于原视频；默认返回全部，用户设置 `audio_detail_limit` 为正整数时按该数目筛选，`0` 返回全部。
 - `tempo`：根据起音包络自相关估计的脉冲速度、候选 BPM 和周期性分数。半拍、双拍和歌词节奏可能产生多个候选，卡点时结合相邻画面判断；没有稳定脉冲时 BPM 返回 null。
 
 从这些测量描述强弱、停顿和节奏位置。乐器、音色、情绪等结论需要相应听觉或模型分析依据；歌词文字本身和信号数值各有自己的用途。回答中自然说明实际分析了哪些片段和所用来源，不把画面抽帧当作听过音频。
