@@ -116,7 +116,7 @@ export function makeTool(ctx, settings = {}, nativeSession) {
       const range = automaticAudioRange(asset, { ...args, start_seconds: requestedStart }, frames);
       const audio = args.audio_mode === 'off' || !range ? { state: 'not-requested' } :
         await inspectAudio(engine, asset, { ...args, start_seconds: range.start, end_seconds: range.end }, speech, speechState, exec.signal);
-      return { action, ...engine.summary(asset), frames, sampled_range_seconds: [start, end], audio,
+      return { action, ...engine.summary(asset), frames, sampled_range_seconds: frames.length ? [start, end] : null, audio,
         coverage: 'Visual sampling and audio analysis each report their own time coverage. Continue relevant audio ranges with action=audio.',
         transcript: engine.transcript(asset, start, end), speech: speechState,
         note: 'Platform captions, on-screen text, speech recognition and signal measurements are distinct sources. For lyrics, read the audio guidance and compare nearby frames.' };
