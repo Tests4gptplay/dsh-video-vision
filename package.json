@@ -1,6 +1,6 @@
 {
   "name": "@tests4gptplay/dsh-video-vision",
-  "version": "0.10.2-review.7",
+  "version": "0.10.2",
   "description": "Analyze multi-site online and local video with frames, audio, subtitles and speech transcription; resume viewing, reuse site methods, import login state, and cache or export media.",
   "type": "module",
   "license": "MIT",
@@ -43,7 +43,8 @@
     "SPONSOR.md",
     "browser-session/playwright-source.cjs",
     "browser-session/playwright-capture.cjs",
-    "browser-session/playwright-worker.cjs"
+    "browser-session/playwright-worker.cjs",
+    "CHANGELOG.md"
   ],
   "dsh": {
     "bundle": {
