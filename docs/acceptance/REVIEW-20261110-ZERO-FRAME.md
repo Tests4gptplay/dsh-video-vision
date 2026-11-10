@@ -4,7 +4,7 @@
 
 回归测试覆盖音频-only watch(frames=0)、关闭音频的 open(frames=0)、普通两帧取样。
 
-- CI Run：https://github.com/Tests4gptplay/dsh-video-vision/actions/runs/42826778005
+- CI Run：https://github.com/Tests4gptplay/dsh-video-vision/actions/runs/42826976281
 - 源码测试：未完成通过
 - 新增/既有 Host 契约测试：未完成通过
 - 已打包候选再次验证：未完成通过
