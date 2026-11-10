@@ -55,12 +55,12 @@ ffmpegPath: ffmpeg
 ffprobePath: ffprobe
 cacheDirectory: .dsh-video-vision
 maxHeight: 720
-frameWidth: 1280
-maxFrames: 12
+frameWidth: 0
+maxFrames: 0
 maxDownloadMB: 1024
 downloadTimeoutMs: 300000
 processTimeoutMs: 60000
-maxAudioSeconds: 60
+maxAudioSeconds: 0
 speechProvider: sensevoice-local
 # configDirectory: 'D:\VideoVisionConfig'
 # ytDlpPath: 'D:\VideoTools\yt-dlp.exe'

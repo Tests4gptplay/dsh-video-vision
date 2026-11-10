@@ -1,6 +1,6 @@
 {
   "name": "@tests4gptplay/dsh-video-vision",
-  "version": "0.10.1",
+  "version": "0.10.2-review.6",
   "description": "Analyze multi-site online and local video with frames, audio, subtitles and speech transcription; resume viewing, reuse site methods, import login state, and cache or export media.",
   "type": "module",
   "license": "MIT",
