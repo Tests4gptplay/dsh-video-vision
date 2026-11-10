@@ -4,7 +4,7 @@ on:
     branches: ['prepare/v0.10.2-review.6']
     paths: ['.github/workflows/vv-review6-zero-frame-verify-once.yml']
 permissions:
-  contents: read
+  contents: write
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -28,7 +28,9 @@ jobs:
           mkdir -p out
           npm ci --ignore-scripts --no-audit --no-fund
           npm test | tee out/vv-source-tests.log
+          echo passed > out/source-tests.status
           node --test test/host-contract-regression.mjs | tee out/vv-host-contract.log
+          echo passed > out/host-contract.status
       - name: Pack and verify exact review.6 candidate
         run: |
           set -euo pipefail
@@ -38,6 +40,7 @@ jobs:
           tar -xzf "$filename" -C out/vv-unpacked
           ln -s "$GITHUB_WORKSPACE/node_modules" out/vv-unpacked/package/node_modules
           VV_TARGET_ROOT="$GITHUB_WORKSPACE/out/vv-unpacked/package" node --test test/host-contract-regression.mjs | tee out/vv-packed-contract.log
+          echo passed > out/packed-contract.status
           python3 - <<'PY'
           import json,tarfile,hashlib,pathlib,subprocess
           root=pathlib.Path('.')
@@ -72,3 +75,42 @@ jobs:
             out/vv-host-contract.log
             out/vv-packed-contract.log
           if-no-files-found: warn
+
+      - name: Record real CI outcome and remove one-shot verification file
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, json
+          root=Path('out')
+          src=(root/'source-tests.status').exists()
+          host=(root/'host-contract.status').exists()
+          packed=(root/'packed-contract.status').exists()
+          pkg=(root/'pack-verification.json')
+          digest=(json.loads(pkg.read_text())['archive_sha256'] if pkg.exists() else None)
+          run=os.environ['GITHUB_RUN_ID']
+          report=Path('docs/acceptance/REVIEW-20261110-ZERO-FRAME.md')
+          report.parent.mkdir(parents=True,exist_ok=True)
+          report.write_text(
+              '# Video Vision review.6：零帧视觉范围修复验收\n\n'
+              '本次修复仅修改零帧结果的 sampled_range_seconds：无帧返回 null；'
+              '有帧仍返回真实采样时间范围。音频 analyzed_range_seconds 由音频处理结果提供。\n\n'
+              '回归测试覆盖音频-only watch(frames=0)、关闭音频的 open(frames=0)、'
+              '普通两帧取样。\n\n'
+              f'- CI Run：https://github.com/Tests4gptplay/dsh-video-vision/actions/runs/{run}\n'
+              f'- 源码测试：{"通过" if src else "未完成通过"}\n'
+              f'- 新增/既有 Host 契约测试：{"通过" if host else "未完成通过"}\n'
+              f'- 已打包候选再次验证：{"通过" if packed and digest else "未完成通过"}\n'
+              f'- 候选 TGZ SHA-256：{digest or "未生成"}\n'
+              '- 该操作只在开发分支执行，未执行正式发布。\n',
+              encoding='utf-8'
+          )
+          PY
+          git rm -- .github/workflows/vv-review6-zero-frame-verify-once.yml
+          git add docs/acceptance/REVIEW-20261110-ZERO-FRAME.md
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test(vv): record zero-frame verification and remove temporary CI helper'
+          git push origin HEAD:refs/heads/prepare/v0.10.2-review.6
