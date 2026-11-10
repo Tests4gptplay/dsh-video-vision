@@ -25,7 +25,7 @@ Windows、Linux、macOS 使用同一插件内路径：明确选择来源 → 官
 - Cookie 仅按域、路径、HTTPS 与有效期加入 Video Vision HTTP 请求；重定向每一跳重新过滤。不进入模型、日志、CLI 参数或解析子进程。
 - yt-dlp 及外部站点解析进程继续匿名，不传 Cookie。ASR/视频/字幕/缓存等功能未因本次改动新增凭据通道。
 - 本版本移除“向 DSH 内置浏览器同步登录态”。经检查的官方 rc.5 插件 preload/main IPC/SDK/provider 链未公开合法 Cookie/session 导入接口；这不是仅隐藏 UI，也不代表 B 站登录失败根因已确定。
-- 不含旧同步、旧 Windows IPC、ASAR 安装器或自动恢复 fallback。已经装进宿主的旧 hook 不会因升级插件自动消失，须按独立 [一次性退出说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/test/cloud-acceptance-20261030-audit6/docs/testing/LEGACY-EXIT.md) 审核处理。
+- 不含旧同步、旧 Windows IPC、ASAR 安装器或自动恢复 fallback。已经装进宿主的旧 hook 不会因升级插件自动消失，须按独立 [一次性退出说明](https://github.com/Tests4gptplay/dsh-video-vision/blob/main/docs/testing/LEGACY-EXIT.md) 审核处理。
 - 旧 Electron safeStorage 密文与新 keyring 格式不可互换；本版本不暗中读取旧 IPC 解密迁移。保留旧数据，需使用新明确来源重新导入；退出工具不迁移/删除旧密文。用户另行明确点击“清理登录态”时，会删除Video Vision活动目录内旧 `session-state.bin` 及新活动快照；人工归档/备份仍不在清理范围。
 
 ## 与旧宿主授权隔离
