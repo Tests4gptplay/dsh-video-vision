@@ -82,4 +82,4 @@ Install `@tests4gptplay/dsh-video-vision@0.10.2` or `github:Tests4gptplay/dsh-vi
 
 ## 支持项目 / Support
 
-感谢支持 Video Vision 的开发与维护。[捐赠页 / Donation page](https://github.com/Tests4gptplay/dsh-video-vision/blob/v0.10.2/SPONSOR.md) · [Ko-fi](https://ko-fi.com/kou392350) · [支付宝 / Alipay](https://github.com/Tests4gptplay/dsh-video-vision/blob/v0.10.2/SPONSOR.md#alipay--支付宝) · [GitHub Sponsors](https://github.com/sponsors/Tests4gptplay)
+[GitHub Sponsors](https://github.com/sponsors/Tests4gptplay) · [Ko-fi](https://ko-fi.com/kou392350) · [支付宝 / Alipay](SPONSOR.md)
